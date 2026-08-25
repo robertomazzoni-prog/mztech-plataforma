@@ -38,6 +38,21 @@ export function cleanPhoneDigits(value: string): string {
 
 export function formatDatePtBR(dateString: string): string {
   if (!dateString) return '';
-  const [year, month, day] = dateString.split('-');
-  return `${day}/${month}/${year}`;
+  try {
+    const d = new Date(dateString);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      const cleanDay = parts[2].substring(0, 2);
+      return `${cleanDay}/${parts[1]}/${parts[0]}`;
+    }
+    return dateString;
+  } catch {
+    return dateString;
+  }
 }

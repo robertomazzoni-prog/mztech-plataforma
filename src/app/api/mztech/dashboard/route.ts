@@ -42,13 +42,9 @@ export async function GET(req: NextRequest) {
       0
     );
 
-    // 5. Receita Recorrente Mensal (MRR) - de contratos e assinaturas ativas
+    // 5. Receita Recorrente Mensal (MRR) - de assinaturas ativas
     const activeSubs = subscriptions.filter((s) => s.status === 'ACTIVE');
-    const monthlyRecurringRevenue = activeSubs.length > 0
-      ? activeSubs.reduce((acc, s) => acc + (s.amount || 0), 0)
-      : contracts
-          .filter((c) => c.status === 'ATIVO')
-          .reduce((acc, c) => acc + (c.monthlyPrice || 0), 0);
+    const monthlyRecurringRevenue = activeSubs.reduce((acc, s) => acc + (s.amount || 0), 0);
 
     // 6. Métricas Financeiras Consolidadas
     const paidPayments = payments.filter((p) => p.status === 'PAID');
@@ -58,7 +54,7 @@ export async function GET(req: NextRequest) {
     const failedPayments = payments.filter((p) => p.status === 'FAILED');
     const cancelledPayments = payments.filter((p) => p.status === 'CANCELLED');
 
-    // 7. Próximas Cobranças
+    // 7. Próximas Cobranças Reais
     const upcomingBillings = payments
       .filter((p) => p.status === 'PENDING' || p.status === 'OVERDUE')
       .slice(0, 5)
@@ -72,22 +68,6 @@ export async function GET(req: NextRequest) {
         paymentMethod: p.paymentMethod,
         status: p.status,
       }));
-
-    // Se não houver cobranças cadastradas ainda mas houver contratos ativos, gerar projeção
-    if (upcomingBillings.length === 0 && contracts.length > 0) {
-      contracts.slice(0, 3).forEach((c, idx) => {
-        upcomingBillings.push({
-          id: `proj-bill-${idx}`,
-          transactionId: `TXN-PROJ-${idx + 1}`,
-          clientName: c.client?.companyName || c.client?.contactName || 'Cliente mzTech',
-          title: `Mensalidade ${c.title}`,
-          amount: c.monthlyPrice || 79.9,
-          dueDate: new Date(Date.now() + 86400000 * (10 + idx * 5)).toISOString(),
-          paymentMethod: c.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
-          status: 'PENDING',
-        });
-      });
-    }
 
     const activeClientsCount = clients.filter((c) => c.status === 'ATIVO').length;
     const productionProjectsCount = projects.filter((p) => p.status === 'PRODUCAO').length;

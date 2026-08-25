@@ -6,6 +6,7 @@ import {
   getStoredContracts,
   updateStoredContract,
   deleteStoredContract,
+  generateBillingForSignedContract,
 } from '@/lib/mz-entities-store';
 import { logActivity } from '@/lib/audit-store';
 
@@ -136,11 +137,14 @@ export async function PATCH(
           description: `Cliente "${updated.client?.companyName || signer}" assinou e aceitou digitalmente o contrato ${updated.contractNumber || params.id}.`,
           details: { ip, userAgent, timestamp: nowStr, document: clientDocument },
         });
+
+        // Libera e gera a cobrança inicial e assinatura no módulo financeiro agora que o cliente assinou
+        generateBillingForSignedContract(params.id);
       }
 
       return NextResponse.json({
         success: true,
-        message: 'Contrato aceito e assinado digitalmente com sucesso pelo cliente!',
+        message: 'Contrato aceito e assinado digitalmente com sucesso pelo cliente! Cobrança liberada.',
         contract: updated,
       });
     }

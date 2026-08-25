@@ -189,7 +189,7 @@ export default function MzTechDashboardPage() {
             Receita Recorrente (MRR)
           </span>
           <span className="text-lg font-bold font-mono text-cyan-400 mt-1 block">
-            {formatCurrency(metrics?.monthlyRecurringRevenue || 79.9)}/mês
+            {formatCurrency(metrics?.monthlyRecurringRevenue ?? 0)}/mês
           </span>
           <span className="text-[10px] text-slate-500">Hospedagens & Manutenções</span>
         </div>

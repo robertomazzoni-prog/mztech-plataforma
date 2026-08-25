@@ -735,72 +735,13 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     category: 'CONTRATO',
     targetId: newContract.id,
     targetNumber: newContract.contractNumber,
-    description: `Contrato ${newContract.contractNumber} gerado automaticamente para "${company}" com snapshot imutável.`,
+    description: `Contrato ${newContract.contractNumber} gerado para "${company}". Aguardando assinatura digital do cliente para liberação da cobrança.`,
     details: {
       devPrice: initialDevPrice,
       monthlyPrice,
       metodo: snapshot.paymentMethod,
     },
   });
-
-  // 4. Gerar Cobrança Inicial e Assinatura
-  let initialCharge: MzPaymentItem | null = null;
-  if (initialDevPrice > 0) {
-    initialCharge = createStoredPayment({
-      clientId: client.id,
-      client: {
-        id: client.id,
-        companyName: client.companyName,
-        contactName: client.contactName,
-      },
-      contractId: newContract.id,
-      title: `Taxa de Desenvolvimento Inicial — ${project.name}`,
-      amount: initialDevPrice,
-      paymentMethod: paymentMethodChoice.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
-      paymentType: 'TAXA_INICIAL',
-      status: 'PENDING',
-      dueDate: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 dias para pagar
-      notes: `Gerado a partir do orçamento ${quote.quoteNumber || quote.id}`,
-    });
-
-    logActivity({
-      actor: 'Sistema mzTech',
-      action: 'CRIAR_COBRANCA',
-      category: 'PAGAMENTO',
-      targetId: initialCharge.id,
-      targetNumber: initialCharge.transactionId,
-      description: `Cobrança inicial de R$ ${initialDevPrice.toFixed(2)} (${initialCharge.transactionId}) criada para "${company}".`,
-    });
-  }
-
-  // Se houver mensalidade, registrar a assinatura
-  if (monthlyPrice > 0) {
-    const newSubscription = createStoredSubscription({
-      clientId: client.id,
-      client: {
-        id: client.id,
-        companyName: client.companyName,
-        contactName: client.contactName,
-        email: client.email,
-      },
-      projectId: project.id,
-      contractId: newContract.id,
-      planName: quote.needsHosting || 'Plano Hospedagem + Manutenção',
-      amount: monthlyPrice,
-      periodicity: 'MENSAL',
-      paymentMethod: paymentMethodChoice === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-      status: 'PAYMENT_PENDING',
-      notes: `Assinatura vinculada ao contrato ${newContract.contractNumber}`,
-    });
-
-    logActivity({
-      actor: 'Sistema mzTech',
-      action: 'CRIAR_ASSINATURA',
-      category: 'PAGAMENTO',
-      targetId: newSubscription.id,
-      description: `Recorrência mensal de R$ ${monthlyPrice.toFixed(2)}/mês configurada para "${company}".`,
-    });
-  }
 
   // 5. Atualizar o Orçamento como APROVADO e com os Vínculos
   updateQuote(quote.id, {
@@ -811,7 +752,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     linkedClientId: client.id,
     linkedProjectId: project.id,
     linkedContractId: newContract.id,
-    linkedPaymentId: initialCharge?.id || null,
+    linkedPaymentId: null,
   });
 
   logActivity({
@@ -828,8 +769,96 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     client,
     project,
     contract: newContract,
-    payment: initialCharge,
+    payment: null,
   };
+}
+
+/**
+ * Libera e gera as cobranças e recorrências na Gestão Financeira SOMENTE após a assinatura do contrato pelo cliente
+ */
+export function generateBillingForSignedContract(contractId: string): { payment?: MzPaymentItem; subscription?: MzSubscriptionItem } | null {
+  const contracts = getStoredContracts();
+  const contract = contracts.find((c) => c.id === contractId);
+  if (!contract) return null;
+
+  const payments = getStoredPayments();
+  const existingPayment = payments.find((p) => p.contractId === contract.id);
+
+  let initialCharge: MzPaymentItem | undefined = existingPayment;
+
+  // 1. Gerar Cobrança Inicial de Desenvolvimento (se houver valor e ainda não existir)
+  if (contract.totalDevPrice > 0 && !existingPayment) {
+    const clients = getStoredClients();
+    const client = clients.find((c) => c.id === contract.clientId) || contract.client;
+
+    initialCharge = createStoredPayment({
+      clientId: contract.clientId,
+      client: {
+        id: contract.clientId,
+        companyName: client?.companyName || 'Cliente',
+        contactName: client?.contactName || 'Contato',
+      },
+      contractId: contract.id,
+      title: `Taxa de Desenvolvimento Inicial — ${contract.project?.name || contract.title}`,
+      amount: contract.totalDevPrice,
+      paymentMethod: contract.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+      paymentType: 'TAXA_INICIAL',
+      status: 'PENDING',
+      dueDate: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 dias para pagamento
+      notes: `Cobrança liberada após assinatura digital do contrato ${contract.contractNumber}`,
+    });
+
+    logActivity({
+      actor: 'Sistema mzTech',
+      action: 'CRIAR_COBRANCA',
+      category: 'PAGAMENTO',
+      targetId: initialCharge.id,
+      targetNumber: initialCharge.transactionId,
+      description: `Cobrança inicial de R$ ${contract.totalDevPrice.toFixed(2)} (${initialCharge.transactionId}) gerada para Gestão Financeira após assinatura do contrato ${contract.contractNumber}.`,
+    });
+  }
+
+  // 2. Se houver mensalidade, registrar a assinatura recorrente
+  let newSubscription: MzSubscriptionItem | undefined;
+  if (contract.monthlyPrice > 0) {
+    const subscriptions = getStoredSubscriptions();
+    const existingSub = subscriptions.find((s) => s.contractId === contract.id);
+
+    if (!existingSub) {
+      const clients = getStoredClients();
+      const client = clients.find((c) => c.id === contract.clientId) || contract.client;
+
+      newSubscription = createStoredSubscription({
+        clientId: contract.clientId,
+        client: {
+          id: contract.clientId,
+          companyName: client?.companyName || 'Cliente',
+          contactName: client?.contactName || 'Contato',
+          email: client?.email || '',
+        },
+        projectId: contract.projectId,
+        contractId: contract.id,
+        planName: contract.title || 'Plano Hospedagem + Manutenção mzTech',
+        amount: contract.monthlyPrice,
+        periodicity: 'MENSAL',
+        paymentMethod: contract.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+        status: 'ACTIVE',
+        notes: `Recorrência ativada após assinatura digital do contrato ${contract.contractNumber}`,
+      });
+
+      logActivity({
+        actor: 'Sistema mzTech',
+        action: 'CRIAR_ASSINATURA',
+        category: 'PAGAMENTO',
+        targetId: newSubscription.id,
+        description: `Recorrência mensal de R$ ${contract.monthlyPrice.toFixed(2)}/mês ativada na Gestão Financeira após assinatura do contrato ${contract.contractNumber}.`,
+      });
+    } else {
+      newSubscription = existingSub;
+    }
+  }
+
+  return { payment: initialCharge, subscription: newSubscription };
 }
 
 /**

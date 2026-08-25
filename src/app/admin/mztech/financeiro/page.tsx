@@ -218,9 +218,9 @@ export default function MzTechFinanceiroPage() {
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
           <span className="text-[11px] text-slate-400 font-mono font-medium block">Receita Recorrente (MRR)</span>
           <span className="text-xl font-bold text-cyan-400 font-mono mt-1 block">
-            {formatCurrency(totalMRR || (clientsList.length * 79.9))}/mês
+            {formatCurrency(totalMRR)}/mês
           </span>
-          <span className="text-[10px] text-slate-500">{activeSubscriptions.length || clientsList.length} assinaturas ativas</span>
+          <span className="text-[10px] text-slate-500">{activeSubscriptions.length} assinaturas ativas</span>
         </div>
 
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
@@ -337,34 +337,14 @@ export default function MzTechFinanceiroPage() {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {subscriptions.length === 0 ? (
-                  clientsList.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4">
-                        <strong className="text-white block">{c.companyName}</strong>
-                        <span className="text-[11px] text-slate-400">{c.contactName}</span>
-                      </td>
-                      <td className="py-3 px-4 text-slate-300">
-                        Plano Hospedagem + Manutenção
-                      </td>
-                      <td className="py-3 px-4 font-mono font-bold text-cyan-400">
-                        R$ 79,90/mês
-                      </td>
-                      <td className="py-3 px-4 text-slate-400 font-mono">
-                        Mensal
-                      </td>
-                      <td className="py-3 px-4 text-slate-300">
-                        Cartão Recorrente / Pix
-                      </td>
-                      <td className="py-3 px-4 font-mono text-slate-300">
-                        Todo dia 10
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          ● Ativa
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-500 space-y-1">
+                      <p className="text-xs font-semibold text-slate-400">Nenhuma assinatura recorrente ativa no momento.</p>
+                      <p className="text-[11px] text-slate-500">
+                        As assinaturas e cobranças mensais são ativadas após a assinatura digital do contrato pelo cliente.
+                      </p>
+                    </td>
+                  </tr>
                 ) : (
                   subscriptions.map((s) => (
                     <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">

@@ -1,50 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { ensureDatabaseReady } from '@/lib/init-db';
+import { isDatabaseOnline } from '@/lib/init-db';
 import { getUserFromRequest } from '@/lib/auth';
-import { paymentService } from '@/lib/payment/payment-service';
+import {
+  getStoredSubscriptions,
+  createStoredSubscription,
+  getStoredClientById,
+} from '@/lib/mz-entities-store';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
-    }
-
-    await ensureDatabaseReady();
-
     const { searchParams } = new URL(req.url);
     const clientId = searchParams.get('clientId');
 
-    const where: any = {};
-    if (clientId) where.clientId = clientId;
+    let subscriptions = getStoredSubscriptions();
 
-    const subscriptions = await prisma.mzSubscription.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        client: {
-          select: {
-            id: true,
-            companyName: true,
-            contactName: true,
-            email: true,
+    const dbOnline = await isDatabaseOnline();
+    if (dbOnline) {
+      try {
+        const where: any = {};
+        if (clientId) where.clientId = clientId;
+
+        const dbSubs = await prisma.mzSubscription.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            client: {
+              select: {
+                id: true,
+                companyName: true,
+                contactName: true,
+                email: true,
+              },
+            },
+            project: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
-        },
-        project: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        payments: {
-          orderBy: { dueDate: 'desc' },
-          take: 5,
-        },
-      },
-    });
+        });
+        if (dbSubs && dbSubs.length > 0) {
+          subscriptions = dbSubs as any;
+        }
+      } catch (e) {}
+    }
+
+    if (clientId) {
+      subscriptions = subscriptions.filter((s) => s.clientId === clientId);
+    }
 
     return NextResponse.json({ subscriptions });
   } catch (error: any) {
@@ -55,11 +62,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
-    }
-
     const body = await req.json();
     const { clientId, projectId, planName, amount, paymentMethod, periodicity } = body;
 
@@ -70,16 +72,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await paymentService.createSubscriptionForClient({
+    const client = getStoredClientById(clientId);
+
+    const subscription = createStoredSubscription({
       clientId,
-      projectId,
+      client: client ? {
+        id: client.id,
+        companyName: client.companyName,
+        contactName: client.contactName,
+        email: client.email,
+      } : undefined,
+      projectId: projectId || null,
       planName,
       amount: Number(amount),
       paymentMethod: paymentMethod || 'CREDIT_CARD',
       periodicity: periodicity || 'MENSAL',
+      status: 'ACTIVE',
     });
 
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json({ subscription }, { status: 201 });
   } catch (error: any) {
     console.error('Erro ao criar assinatura mzTech:', error);
     return NextResponse.json({ error: error?.message || 'Erro ao criar assinatura.' }, { status: 500 });
