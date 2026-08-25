@@ -34,7 +34,7 @@ import {
   Shield,
   Loader2,
 } from 'lucide-react';
-import { formatCurrency, formatDatePtBR } from '@/lib/utils';
+import { formatCurrency, formatDatePtBR, generatePixPayload, getPixQrCodeImageUrl } from '@/lib/utils';
 import { MzClientItem, MzProjectItem, MzQuoteItem, MzContractItem } from '@/types/mztech';
 
 export default function ClientPortalPage() {
@@ -633,31 +633,58 @@ export default function ClientPortalPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1 text-center">
                   <p className="text-xs text-slate-400">{selectedInvoice.title}</p>
                   <p className="text-3xl font-black text-emerald-400 font-mono">
                     {formatCurrency(selectedInvoice.amount)}
                   </p>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[11px] uppercase font-bold text-slate-400">Chave Pix Oficial mzTech:</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={selectedInvoice.pixQrCodeText}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px] font-mono text-cyan-300 focus:outline-none truncate"
-                    />
-                    <button
-                      onClick={handleCopyPix}
-                      className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 flex-shrink-0"
-                    >
-                      {pixCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{pixCopied ? 'Copiado!' : 'Copiar'}</span>
-                    </button>
-                  </div>
-                </div>
+                {/* QR Code Real Escaneável */}
+                {(() => {
+                  const pixPayload = generatePixPayload({
+                    pixKey: 'robertomazzoni956@gmail.com',
+                    merchantName: 'ROBERTO MAZZONI',
+                    merchantCity: 'BELO HORIZONTE',
+                    amount: selectedInvoice.amount,
+                    txid: `MZ${selectedInvoice.id.replace(/\D/g, '').substring(0, 10) || '2026'}`,
+                  });
+                  const qrUrl = getPixQrCodeImageUrl(pixPayload, 220);
+
+                  return (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-white rounded-2xl max-w-[200px] mx-auto shadow-xl flex flex-col items-center justify-center">
+                        <img src={qrUrl} alt="QR Code Pix" className="w-44 h-44 object-contain rounded-lg" />
+                        <span className="text-[9px] font-mono text-slate-800 font-bold uppercase tracking-wider mt-1">
+                          Escaneie no seu Banco
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[11px] uppercase font-bold text-slate-400">Pix Copia e Cola:</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={pixPayload}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px] font-mono text-cyan-300 focus:outline-none truncate"
+                          />
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(pixPayload);
+                              setPixCopied(true);
+                              setTimeout(() => setPixCopied(false), 3000);
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 flex-shrink-0 transition-all shadow-md shadow-emerald-500/10"
+                          >
+                            {pixCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{pixCopied ? 'Copiado!' : 'Copiar Pix'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="pt-2">
                   <button

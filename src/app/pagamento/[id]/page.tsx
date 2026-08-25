@@ -19,13 +19,19 @@ import {
   FileText,
   Sparkles,
 } from 'lucide-react';
-import { formatCurrency, formatDatePtBR } from '@/lib/utils';
+import {
+  formatCurrency,
+  formatDatePtBR,
+  generatePixPayload,
+  getPixQrCodeImageUrl,
+} from '@/lib/utils';
 import { MzContractItem } from '@/types/mztech';
 
 export default function PublicPaymentPage({ params }: { params: { id: string } }) {
   const [contract, setContract] = useState<MzContractItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [pixCopied, setPixCopied] = useState(false);
+  const [payloadCopied, setPayloadCopied] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX');
   const [processing, setProcessing] = useState(false);
   const [paidSuccess, setPaidSuccess] = useState(false);
@@ -304,57 +310,107 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
             </div>
 
             {/* ÁREA DE PAGAMENTO PIX */}
-            {selectedMethod === 'PIX' && (
-              <div className="p-6 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-4 text-center animate-in fade-in">
-                
-                {/* QR Code Ilustrativo */}
-                <div className="p-4 bg-white rounded-2xl max-w-[180px] mx-auto shadow-xl flex items-center justify-center">
-                  <div className="w-36 h-36 bg-slate-950 rounded-lg p-2 flex flex-col items-center justify-center text-white space-y-1">
-                    <QrCode className="w-20 h-20 text-white" />
-                    <span className="text-[9px] font-mono text-cyan-400 font-bold">mzTech Pix Pay</span>
-                  </div>
-                </div>
+            {selectedMethod === 'PIX' && (() => {
+              const pixPayload = generatePixPayload({
+                pixKey,
+                merchantName: 'ROBERTO MAZZONI',
+                merchantCity: 'BELO HORIZONTE',
+                amount: amountToPay,
+                txid: `MZ${contract.id.replace(/\D/g, '').substring(0, 10) || '2026'}`,
+              });
+              const qrCodeImageUrl = getPixQrCodeImageUrl(pixPayload, 260);
 
-                <div className="space-y-2 text-left max-w-md mx-auto">
-                  <label className="text-[11px] uppercase font-bold text-slate-400">
-                    Chave Pix Oficial da mzTech (E-mail):
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={pixKey}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-cyan-300 focus:outline-none truncate"
-                    />
+              const handleCopyPayload = () => {
+                navigator.clipboard.writeText(pixPayload);
+                setPayloadCopied(true);
+                setTimeout(() => setPayloadCopied(false), 3000);
+              };
+
+              return (
+                <div className="p-6 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-5 text-center animate-in fade-in">
+                  
+                  {/* QR Code Real Escaneável por Qualquer Banco */}
+                  <div className="space-y-2">
+                    <div className="p-3.5 bg-white rounded-2xl max-w-[220px] mx-auto shadow-2xl flex flex-col items-center justify-center">
+                      <img
+                        src={qrCodeImageUrl}
+                        alt="QR Code Pix Oficial"
+                        className="w-48 h-48 object-contain rounded-lg"
+                      />
+                      <span className="text-[10px] font-mono text-slate-800 font-bold uppercase tracking-wider mt-1">
+                        Pague com Pix • Escaneie Aqui
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Abra o aplicativo do seu banco, escolha <strong className="text-white">Pix &gt; Ler QR Code</strong> e aponte a câmera.
+                    </p>
+                  </div>
+
+                  {/* Pix Copia e Cola Oficial */}
+                  <div className="space-y-2 text-left max-w-md mx-auto">
+                    <label className="text-[11px] uppercase font-bold text-slate-400 flex items-center justify-between">
+                      <span>Pix Copia e Cola (Código Completo):</span>
+                      <span className="text-emerald-400 font-normal text-[10px]">Recomendado no celular</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={pixPayload}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-cyan-300 focus:outline-none truncate"
+                      />
+                      <button
+                        onClick={handleCopyPayload}
+                        className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all shadow-md shadow-emerald-500/10"
+                      >
+                        {payloadCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{payloadCopied ? 'Copiado!' : 'Copiar Pix'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Chave Pix Direta */}
+                  <div className="space-y-2 text-left max-w-md mx-auto pt-2 border-t border-slate-800/80">
+                    <label className="text-[11px] uppercase font-bold text-slate-400">
+                      Ou Pague Usando a Chave Pix Direta (E-mail):
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={pixKey}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-300 focus:outline-none truncate"
+                      />
+                      <button
+                        onClick={handleCopyPix}
+                        className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors"
+                      >
+                        {pixCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{pixCopied ? 'Copiado!' : 'Copiar Chave'}</span>
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-500">
+                      Favorecido: <strong className="text-slate-400">Roberto Mazzoni</strong> (Sócio & Titular mzTech).
+                    </p>
+                  </div>
+
+                  <div className="pt-2 max-w-md mx-auto">
                     <button
-                      onClick={handleCopyPix}
-                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors"
+                      onClick={() => handleConfirmPayment('PIX')}
+                      disabled={processing}
+                      className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                     >
-                      {pixCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{pixCopied ? 'Copiado!' : 'Copiar'}</span>
+                      {processing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4" />
+                      )}
+                      <span>Já Efetuei o Pagamento (Confirmar)</span>
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-500">
-                    Favorecido: Roberto Mazzoni (Titular & Sócio mzTech).
-                  </p>
                 </div>
-
-                <div className="pt-2 max-w-md mx-auto">
-                  <button
-                    onClick={() => handleConfirmPayment('PIX')}
-                    disabled={processing}
-                    className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                  >
-                    {processing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4" />
-                    )}
-                    <span>Confirmar Pagamento Realizado</span>
-                  </button>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* ÁREA DE PAGAMENTO CARTÃO DE CRÉDITO */}
             {selectedMethod === 'CREDIT_CARD' && (
