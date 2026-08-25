@@ -89,9 +89,44 @@ export interface PixPayloadOptions {
   txid?: string;
 }
 
+export function normalizePixKey(key: string): string {
+  if (!key) return '';
+  const trimmed = key.trim();
+
+  // E-mail
+  if (trimmed.includes('@')) {
+    return trimmed.toLowerCase();
+  }
+
+  // Chave Aleatória (EVP UUID)
+  if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+
+  const digits = trimmed.replace(/\D/g, '');
+
+  // Telefone celular brasileiro (10 ou 11 dígitos com DDD): no padrão Bacen precisa de +55
+  if ((digits.length === 10 || digits.length === 11) && !trimmed.includes('.')) {
+    return `+55${digits}`;
+  }
+
+  if (digits.length === 13 && digits.startsWith('55')) {
+    return `+${digits}`;
+  }
+
+  // CPF (11 dígitos formatado com ponto/traço) ou CNPJ (14 dígitos)
+  if (trimmed.includes('.') || trimmed.includes('/')) {
+    return digits;
+  }
+
+  return trimmed;
+}
+
 export function generatePixPayload(options: PixPayloadOptions): string {
+  const rawKey = options.pixKey || 'robertomazzoni956@gmail.com';
+  const pixKey = normalizePixKey(rawKey);
+
   const {
-    pixKey = 'robertomazzoni956@gmail.com',
     merchantName = 'ROBERTO MAZZONI',
     merchantCity = 'BELO HORIZONTE',
     amount,
