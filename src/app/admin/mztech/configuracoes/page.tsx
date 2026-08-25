@@ -311,14 +311,25 @@ export default function AdminSettingsPage() {
           </p>
         </div>
 
-        <div className="relative z-10 flex-shrink-0">
+        <div className="relative z-10 flex items-center gap-2.5 flex-shrink-0">
           <button
             onClick={loadSettings}
             disabled={loading}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-2 transition-all"
+            type="button"
+            className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Recarregar</span>
+          </button>
+
+          <button
+            type="submit"
+            form="settings-form"
+            disabled={saving}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>Salvar Alterações</span>
           </button>
         </div>
       </div>
@@ -344,7 +355,7 @@ export default function AdminSettingsPage() {
           <p className="text-sm text-slate-400">Carregando configurações...</p>
         </div>
       ) : (
-        <form onSubmit={handleSave} className="space-y-8">
+        <form id="settings-form" onSubmit={handleSave} className="space-y-8">
           
           {/* ============================================================ */}
           {/* BLOCO 1: E-MAILS DE CONTATO & NOTIFICAÇÕES (MÚLTIPLOS) */}
@@ -368,14 +379,25 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddEmail}
-                className="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Adicionar Mais um E-mail</span>
-              </button>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleAddEmail}
+                  className="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Adicionar E-mail</span>
+                </button>
+                <button
+                  type="submit"
+                  form="settings-form"
+                  disabled={saving}
+                  className="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-indigo-500/20"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Salvar</span>
+                </button>
+              </div>
             </div>
 
             {/* Lista de E-mails */}
@@ -472,14 +494,26 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddPixKey}
-                className="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Adicionar Mais uma Chave Pix</span>
-              </button>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleAddPixKey}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Adicionar Mais uma Chave Pix</span>
+                </button>
+
+                <button
+                  type="submit"
+                  form="settings-form"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20"
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Salvar Chaves Pix</span>
+                </button>
+              </div>
             </div>
 
             {/* Lista de Chaves Pix */}
@@ -617,16 +651,28 @@ export default function AdminSettingsPage() {
           {/* BLOCO 3: TELEFONES & WHATSAPP DOS SÓCIOS */}
           {/* ============================================================ */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl backdrop-blur-xl space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
-                <Phone className="w-5 h-5" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Telefones & Chaves dos Sócios</h3>
+                  <p className="text-xs text-slate-400">
+                    Estes números recebem as notificações de orçamentos e as chaves Pix recebem pagamentos direcionados.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Telefones & WhatsApp dos Sócios</h3>
-                <p className="text-xs text-slate-400">
-                  Estes números recebem as notificações de orçamentos e são exibidos no rodapé do site.
-                </p>
-              </div>
+
+              <button
+                type="submit"
+                form="settings-form"
+                disabled={saving}
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-cyan-500/20 self-start sm:self-auto"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>Salvar Sócios & Chaves</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

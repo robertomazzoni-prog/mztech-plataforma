@@ -44,11 +44,11 @@ export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
   tagline: 'Tecnologia que coloca sua empresa no digital.',
-  email: 'robertomazzoni956@gmail.com',
+  email: 'robertomazzoni123@gmail.com',
   emails: [
     {
       id: 'email-1',
-      address: 'robertomazzoni956@gmail.com',
+      address: 'robertomazzoni123@gmail.com',
       label: 'E-mail Principal & Atendimento',
       isPrimary: true,
     },
@@ -56,16 +56,16 @@ export const defaultCompanySettings: CompanySettings = {
   robertoName: 'Roberto',
   robertoPhone: '(31) 98684-7049',
   robertoWhatsapp: '5531986847049',
-  robertoPixKey: 'robertomazzoni956@gmail.com',
+  robertoPixKey: 'robertomazzoni123@gmail.com',
   morvanName: 'Morvan',
   morvanPhone: '(31) 99359-7136',
   morvanWhatsapp: '5531993597136',
   morvanPixKey: 'morvan@mztech.com.br',
-  pixKey: 'robertomazzoni956@gmail.com',
+  pixKey: 'robertomazzoni123@gmail.com',
   pixKeys: [
     {
       id: 'pix-roberto',
-      key: 'robertomazzoni956@gmail.com',
+      key: 'robertomazzoni123@gmail.com',
       type: 'EMAIL',
       holder: 'Roberto (Sócio mzTech)',
       bank: 'Nubank / Inter',
