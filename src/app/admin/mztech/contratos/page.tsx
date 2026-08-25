@@ -75,6 +75,7 @@ export default function MzTechContractsPage() {
     clientId: '',
     newClientName: '',
     projectId: '',
+    assignedDev: 'Roberto',
     contractNumber: '',
     title: 'Contrato de Prestação de Serviços Digitais & Políticas Comerciais',
     status: 'RASCUNHO' as ContractStatus,
@@ -125,7 +126,7 @@ export default function MzTechContractsPage() {
         setProjects(pData.projects || []);
       }
     } catch (err) {
-      console.error('Erro ao buscar contratos:', err);
+      console.error('Erro ao carregar dados de contratos:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -143,6 +144,7 @@ export default function MzTechContractsPage() {
       clientId: clients.length > 0 ? clients[0].id : '',
       newClientName: '',
       projectId: projects.length > 0 ? projects[0].id : '',
+      assignedDev: 'Roberto',
       contractNumber: `CTR-2026-${(contracts.length + 1).toString().padStart(4, '0')}`,
       title: 'Contrato de Prestação de Serviços Digitais & Políticas Comerciais',
       status: 'RASCUNHO',
@@ -176,6 +178,7 @@ export default function MzTechContractsPage() {
       clientId: contract.clientId,
       newClientName: '',
       projectId: contract.projectId || '',
+      assignedDev: contract.assignedDev || (contract as any).snapshot?.assignedDev || 'Roberto',
       contractNumber: contract.contractNumber || '',
       title: contract.title,
       status: contract.status,
@@ -476,6 +479,7 @@ export default function MzTechContractsPage() {
                   <th className="py-3 px-4 font-semibold">Número</th>
                   <th className="py-3 px-4 font-semibold">Cliente / Empresa</th>
                   <th className="py-3 px-4 font-semibold">Serviço / Projeto</th>
+                  <th className="py-3 px-4 font-semibold">Sócio / Especialista</th>
                   <th className="py-3 px-4 font-semibold">Valor Inicial</th>
                   <th className="py-3 px-4 font-semibold">Mensalidade</th>
                   <th className="py-3 px-4 font-semibold">Assinatura Prestador</th>
@@ -487,6 +491,8 @@ export default function MzTechContractsPage() {
                 {filteredContracts.map((c) => {
                   const isProviderSigned = Boolean(c.providerSigned);
                   const isClientSigned = Boolean(c.clientSigned || c.acceptedOnline);
+                  const devName = c.assignedDev || (c as any).snapshot?.assignedDev || (c.providerSignedBy ? c.providerSignedBy.split(' ')[0] : 'Roberto');
+                  const isMorvan = devName.toLowerCase().includes('morvan');
 
                   return (
                     <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
@@ -500,11 +506,24 @@ export default function MzTechContractsPage() {
                       <td className="py-3 px-4 text-slate-300 max-w-[180px] truncate">
                         {c.project?.name || c.title}
                       </td>
+                      <td className="py-3 px-4">
+                        {isMorvan ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                            <span>Morvan</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span>Roberto</span>
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 font-mono font-bold text-slate-200">
-                        {formatCurrency(c.totalDevPrice)}
+                        {c.totalDevPrice > 0 ? formatCurrency(c.totalDevPrice) : 'A Definir'}
                       </td>
                       <td className="py-3 px-4 font-mono text-cyan-400">
-                        {formatCurrency(c.monthlyPrice)}/mês
+                        {c.monthlyPrice > 0 ? `${formatCurrency(c.monthlyPrice)}/mês` : 'Isento (Dev)'}
                       </td>
                       <td className="py-3 px-4">
                         {isProviderSigned ? (
@@ -617,7 +636,7 @@ export default function MzTechContractsPage() {
                   <span>1. Identificação das Partes & Título</span>
                 </h4>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="text-slate-400 font-semibold">Cliente *</label>
                     <select
@@ -630,6 +649,18 @@ export default function MzTechContractsPage() {
                           {cl.companyName} ({cl.contactName})
                         </option>
                       ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Sócio / Especialista *</label>
+                    <select
+                      value={formData.assignedDev}
+                      onChange={(e) => setFormData({ ...formData, assignedDev: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-cyan-500/30 rounded-lg text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="Roberto">Roberto Mazzoni</option>
+                      <option value="Morvan">Morvan</option>
                     </select>
                   </div>
 

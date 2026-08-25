@@ -47,6 +47,7 @@ export async function PATCH(
       clientDocument,
       clientSignatureDataUrl,
       // Campos comuns
+      assignedDev,
       title,
       content,
       totalDevPrice,
@@ -151,6 +152,7 @@ export async function PATCH(
 
     // 3. Atualização normal de campos contratuais
     const dataToUpdate: any = {};
+    if (assignedDev !== undefined) dataToUpdate.assignedDev = assignedDev;
     if (title !== undefined) dataToUpdate.title = title;
     if (content !== undefined) dataToUpdate.content = content;
     if (totalDevPrice !== undefined) dataToUpdate.totalDevPrice = parseFloat(totalDevPrice);
