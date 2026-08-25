@@ -23,6 +23,7 @@ import {
   X,
   Loader2,
   ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 import { MzPaymentItem, MzSubscriptionItem, PaymentStatus, PaymentMethod } from '@/types/mztech';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
@@ -98,6 +99,32 @@ export default function MzTechFinanceiroPage() {
       }
     } catch (err) {
       alert('Erro ao confirmar pagamento.');
+    }
+  };
+
+  const handleDeletePayment = async (paymentId: string, transactionId?: string) => {
+    if (!confirm(`Deseja realmente excluir a cobrança ${transactionId || paymentId}?`)) return;
+    try {
+      setPayments((prev) => prev.filter((p) => p.id !== paymentId && p.transactionId !== paymentId));
+      await fetch(`/api/mztech/payments?id=${paymentId}`, {
+        method: 'DELETE',
+      });
+      loadFinancialData();
+    } catch (err) {
+      loadFinancialData();
+    }
+  };
+
+  const handleDeleteSubscription = async (subId: string, planName?: string) => {
+    if (!confirm(`Deseja realmente cancelar/excluir a assinatura ${planName || subId}?`)) return;
+    try {
+      setSubscriptions((prev) => prev.filter((s) => s.id !== subId));
+      await fetch(`/api/mztech/subscriptions?id=${subId}`, {
+        method: 'DELETE',
+      });
+      loadFinancialData();
+    } catch (err) {
+      loadFinancialData();
     }
   };
 
@@ -333,12 +360,13 @@ export default function MzTechFinanceiroPage() {
                   <th className="py-3 px-4 font-semibold">Forma de Cobrança</th>
                   <th className="py-3 px-4 font-semibold">Próxima Cobrança</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 font-semibold text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {subscriptions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500 space-y-1">
+                    <td colSpan={8} className="py-12 text-center text-slate-500 space-y-1">
                       <p className="text-xs font-semibold text-slate-400">Nenhuma assinatura recorrente ativa no momento.</p>
                       <p className="text-[11px] text-slate-500">
                         As assinaturas e cobranças mensais são ativadas após a assinatura digital do contrato pelo cliente.
@@ -367,6 +395,15 @@ export default function MzTechFinanceiroPage() {
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           ● {s.status === 'ACTIVE' ? 'Ativa' : s.status}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => handleDeleteSubscription(s.id, s.planName)}
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 transition-colors"
+                          title="Cancelar / Excluir Assinatura"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -447,20 +484,29 @@ export default function MzTechFinanceiroPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          {isPending && (
+                          <div className="flex items-center justify-end gap-2">
+                            {isPending && (
+                              <button
+                                onClick={() => handleConfirmPayment(p.id)}
+                                className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 text-[11px] font-semibold transition-colors border border-slate-700 whitespace-nowrap"
+                                title="Marcar como Pago Manualmente"
+                              >
+                                Confirmar Recebimento
+                              </button>
+                            )}
+                            {isPaid && (
+                              <span className="text-[11px] font-mono text-emerald-400 whitespace-nowrap">
+                                Recebido {p.paidAt ? formatDatePtBR(p.paidAt) : ''}
+                              </span>
+                            )}
                             <button
-                              onClick={() => handleConfirmPayment(p.id)}
-                              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 text-[11px] font-semibold transition-colors border border-slate-700"
-                              title="Marcar como Pago Manualmente"
+                              onClick={() => handleDeletePayment(p.id, p.transactionId)}
+                              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 transition-colors"
+                              title="Excluir Cobrança"
                             >
-                              Confirmar Recebimento
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
-                          {isPaid && (
-                            <span className="text-[11px] font-mono text-emerald-400">
-                              Recebido {p.paidAt ? formatDatePtBR(p.paidAt) : ''}
-                            </span>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );

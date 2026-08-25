@@ -5,8 +5,10 @@ import { getUserFromRequest } from '@/lib/auth';
 import {
   getStoredSubscriptions,
   createStoredSubscription,
+  deleteStoredSubscription,
   getStoredClientById,
 } from '@/lib/mz-entities-store';
+import { logActivity } from '@/lib/audit-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,5 +96,40 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Erro ao criar assinatura mzTech:', error);
     return NextResponse.json({ error: error?.message || 'Erro ao criar assinatura.' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID da assinatura é obrigatório.' }, { status: 400 });
+    }
+
+    deleteStoredSubscription(id);
+
+    const dbOnline = await isDatabaseOnline();
+    if (dbOnline) {
+      try {
+        await prisma.mzSubscription.deleteMany({
+          where: { id },
+        });
+      } catch (e) {}
+    }
+
+    logActivity({
+      actor: 'Administrador',
+      action: 'CANCELAR_ASSINATURA',
+      category: 'PAGAMENTO',
+      targetId: id,
+      description: `Assinatura recorrente ${id} foi cancelada/excluída.`,
+    });
+
+    return NextResponse.json({ success: true, message: 'Assinatura cancelada com sucesso.' });
+  } catch (error: any) {
+    console.error('Erro ao cancelar assinatura:', error);
+    return NextResponse.json({ error: 'Erro ao cancelar assinatura.' }, { status: 500 });
   }
 }

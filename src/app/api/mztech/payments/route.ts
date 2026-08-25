@@ -6,6 +6,7 @@ import {
   getStoredPayments,
   createStoredPayment,
   updateStoredPayment,
+  deleteStoredPayment,
   updateStoredClient,
   getStoredClientById,
   getStoredContractById,
@@ -181,5 +182,40 @@ export async function PATCH(req: NextRequest) {
   } catch (error: any) {
     console.error('Erro ao atualizar pagamento:', error);
     return NextResponse.json({ error: 'Erro ao atualizar pagamento.' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID da cobrança é obrigatório.' }, { status: 400 });
+    }
+
+    deleteStoredPayment(id);
+
+    const dbOnline = await isDatabaseOnline();
+    if (dbOnline) {
+      try {
+        await prisma.mzPayment.deleteMany({
+          where: { id },
+        });
+      } catch (e) {}
+    }
+
+    logActivity({
+      actor: 'Administrador',
+      action: 'EXCLUIR_COBRANCA',
+      category: 'PAGAMENTO',
+      targetId: id,
+      description: `Cobrança ${id} foi excluída da Gestão Financeira.`,
+    });
+
+    return NextResponse.json({ success: true, message: 'Cobrança excluída com sucesso.' });
+  } catch (error: any) {
+    console.error('Erro ao excluir pagamento:', error);
+    return NextResponse.json({ error: 'Erro ao excluir pagamento.' }, { status: 500 });
   }
 }

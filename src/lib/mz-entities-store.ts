@@ -463,6 +463,28 @@ export function updateStoredPayment(id: string, updates: Partial<MzPaymentItem>)
   return payment;
 }
 
+export function deleteStoredPayment(id: string): boolean {
+  let payments = getStoredPayments();
+  const initialCount = payments.length;
+  payments = payments.filter((p) => p.id !== id && p.transactionId !== id);
+  if (payments.length !== initialCount) {
+    saveStoredPayments(payments);
+    return true;
+  }
+  return false;
+}
+
+export function deleteStoredSubscription(id: string): boolean {
+  let subs = getStoredSubscriptions();
+  const initialCount = subs.length;
+  subs = subs.filter((s) => s.id !== id);
+  if (subs.length !== initialCount) {
+    saveStoredSubscriptions(subs);
+    return true;
+  }
+  return false;
+}
+
 // ============================================================
 // RECORRÊNCIAS / ASSINATURAS (MzSubscription)
 // ============================================================
