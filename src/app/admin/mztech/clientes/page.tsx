@@ -582,11 +582,15 @@ export default function MzTechClientsPage() {
                     <td className="px-5 py-4 whitespace-nowrap">
                       <div className="space-y-1">
                         {getFinancialStatusBadge(c.financialStatus)}
-                        {c.subscriptions && c.subscriptions.length > 0 && (
+                        {c.subscriptions && c.subscriptions.length > 0 && c.subscriptions[0].amount > 0 ? (
                           <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
                             <span>{formatCurrency(c.subscriptions[0].amount)}/mês</span>
                             <span>•</span>
                             <span className="text-cyan-400">{c.subscriptions[0].paymentMethod === 'PIX' ? 'Pix' : 'Cartão'}</span>
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                            Apenas Dev (Sem Recorrência)
                           </p>
                         )}
                       </div>
@@ -685,77 +689,92 @@ export default function MzTechClientsPage() {
             </div>
 
             {/* SEÇÃO 1: INFORMAÇÕES DE PAGAMENTO (Ficha do Cliente) */}
-            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <DollarSign className="w-4 h-4 text-cyan-400" />
-                  <span>Ficha Financeira da Assinatura</span>
-                </h4>
-                {getFinancialStatusBadge(selectedClientFinancial.financialStatus)}
-              </div>
+            {(() => {
+              const activeSub = selectedClientFinancial.subscriptions?.find((s: any) => s.status === 'ACTIVE') || selectedClientFinancial.subscriptions?.[0];
+              const hasSub = Boolean(activeSub && activeSub.amount > 0);
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Plano Atual</p>
-                  <p className="font-bold text-white mt-0.5">
-                    {selectedClientFinancial.subscriptions?.[0]?.planName || 'Plano Hospedagem + Manutenção'}
-                  </p>
-                </div>
+              return (
+                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                      <DollarSign className="w-4 h-4 text-cyan-400" />
+                      <span>{hasSub ? 'Ficha Financeira da Assinatura' : 'Ficha Financeira (Sem Recorrência Mensal)'}</span>
+                    </h4>
+                    {getFinancialStatusBadge(selectedClientFinancial.financialStatus)}
+                  </div>
 
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Valor Mensal</p>
-                  <p className="font-bold text-emerald-400 mt-0.5">
-                    {formatCurrency(selectedClientFinancial.subscriptions?.[0]?.amount || 79.90)}
-                  </p>
-                </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Plano Atual</p>
+                      <p className="font-bold text-white mt-0.5">
+                        {hasSub ? (activeSub?.planName || 'Plano de Hospedagem') : 'Apenas Desenvolvimento'}
+                      </p>
+                    </div>
 
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Método</p>
-                  <div className="mt-1">
-                    {getPaymentMethodBadge(selectedClientFinancial.subscriptions?.[0]?.paymentMethod)}
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Valor Mensal</p>
+                      <p className={`font-bold mt-0.5 ${hasSub ? 'text-emerald-400' : 'text-slate-400'}`}>
+                        {hasSub && activeSub ? formatCurrency(activeSub.amount) : 'R$ 0,00 (Isento)'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Método</p>
+                      <div className="mt-1">
+                        {hasSub && activeSub ? (
+                          getPaymentMethodBadge(activeSub.paymentMethod)
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                            Taxa Única / Pix
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Status Assinatura</p>
+                      <p className={`font-bold mt-0.5 ${hasSub ? 'text-cyan-300' : 'text-slate-400'}`}>
+                        {hasSub ? (activeSub?.status || 'ACTIVE') : 'SEM RECORRÊNCIA'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1 border-t border-slate-900">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Início da Assinatura</p>
+                      <p className="text-slate-300 mt-0.5 font-medium">
+                        {hasSub
+                          ? formatDatePtBR(activeSub?.startDate || selectedClientFinancial.startDate || new Date().toISOString())
+                          : '-'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Próxima Cobrança</p>
+                      <p className="text-slate-300 mt-0.5 font-medium">
+                        {hasSub
+                          ? (activeSub?.nextBillingDate ? formatDatePtBR(activeSub.nextBillingDate) : 'Em 30 dias')
+                          : 'Isento de Mensalidade'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Gateway Conectado</p>
+                      <p className="text-cyan-400 mt-0.5 font-mono text-[11px]">
+                        {hasSub ? (activeSub?.gateway || 'SANDBOX_MOCK') : '-'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">ID Assinatura Gateway</p>
+                      <p className="text-slate-400 mt-0.5 font-mono text-[11px] truncate">
+                        {hasSub ? (activeSub?.gatewaySubscriptionId || 'sub_mock_2026') : '-'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Status Assinatura</p>
-                  <p className="font-bold text-cyan-300 mt-0.5">
-                    {selectedClientFinancial.subscriptions?.[0]?.status || 'ACTIVE'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1 border-t border-slate-900">
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Início da Assinatura</p>
-                  <p className="text-slate-300 mt-0.5 font-medium">
-                    {formatDatePtBR(selectedClientFinancial.subscriptions?.[0]?.startDate || selectedClientFinancial.startDate || new Date().toISOString())}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Próxima Cobrança</p>
-                  <p className="text-slate-300 mt-0.5 font-medium">
-                    {selectedClientFinancial.subscriptions?.[0]?.nextBillingDate
-                      ? formatDatePtBR(selectedClientFinancial.subscriptions[0].nextBillingDate)
-                      : 'Em 30 dias'}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">Gateway Conectado</p>
-                  <p className="text-cyan-400 mt-0.5 font-mono text-[11px]">
-                    {selectedClientFinancial.subscriptions?.[0]?.gateway || 'SANDBOX_MOCK'}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold">ID Assinatura Gateway</p>
-                  <p className="text-slate-400 mt-0.5 font-mono text-[11px] truncate">
-                    {selectedClientFinancial.subscriptions?.[0]?.gatewaySubscriptionId || 'sub_mock_2026'}
-                  </p>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* SEÇÃO 2: HISTÓRICO DE PAGAMENTOS */}
             <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3">
