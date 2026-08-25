@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Globe,
@@ -47,14 +47,22 @@ import {
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
 
-const getMonthlyPriceFromPlan = (plan: string): number => {
-  if (plan.includes('39,90')) return 39.90;
-  if (plan.includes('79,90')) return 79.90;
-  if (plan.includes('Apenas')) return 0;
+const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
+  if (plan.toLowerCase().includes('apenas')) return 0;
+  for (const p of customPlans) {
+    if (plan.includes(p.name)) return p.price;
+  }
+  if (plan.includes('39,90') || plan.includes('39.9')) return 39.90;
+  if (plan.includes('79,90') || plan.includes('79.9')) return 79.90;
+  if (plan.includes('149,90') || plan.includes('149.9')) return 149.90;
   return 79.90;
 };
 
 export default function MzTechPublicPage() {
+  // Estado dos Serviços Dinâmicos e Configurações Administrativas
+  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [settingsData, setSettingsData] = useState<any>(null);
+
   // Estado do FAQ Accordion
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
@@ -85,16 +93,71 @@ export default function MzTechPublicPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchServicesAndSettings = async () => {
+      try {
+        const [servRes, settRes] = await Promise.all([
+          fetch('/api/mztech/services'),
+          fetch('/api/mztech/settings'),
+        ]);
+        if (servRes.ok) {
+          const sData = await servRes.json();
+          if (Array.isArray(sData.services) && sData.services.length > 0) {
+            setServicesList(sData.services);
+          }
+        }
+        if (settRes.ok) {
+          const settData = await settRes.json();
+          if (settData.settings) {
+            setSettingsData(settData.settings);
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar dados dinâmicos do site:', err);
+      }
+    };
+    fetchServicesAndSettings();
+  }, []);
+
+  // Separar planos mensais e serviços de desenvolvimento cadastrados no painel
+  const monthlyPlans = servicesList.length > 0
+    ? servicesList.filter((s) => s.recurrence === 'MENSAL' || s.type === 'HOSPEDAGEM' || s.type === 'MANUTENCAO' || s.type === 'SUPORTE')
+    : MZTECH_PLANS.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        description: p.description,
+        features: p.features,
+        type: p.id === 'plano-hospedagem' ? 'HOSPEDAGEM' : 'MANUTENCAO',
+        recurrence: 'MENSAL',
+        badge: p.badge,
+        recommended: p.recommended,
+        cta: p.cta,
+      }));
+
+  const devServices = servicesList.length > 0
+    ? servicesList.filter((s) => s.type === 'DESENVOLVIMENTO' || s.recurrence === 'UNICA')
+    : [
+        { id: '1', name: 'Site Institucional Profissional' },
+        { id: '2', name: 'Landing Page de Alta Conversão' },
+        { id: '3', name: 'Sistema Web & Painel Administrativo Sob Medida' },
+        { id: '4', name: 'Sistema de Agendamento Online' },
+        { id: '5', name: 'Portal / Catálogo' },
+      ];
+
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const handleSelectPlan = (planName: string) => {
-    const newMonthly = getMonthlyPriceFromPlan(planName);
+  const handleSelectPlan = (plan: any) => {
+    const planName = typeof plan === 'string' ? plan : plan.name;
+    const planPrice = typeof plan === 'object' && plan.price !== undefined ? plan.price : getMonthlyPriceFromPlan(planName, monthlyPlans);
+    const planFormattedText = `${planName} (${formatCurrency(planPrice)}/mês)`;
+
     setFormData((prev) => ({
       ...prev,
-      needsHosting: planName,
-      monthlyPrice: newMonthly,
+      needsHosting: planFormattedText,
+      monthlyPrice: planPrice,
     }));
     const formElement = document.getElementById('orcamento');
     if (formElement) {
@@ -152,8 +215,8 @@ export default function MzTechPublicPage() {
 
     const encodedMessage = encodeURIComponent(message);
     const targetPhone = formData.selectedDev === 'Morvan'
-      ? (MZTECH_INFO.morvanWhatsapp || '5531993597136')
-      : (MZTECH_INFO.robertoWhatsapp || '5531986847049');
+      ? (settingsData?.morvanWhatsapp || MZTECH_INFO.morvanWhatsapp || '5531993597136').replace(/\D/g, '')
+      : (settingsData?.robertoWhatsapp || MZTECH_INFO.robertoWhatsapp || '5531986847049').replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
 
     setFormLoading(false);
@@ -539,67 +602,72 @@ export default function MzTechPublicPage() {
             </p>
           </div>
 
-          {/* Cards dos Planos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {MZTECH_PLANS.map((plan) => (
-              <div
-                key={plan.id}
-                className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
-                  plan.recommended
-                    ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-cyan-950/30 border-2 border-cyan-500 shadow-2xl shadow-cyan-500/10'
-                    : 'bg-slate-900/90 border border-slate-800'
-                }`}
-              >
-                {plan.recommended && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-slate-950 font-bold text-xs shadow-md">
-                    {plan.badge}
+          {/* Cards dos Planos Dinâmicos */}
+          <div className={`grid gap-8 max-w-5xl mx-auto ${monthlyPlans.length === 1 ? 'grid-cols-1 max-w-md' : monthlyPlans.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl' : 'grid-cols-1 md:grid-cols-3'}`}>
+            {monthlyPlans.map((plan) => {
+              const isRec = plan.recommended || (typeof plan.name === 'string' && plan.name.toLowerCase().includes('manutenção')) || plan.type === 'MANUTENCAO';
+              const badgeText = plan.badge || (isRec ? 'Mais Recomendado' : 'Hospedagem Gerenciada');
+
+              return (
+                <div
+                  key={plan.id || plan.name}
+                  className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
+                    isRec
+                      ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-cyan-950/30 border-2 border-cyan-500 shadow-2xl shadow-cyan-500/10'
+                      : 'bg-slate-900/90 border border-slate-800'
+                  }`}
+                >
+                  {isRec && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-slate-950 font-bold text-xs shadow-md">
+                      {badgeText}
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
+                      {!isRec && (
+                        <span className="text-xs font-semibold text-slate-400">{badgeText}</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-baseline gap-1 my-6">
+                      <span className="text-4xl sm:text-5xl font-extrabold text-white font-mono">
+                        {formatCurrency(plan.price)}
+                      </span>
+                      <span className="text-slate-400 text-sm">/mês</span>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+                      "{plan.description}"
+                    </p>
+
+                    <div className="space-y-3 pt-4 border-t border-slate-800">
+                      <p className="text-xs uppercase font-bold text-slate-400">O que está incluído:</p>
+                      {Array.isArray(plan.features) && plan.features.map((feat: string, i: number) => (
+                        <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200">
+                          <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
 
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
-                    {!plan.recommended && (
-                      <span className="text-xs font-semibold text-slate-400">{plan.badge}</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-baseline gap-1 my-6">
-                    <span className="text-4xl sm:text-5xl font-extrabold text-white font-mono">
-                      {formatCurrency(plan.price)}
-                    </span>
-                    <span className="text-slate-400 text-sm">{plan.period}</span>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-                    "{plan.description}"
-                  </p>
-
-                  <div className="space-y-3 pt-4 border-t border-slate-800">
-                    <p className="text-xs uppercase font-bold text-slate-400">O que está incluído:</p>
-                    {plan.features.map((feat, i) => (
-                      <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200">
-                        <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
+                  <div className="mt-8 pt-6 border-t border-slate-800">
+                    <button
+                      onClick={() => handleSelectPlan(plan)}
+                      className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
+                        isRec
+                          ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
+                          : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                      }`}
+                    >
+                      {plan.cta || `Escolher ${plan.name.replace('Plano ', '')}`}
+                    </button>
                   </div>
                 </div>
-
-                <div className="mt-8 pt-6 border-t border-slate-800">
-                  <button
-                    onClick={() => handleSelectPlan(plan.name)}
-                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
-                      plan.recommended
-                        ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
-                        : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
-                    }`}
-                  >
-                    {plan.cta}
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Seção Explicativa: Por que existe uma mensalidade? */}
@@ -1072,12 +1140,12 @@ export default function MzTechPublicPage() {
                       onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
                     >
-                      <option value="Site Institucional Profissional">Site Institucional</option>
-                      <option value="Landing Page de Conversão">Landing Page</option>
-                      <option value="Sistema Web Personalizado">Sistema Web Personalizado</option>
-                      <option value="Sistema de Agendamento Online">Sistema de Agendamento</option>
-                      <option value="Portal / Catálogo">Portal / Catálogo</option>
-                      <option value="Outro">Outro</option>
+                      {devServices.map((s: any) => (
+                        <option key={s.id || s.name} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))}
+                      <option value="Outro Projeto Personalizado">Outro Projeto Personalizado</option>
                     </select>
                   </div>
 
@@ -1100,7 +1168,8 @@ export default function MzTechPublicPage() {
                       value={formData.needsHosting}
                       onChange={(e) => {
                         const newPlan = e.target.value;
-                        const newMonthly = getMonthlyPriceFromPlan(newPlan);
+                        const matchingPlan = monthlyPlans.find((p) => newPlan.includes(p.name));
+                        const newMonthly = matchingPlan ? matchingPlan.price : getMonthlyPriceFromPlan(newPlan, monthlyPlans);
                         setFormData((prev) => ({
                           ...prev,
                           needsHosting: newPlan,
@@ -1109,13 +1178,12 @@ export default function MzTechPublicPage() {
                       }}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
                     >
-                      <option value="Plano Hospedagem + Manutenção (R$ 79,90/mês)">
-                        Hospedagem + Manutenção (R$ 79,90)
-                      </option>
-                      <option value="Plano Hospedagem (R$ 39,90/mês)">
-                        Hospedagem (R$ 39,90)
-                      </option>
-                      <option value="Apenas Desenvolvimento">Apenas Desenvolvimento</option>
+                      {monthlyPlans.map((p: any) => (
+                        <option key={p.id || p.name} value={`${p.name} (${formatCurrency(p.price)}/mês)`}>
+                          {p.name} ({formatCurrency(p.price)}/mês)
+                        </option>
+                      ))}
+                      <option value="Apenas Desenvolvimento">Apenas Desenvolvimento (Sem Recorrência)</option>
                     </select>
                   </div>
                 </div>
