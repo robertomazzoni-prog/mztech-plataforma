@@ -41,7 +41,6 @@ import {
   MZTECH_SERVICE_CATEGORIES,
   MZTECH_STEPS,
   MZTECH_SCOPE_INCLUDED,
-  MZTECH_SCOPE_EXCLUDED,
   MZTECH_FAQ,
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
@@ -745,55 +744,34 @@ export default function MzTechPublicPage() {
               O que a manutenção mzTech inclui?
             </h2>
             <p className="text-slate-400 text-base sm:text-lg mt-3">
-              Saiba exatamente o que está coberto no seu plano recorrente e o que pode ser orçado separadamente.
+              Saiba exatamente o que está coberto no seu plano recorrente de manutenção e estabilidade.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
+          <div className="max-w-3xl mx-auto">
             {/* O Que Está Incluído */}
-            <div className="bg-slate-900/90 border border-emerald-500/30 rounded-3xl p-8 space-y-6">
-              <div className="flex items-center gap-2.5 pb-4 border-b border-slate-800">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <div className="bg-slate-900/90 border border-emerald-500/30 rounded-3xl p-8 sm:p-10 space-y-6 shadow-2xl">
+              <div className="flex items-center gap-3 pb-5 border-b border-slate-800">
+                <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Incluído no Plano de Manutenção</h3>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">Incluído no Plano de Manutenção</h3>
+                  <p className="text-xs text-slate-400">Cobertura técnica contínua para sua aplicação</p>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {MZTECH_SCOPE_INCLUDED.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm">
+                  <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-bold text-white">{item.title}</p>
-                      <p className="text-slate-400 text-xs mt-0.5">{item.description}</p>
+                      <p className="font-bold text-white text-sm">{item.title}</p>
+                      <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">{item.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* O Que NÃO Está Incluído (Serviços Adicionais) */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 space-y-6">
-              <div className="flex items-center gap-2.5 pb-4 border-b border-slate-800">
-                <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center">
-                  <Layers className="w-5 h-5" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Serviços Adicionais (Orçados à Parte)</h3>
-              </div>
-
-              <div className="space-y-3">
-                {MZTECH_SCOPE_EXCLUDED.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-600 shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-[11px] text-slate-500 italic pt-2">
-                * Para qualquer necessidade fora do escopo, apresentamos uma proposta transparente antes de iniciar.
-              </p>
             </div>
           </div>
         </div>

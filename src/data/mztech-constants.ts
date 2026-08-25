@@ -132,10 +132,6 @@ export const MZTECH_SCOPE_INCLUDED = [
     description: 'Resolução de eventuais falhas técnicas, quebras de layout ou erros de script.',
   },
   {
-    title: 'Pequenas Alterações Pontuais',
-    description: 'Troca de textos, fotos, telefones, endereços, horários ou links de redes sociais.',
-  },
-  {
     title: 'Atualizações de Segurança',
     description: 'Manutenção de dependências e aplicação de correções de vulnerabilidades conhecidas.',
   },
