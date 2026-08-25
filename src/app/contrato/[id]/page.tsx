@@ -220,16 +220,26 @@ export default function PublicContractSignPage({ params }: { params: { id: strin
 
         {/* Banner de Sucesso quando assinado */}
         {isAlreadySignedByClient && (
-          <div className="p-5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-3.5 animate-in fade-in">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="p-5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm">Contrato Assinado Digitalmente com Sucesso!</h3>
+                <p className="text-xs text-emerald-300/90">
+                  Assinatura registrada para {contract.clientSignedBy || contract.client?.contactName} em {formatDatePtBR(contract.clientSignedAt || contract.acceptedAt || '')}.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-white text-sm">Contrato Assinado Digitalmente com Sucesso!</h3>
-              <p className="text-xs text-emerald-300/90">
-                Assinatura registrada para {contract.clientSignedBy || contract.client?.contactName} em {formatDatePtBR(contract.clientSignedAt || contract.acceptedAt || '')}.
-              </p>
-            </div>
+
+            <Link
+              href={`/pagamento/${contract.id}`}
+              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 shrink-0 transition-all hover:scale-[1.02]"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Pagar Agora (PIX / Cartão)</span>
+            </Link>
           </div>
         )}
 
