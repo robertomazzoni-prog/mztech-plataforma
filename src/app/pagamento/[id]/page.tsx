@@ -29,6 +29,7 @@ import { MzContractItem } from '@/types/mztech';
 
 export default function PublicPaymentPage({ params }: { params: { id: string } }) {
   const [contract, setContract] = useState<MzContractItem | null>(null);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [pixCopied, setPixCopied] = useState(false);
   const [payloadCopied, setPayloadCopied] = useState(false);
@@ -54,13 +55,13 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
       if (contRes.ok) {
         const cData = await contRes.json();
         setContract(cData.contract);
-        if (cData.contract?.status === 'ATIVO' && cData.contract?.clientSigned) {
-          // Pode verificar se já foi pago
-        }
       }
       if (settRes.ok) {
         const sData = await settRes.json();
-        if (sData.pixKey) setPixKey(sData.pixKey);
+        if (sData.settings) {
+          setSettings(sData.settings);
+          if (sData.settings.pixKey) setPixKey(sData.settings.pixKey);
+        }
       }
     } catch (err) {
       console.error('Erro ao carregar checkout de pagamento:', err);
@@ -311,9 +312,25 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
 
             {/* ÁREA DE PAGAMENTO PIX */}
             {selectedMethod === 'PIX' && (() => {
+              const isMorvan = Boolean(
+                contract.assignedDev?.toLowerCase().includes('morvan') ||
+                contract.snapshot?.assignedDev?.toLowerCase().includes('morvan') ||
+                (contract.scopeSupport?.toLowerCase().includes('morvan') && !contract.scopeSupport?.toLowerCase().includes('roberto'))
+              );
+
+              const specialistDisplayName = isMorvan ? (settings?.morvanName || 'Morvan') : (settings?.robertoName || 'Roberto');
+              const specialistFullName = isMorvan
+                ? `${settings?.morvanName || 'Morvan'} (Sócio & Especialista mzTech)`
+                : `${settings?.robertoName || 'Roberto Mazzoni'} (Sócio & Especialista mzTech)`;
+              const merchantName = isMorvan ? (settings?.morvanName || 'MORVAN') : (settings?.robertoName || 'ROBERTO MAZZONI');
+
+              const activePixKey = isMorvan
+                ? (settings?.morvanPixKey || settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('morvan'))?.key || 'morvan@mztech.com.br')
+                : (settings?.robertoPixKey || settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('roberto'))?.key || settings?.pixKey || pixKey);
+
               const pixPayload = generatePixPayload({
-                pixKey,
-                merchantName: 'ROBERTO MAZZONI',
+                pixKey: activePixKey,
+                merchantName,
                 merchantCity: 'BELO HORIZONTE',
                 amount: amountToPay,
                 txid: `MZ${contract.id.replace(/\D/g, '').substring(0, 10) || '2026'}`,
@@ -326,19 +343,31 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                 setTimeout(() => setPayloadCopied(false), 3000);
               };
 
+              const handleCopyActivePix = () => {
+                navigator.clipboard.writeText(activePixKey);
+                setPixCopied(true);
+                setTimeout(() => setPixCopied(false), 3000);
+              };
+
               return (
                 <div className="p-6 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-5 text-center animate-in fade-in">
                   
+                  {/* Badge de Identificação do Especialista Responsável */}
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <span>Especialista Selecionado: <strong>{specialistDisplayName}</strong></span>
+                  </div>
+
                   {/* QR Code Real Escaneável por Qualquer Banco */}
                   <div className="space-y-2">
                     <div className="p-3.5 bg-white rounded-2xl max-w-[220px] mx-auto shadow-2xl flex flex-col items-center justify-center">
                       <img
                         src={qrCodeImageUrl}
-                        alt="QR Code Pix Oficial"
+                        alt={`QR Code Pix Oficial - ${specialistDisplayName}`}
                         className="w-48 h-48 object-contain rounded-lg"
                       />
                       <span className="text-[10px] font-mono text-slate-800 font-bold uppercase tracking-wider mt-1">
-                        Pague com Pix • Escaneie Aqui
+                        Pague com Pix • {specialistDisplayName}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400">
@@ -369,28 +398,28 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                     </div>
                   </div>
 
-                  {/* Chave Pix Direta */}
+                  {/* Chave Pix Direta do Sócio Escolhido */}
                   <div className="space-y-2 text-left max-w-md mx-auto pt-2 border-t border-slate-800/80">
                     <label className="text-[11px] uppercase font-bold text-slate-400">
-                      Ou Pague Usando a Chave Pix Direta (E-mail):
+                      Ou Pague Usando a Chave Pix Direta do {specialistDisplayName}:
                     </label>
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
                         readOnly
-                        value={pixKey}
+                        value={activePixKey}
                         className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-300 focus:outline-none truncate"
                       />
                       <button
-                        onClick={handleCopyPix}
+                        onClick={handleCopyActivePix}
                         className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors"
                       >
                         {pixCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{pixCopied ? 'Copiado!' : 'Copiar Chave'}</span>
                       </button>
                     </div>
-                    <p className="text-[10px] text-slate-500">
-                      Favorecido: <strong className="text-slate-400">Roberto Mazzoni</strong> (Sócio & Titular mzTech).
+                    <p className="text-[10px] text-slate-400">
+                      Favorecido da Chave: <strong className="text-white">{specialistFullName}</strong>.
                     </p>
                   </div>
 

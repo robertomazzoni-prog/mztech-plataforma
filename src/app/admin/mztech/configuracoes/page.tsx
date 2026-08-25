@@ -64,9 +64,11 @@ export default function AdminSettingsPage() {
   // Sócios
   const [robertoName, setRobertoName] = useState('Roberto');
   const [robertoPhone, setRobertoPhone] = useState('(31) 98684-7049');
+  const [robertoPixKey, setRobertoPixKey] = useState('robertomazzoni956@gmail.com');
   
   const [morvanName, setMorvanName] = useState('Morvan');
   const [morvanPhone, setMorvanPhone] = useState('(31) 99359-7136');
+  const [morvanPixKey, setMorvanPixKey] = useState('morvan@mztech.com.br');
 
   // Horário
   const [workingHours, setWorkingHours] = useState('Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h');
@@ -84,8 +86,10 @@ export default function AdminSettingsPage() {
         setTagline(s.tagline || 'Tecnologia que coloca sua empresa no digital.');
         setRobertoName(s.robertoName || 'Roberto');
         setRobertoPhone(s.robertoPhone || '(31) 98684-7049');
+        setRobertoPixKey(s.robertoPixKey || 'robertomazzoni956@gmail.com');
         setMorvanName(s.morvanName || 'Morvan');
         setMorvanPhone(s.morvanPhone || '(31) 99359-7136');
+        setMorvanPixKey(s.morvanPixKey || 'morvan@mztech.com.br');
         setWorkingHours(s.workingHours || 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h');
 
         if (Array.isArray(s.emails) && s.emails.length > 0) {
@@ -259,9 +263,11 @@ export default function AdminSettingsPage() {
           robertoName,
           robertoPhone,
           robertoWhatsapp: robertoPhone.replace(/\D/g, ''),
+          robertoPixKey,
           morvanName,
           morvanPhone,
           morvanWhatsapp: morvanPhone.replace(/\D/g, ''),
+          morvanPixKey,
           pixKey: primaryPix,
           pixKeys: validPixKeys,
           workingHours,
@@ -666,6 +672,19 @@ export default function AdminSettingsPage() {
                     className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm font-mono focus:outline-none focus:border-cyan-400"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-cyan-300">
+                    Chave Pix do Roberto (para pagamentos recebidos)
+                  </label>
+                  <input
+                    type="text"
+                    value={robertoPixKey}
+                    onChange={(e) => setRobertoPixKey(e.target.value)}
+                    placeholder="robertomazzoni956@gmail.com"
+                    className="w-full px-3.5 py-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-cyan-200 text-sm font-mono focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
               </div>
 
               {/* Morvan */}
@@ -708,6 +727,19 @@ export default function AdminSettingsPage() {
                     onChange={(e) => setMorvanPhone(formatPhoneNumber(e.target.value))}
                     placeholder="(31) 99359-7136"
                     className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm font-mono focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-cyan-300">
+                    Chave Pix do Morvan (para pagamentos recebidos)
+                  </label>
+                  <input
+                    type="text"
+                    value={morvanPixKey}
+                    onChange={(e) => setMorvanPixKey(e.target.value)}
+                    placeholder="morvan@mztech.com.br ou chave CPF/telefone"
+                    className="w-full px-3.5 py-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-cyan-200 text-sm font-mono focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>

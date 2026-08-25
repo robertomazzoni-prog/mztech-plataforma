@@ -320,6 +320,7 @@ export interface MzContractSnapshot {
   backupRetentionDays: number;
   codeOwnership: CodeOwnershipType;
   termsVersion: string;
+  assignedDev?: string;
   generatedAt: string;
 }
 
@@ -342,6 +343,7 @@ export interface MzContractItem {
     domain?: string | null;
   } | null;
   quoteId?: string | null;
+  assignedDev?: string; // "Roberto" | "Morvan" | "Sem Preferência"
   title: string;
   content: string;
   totalDevPrice: number;

@@ -616,6 +616,12 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     });
   }
 
+  const chosenDev = quote.selectedDev?.includes('Morvan')
+    ? 'Morvan'
+    : quote.selectedDev?.includes('Roberto')
+    ? 'Roberto'
+    : (adminName?.includes('Morvan') ? 'Morvan' : 'Roberto');
+
   // 2. Criar Projeto Registrado
   let projects = getStoredProjects();
   const projectName = `${quote.projectType} - ${company}`;
@@ -623,7 +629,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
 
   if (!project) {
     project = {
-      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: `project-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       clientId: client.id,
       client: {
         id: client.id,
@@ -633,10 +639,10 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
         whatsapp: client.whatsapp,
       },
       name: projectName,
-      type: quote.projectType.includes('Landing')
-        ? 'LANDING_PAGE'
-        : quote.projectType.includes('Sistema')
+      type: quote.projectType?.includes('SISTEMA')
         ? 'SISTEMA_WEB'
+        : quote.projectType?.includes('LOJA')
+        ? 'ECOMMERCE'
         : 'SITE_INSTITUCIONAL',
       status: 'PLANEJAMENTO',
       startDate: nowStr,
@@ -644,8 +650,8 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       domain: client.domain || null,
       hostingUrl: client.domain ? `https://${client.domain}` : 'https://app.mztech.dev',
       hostingPlatform: 'Railway Cloud',
-      responsibleDev: adminName,
-      notes: `Projeto vinculado ao orçamento ${quote.quoteNumber || quote.id}. Aprovado por ${adminName}.`,
+      responsibleDev: chosenDev,
+      notes: `Projeto vinculado ao orçamento ${quote.quoteNumber || quote.id}. Desenvolvedor especialista: ${chosenDev}.`,
       createdAt: nowStr,
       updatedAt: nowStr,
     };
@@ -662,7 +668,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       category: 'PROJETO',
       targetId: project.id,
       targetNumber: project.name,
-      description: `Projeto "${project.name}" foi criado e alocado para ${adminName}.`,
+      description: `Projeto "${project.name}" foi criado e alocado para ${chosenDev}.`,
     });
   }
 
@@ -695,6 +701,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     backupRetentionDays: 30,
     codeOwnership: 'PROPRIEDADE_CLIENTE',
     termsVersion: 'v2.0-2026',
+    assignedDev: chosenDev,
     generatedAt: nowStr,
   };
 
@@ -717,6 +724,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       domain: project.domain,
     },
     quoteId: quote.id,
+    assignedDev: chosenDev,
     title: `Contrato de Prestação de Serviços Digitais — ${company}`,
     content: DEFAULT_CONTRACT_TEMPLATE,
     totalDevPrice: initialDevPrice,
@@ -730,7 +738,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     scopeDevelopment: `Desenvolvimento de ${quote.projectType} com alta performance e design responsivo.`,
     scopeHosting: 'Hospedagem em nuvem Railway com certificado SSL incluso.',
     scopeMaintenance: 'Manutenção preventiva, correções e suporte prioritário via WhatsApp.',
-    scopeSupport: 'Atendimento direto com os desenvolvedores responsáveis (Roberto e Morvan).',
+    scopeSupport: `Atendimento direto com o sócio desenvolvedor ${chosenDev}.`,
     backupRetentionDays: 30,
     migrationExcluded: true,
     status: 'AGUARDANDO_PAGAMENTO',

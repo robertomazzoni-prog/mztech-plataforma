@@ -26,9 +26,11 @@ export interface CompanySettings {
   robertoName: string;
   robertoPhone: string;
   robertoWhatsapp: string;
+  robertoPixKey?: string;
   morvanName: string;
   morvanPhone: string;
   morvanWhatsapp: string;
+  morvanPixKey?: string;
   pixKey: string;
   pixKeys: CompanyPixItem[];
   workingHours: string;
@@ -54,18 +56,28 @@ export const defaultCompanySettings: CompanySettings = {
   robertoName: 'Roberto',
   robertoPhone: '(31) 98684-7049',
   robertoWhatsapp: '5531986847049',
+  robertoPixKey: 'robertomazzoni956@gmail.com',
   morvanName: 'Morvan',
   morvanPhone: '(31) 99359-7136',
   morvanWhatsapp: '5531993597136',
+  morvanPixKey: 'morvan@mztech.com.br',
   pixKey: 'robertomazzoni956@gmail.com',
   pixKeys: [
     {
-      id: 'pix-1',
+      id: 'pix-roberto',
       key: 'robertomazzoni956@gmail.com',
       type: 'EMAIL',
       holder: 'Roberto (Sócio mzTech)',
       bank: 'Nubank / Inter',
       isPrimary: true,
+    },
+    {
+      id: 'pix-morvan',
+      key: 'morvan@mztech.com.br',
+      type: 'EMAIL',
+      holder: 'Morvan (Sócio mzTech)',
+      bank: 'Nubank / Inter',
+      isPrimary: false,
     },
   ],
   workingHours: 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h',
