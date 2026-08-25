@@ -1,0 +1,32 @@
+[
+  {
+    "id": "admin-roberto",
+    "name": "Roberto",
+    "email": "robertomazzoni956@gmail.com",
+    "passwordHash": "$2a$10$z057kSunrtG..aeQePZNXO.bBRgT/ecsArtMpYuslJbeoD2IYSjuC",
+    "phone": "31986847049",
+    "role": "ADMIN",
+    "partner": "Roberto",
+    "updatedAt": "2026-08-25T02:11:43.037Z"
+  },
+  {
+    "id": "admin-morvan",
+    "name": "Morvan",
+    "email": "morvan@mztech.com.br",
+    "passwordHash": "$2a$10$kaym1C5N.NXFUpwevKDRx.AJDNsxVDDVyu9fRLKaIxGXKdkXnGYFi",
+    "phone": "(31) 98888-0002",
+    "role": "ADMIN",
+    "partner": "Morvan",
+    "updatedAt": "2026-08-25T01:56:31.174Z"
+  },
+  {
+    "id": "admin-master",
+    "name": "Admin Master OPS",
+    "email": "admin@mztech.com.br",
+    "passwordHash": "$2a$10$kaym1C5N.NXFUpwevKDRx.AJDNsxVDDVyu9fRLKaIxGXKdkXnGYFi",
+    "phone": "(31) 98888-9999",
+    "role": "ADMIN",
+    "partner": "Geral",
+    "updatedAt": "2026-08-25T01:56:31.174Z"
+  }
+]

@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENTIDADES EXISTENTES DA BARBEARIA (MAZZONI BARBERSHOP)
+// ============================================================
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  phone        String
+  role         String        @default("CLIENT") // "CLIENT", "BARBER", "ADMIN"
+  avatar       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+}
+
+model Service {
+  id              String        @id @default(uuid())
+  name            String
+  category        String        // "CORTE", "BARBA", "PIGMENTACAO", "COMBO", "TRATAMENTO"
+  description     String
+  price           Float
+  durationMinutes Int           @default(30)
+  imageUrl        String?
+  popular         Boolean       @default(false)
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  appointments    Appointment[]
+}
+
+model Barber {
+  id                String        @id @default(uuid())
+  name              String
+  bio               String?
+  avatarUrl         String?
+  specialties       String?       // "Degradê, Barba Terapia, Pigmentação"
+  workingHoursStart String        @default("09:00")
+  workingHoursEnd   String        @default("19:00")
+  lunchStart        String        @default("12:00")
+  lunchEnd          String        @default("13:00")
+  workingDays       String        @default("1,2,3,4,5,6") // Seg(1) a Sáb(6)
+  active            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  appointments      Appointment[]
+}
+
+model Appointment {
+  id           String   @id @default(uuid())
+  clientName   String
+  clientPhone  String   // WhatsApp formatado
+  clientEmail  String?
+  date         String   // Formato YYYY-MM-DD
+  timeSlot     String   // Formato HH:mm
+  status       String   @default("CONFIRMED") // "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
+  notes        String?
+  
+  // Relacionamentos
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  serviceId    String
+  service      Service  @relation(fields: [serviceId], references: [id])
+  
+  barberId     String
+  barber       Barber   @relation(fields: [barberId], references: [id])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SiteSetting {
+  id              String   @id @default("main-settings")
+  heroBadge       String
+  heroTitle       String
+  heroSubtitle    String
+  stat1Number     String
+  stat1Label      String
+  stat2Number     String
+  stat2Label      String
+  stat3Number     String
+  stat3Label      String
+  stat4Number     String
+  stat4Label      String
+  comfortTitle    String
+  comfortText     String
+  address         String
+  phone           String
+  whatsapp        String
+  instagram       String
+  diffTitle       String?  @default("Mais que um corte, uma experiência exclusiva")
+  diffSubtitle    String?  @default("Por que escolher a Mazzoni?")
+  diff1Title      String?  @default("Visagismo Personalizado")
+  diff1Text       String?  @default("Analisamos a geometria do seu rosto e o tipo de cabelo para criar um corte sob medida que valorize seus traços.")
+  diff2Title      String?  @default("Pigmentação de Alta Definição")
+  diff2Text       String?  @default("Preenchimento de falhas de barba e acabamento degradê impecável com produtos hipoalergênicos e longa durabilidade.")
+  diff3Title      String?  @default("Conforto & Cortesia")
+  diff3Text       String?  @default("Ambiente climatizado e café cortesia em um espaço moderno pensado para o seu conforto.")
+  hoursWeekday    String?  @default("09:00 às 20:00")
+  hoursSaturday   String?  @default("09:00 às 19:00")
+  hoursSunday     String?  @default("Fechado")
+  footerAbout     String?  @default("Tradição, estilo e sofisticação no coração da cidade.")
+  ctaTitle        String?  @default("Pronto para Renovar o Visual?")
+  ctaSubtitle     String?  @default("Garanta seu horário com poucos cliques.")
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+// ============================================================
+// ENTIDADES OPERACIONAIS MZTECH
+// ============================================================
+
+model MzClient {
+  id                      String          @id @default(uuid())
+  companyName             String
+  contactName             String
+  whatsapp                String
+  email                   String
+  domain                  String?         // Domínio Próprio Principal
+  status                  String          @default("ATIVO") // "ATIVO", "SUSPENSO", "CANCELAMENTO_SOLICITADO", "ENCERRADO"
+  financialStatus         String          @default("EM_DIA") // "EM_DIA", "PENDENTE", "ATRASADO", "RECUSADO", "CANCELADO"
+  startDate               DateTime?
+  notes                   String?
+
+  // Campos de Encerramento e Entrega de Ativos (Políticas mzTech)
+  cancellationDate        DateTime?
+  terminationEffectiveDate DateTime?
+  cancellationReason      String?
+  terminatedServices      String?
+  codeDelivered           Boolean         @default(false)
+  backupDelivered         Boolean         @default(false)
+  deliveredAt             DateTime?
+  deliveredBy             String?
+  terminationNotes        String?
+
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  projects                MzProject[]
+  hostings                MzHosting[]
+  maintenances            MzMaintenance[]
+  contracts               MzContract[]
+  backups                 MzBackup[]
+  subscriptions           MzSubscription[]
+  payments                MzPayment[]
+}
+
+model MzProject {
+  id              String          @id @default(uuid())
+  clientId        String
+  client          MzClient        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name            String
+  type            String          // "SITE_INSTITUCIONAL", "SISTEMA_WEB", "LANDING_PAGE", "SISTEMA_AGENDAMENTO", "OUTRO"
+  status          String          @default("PLANEJAMENTO") // "PLANEJAMENTO", "DESENVOLVIMENTO", "TESTE", "PRODUCAO", "MANUTENCAO", "ENCERRADO"
+  startDate       DateTime?
+  deliveryDate    DateTime?
+  domain          String?
+  hostingUrl      String?
+  githubRepo      String?
+  hostingPlatform String          @default("Railway")
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  hostings        MzHosting[]
+  maintenances    MzMaintenance[]
+  contracts       MzContract[]
+  backups         MzBackup[]
+  subscriptions   MzSubscription[]
+}
+
+model MzService {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  type        String   // "DESENVOLVIMENTO", "HOSPEDAGEM", "MANUTENCAO", "SUPORTE", "MIGRACAO_ADICIONAL", "ADICIONAL"
+  price       Float
+  recurrence  String   @default("UNICA") // "UNICA", "MENSAL", "TRIMESTRAL", "ANUAL"
+  status      String   @default("ATIVO") // "ATIVO", "INATIVO"
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MzHosting {
+  id              String     @id @default(uuid())
+  clientId        String
+  client          MzClient   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId       String?
+  project         MzProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  provider        String     @default("Railway") // "Railway", "DigitalOcean", "VPS Própria", "Hetzner", "AWS", "Outro"
+  serverType      String?    @default("Cloud App") // "Cloud App", "VPS Linux", "Dedicated"
+  url             String     // URL principal de acesso
+  customDomain    String?    // Domínio próprio do cliente (ex: cliente.com.br)
+  platformDomain  String?    // Endereço técnico fornecido pela plataforma (ex: *.up.railway.app)
+  startDate       DateTime   @default(now())
+  renewalDate     DateTime?
+  cancellationDate DateTime?
+  monthlyPrice    Float      @default(39.90)
+  status          String     @default("ATIVO") // "ATIVO", "SUSPENSO", "CANCELAMENTO_SOLICITADO", "ENCERRADO"
+  notes           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model MzMaintenance {
+  id          String     @id @default(uuid())
+  clientId    String
+  client      MzClient   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     MzProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  date        DateTime   @default(now())
+  type        String     // "CORRECAO", "ALTERACAO", "ATUALIZACAO", "SUPORTE", "SEGURANCA", "OUTRO"
+  description String
+  responsible String     @default("mzTech Equipe")
+  status      String     @default("CONCLUIDO") // "PENDENTE", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO"
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model MzContract {
+  id                  String     @id @default(uuid())
+  clientId            String
+  client              MzClient   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId           String?
+  project             MzProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  title               String
+  content             String     @db.Text
+  totalDevPrice       Float      @default(0.0)
+  monthlyPrice        Float      @default(79.90)
+  paymentMethod       String     @default("PIX / Cartão de Crédito")
+  termsVersion        String     @default("v2.0-2026")
+  codeOwnershipType   String     @default("PROPRIEDADE_CLIENTE") // "PROPRIEDADE_CLIENTE", "LICENCA_USO", "MISTO", "PROPRIEDADE_MZTECH"
+  scopeDevelopment    String?
+  scopeHosting        String?
+  scopeMaintenance    String?
+  scopeSupport        String?
+  backupRetentionDays Int        @default(30)
+  migrationExcluded   Boolean    @default(true) // Migração NÃO inclusa na mensalidade
+  status              String     @default("RASCUNHO") // "RASCUNHO", "EMITIDO", "ASSINADO", "CANCELADO"
+  signedAt            DateTime?
+  notes               String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model MzBackup {
+  id              String     @id @default(uuid())
+  clientId        String
+  client          MzClient   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId       String?
+  project         MzProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  databaseName    String     @default("PostgreSQL (Railway)")
+  backupDate      DateTime   @default(now())
+  fileName        String     // Ex: "backup-2026-08-24.dump"
+  storageLocation String     // Ex: "D:\MZTECH-BACKUPS\Mazzoni-Barbers\postgres\backup-2026-08-24.dump"
+  fileSize        String?    // Ex: "40.9 KB"
+  retentionDays   Int        @default(30)
+  status          String     @default("VALIDO") // "VALIDO", "TESTADO", "ARQUIVADO", "ENTREGUE_AO_CLIENTE"
+  notes           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+// ============================================================
+// ENTIDADES DE PAGAMENTOS, ASSINATURAS E WEBHOOKS (DESACOPLADO)
+// ============================================================
+
+model MzSubscription {
+  id                    String      @id @default(uuid())
+  clientId              String
+  client                MzClient    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId             String?
+  project               MzProject?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  planName              String      // Ex: "Plano Hospedagem + Manutenção"
+  amount                Float       // Ex: 79.90
+  periodicity           String      @default("MENSAL") // "MENSAL", "TRIMESTRAL", "ANUAL"
+  paymentMethod         String      @default("CREDIT_CARD") // "CREDIT_CARD", "PIX"
+  status                String      @default("ACTIVE") // "ACTIVE", "PAYMENT_PENDING", "OVERDUE", "SUSPENDED", "CANCELLED"
+  startDate             DateTime    @default(now())
+  nextBillingDate       DateTime?
+  cancellationDate      DateTime?
+  cancellationReason    String?
+  gateway               String      @default("SANDBOX_MOCK") // "SANDBOX_MOCK", "ASAAS", "STRIPE", "MERCADOPAGO"
+  gatewaySubscriptionId String?     // ID da assinatura no gateway
+  gatewayCustomerId     String?     // ID do cliente no gateway
+  notes                 String?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  payments              MzPayment[]
+}
+
+model MzPayment {
+  id                    String          @id @default(uuid())
+  clientId              String
+  client                MzClient        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  subscriptionId        String?
+  subscription          MzSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  amount                Float
+  paymentMethod         String          // "CREDIT_CARD", "PIX"
+  status                String          @default("PENDING") // "PENDING", "AUTHORIZED", "PAID", "FAILED", "OVERDUE", "CANCELLED", "REFUNDED"
+  dueDate               DateTime        @default(now()) // Data de vencimento
+  paidAt                DateTime?
+  gateway               String          @default("SANDBOX_MOCK")
+  gatewayPaymentId      String?         // ID da cobrança no gateway
+  gatewayPixQrCode      String?         // String copia e cola ou código Pix simulado
+  retryCount            Int             @default(0) // Tentativas de cobrança
+  failureReason         String?
+  notes                 String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
+
+model MzWebhookEvent {
+  id                String    @id @default(uuid())
+  eventId           String    @unique // ID único para garantir IDEMPOTÊNCIA
+  gateway           String    @default("SANDBOX_MOCK")
+  eventType         String    // Ex: "PAYMENT_RECEIVED", "PAYMENT_OVERDUE", "PAYMENT_FAILED", etc.
+  clientId          String?
+  subscriptionId    String?
+  paymentId         String?
+  rawPayload        String    @db.Text // Payload seguro (sem dados de cartão)
+  processedStatus   String    @default("PROCESSED") // "PROCESSED", "IGNORED_DUPLICATE", "ERROR"
+  errorMessage      String?
+  processedAt       DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+}

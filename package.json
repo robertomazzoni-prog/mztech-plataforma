@@ -1,0 +1,38 @@
+{
+  "name": "mztech-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "npx prisma@5.22.0 generate && next build",
+    "start": "node start.js",
+    "lint": "next lint",
+    "postinstall": "npx prisma@5.22.0 generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.460.0",
+    "next": "^14.2.20",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.17.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3"
+  }
+}

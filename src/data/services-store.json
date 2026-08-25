@@ -1,0 +1,109 @@
+[
+  {
+    "id": "serv-landing-page",
+    "name": "Landing Page de Alta Conversão",
+    "description": "Página única responsiva e moderna focada em vendas, captura de leads, WhatsApp integrado e SEO.",
+    "type": "DESENVOLVIMENTO",
+    "price": 890,
+    "recurrence": "UNICA",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Design exclusivo focado em conversão",
+      "Botão WhatsApp flutuante integrado",
+      "Carregamento ultra-rápido (< 1s)",
+      "Otimização completa para celulares",
+      "Configuração de tags de SEO e Meta tags"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "serv-site-institucional",
+    "name": "Site Institucional Profissional",
+    "description": "Site corporativo multi-páginas (Início, Quem Somos, Serviços, Portfólio, Contato e Blog opcional).",
+    "type": "DESENVOLVIMENTO",
+    "price": 1500,
+    "recurrence": "UNICA",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Estrutura multi-páginas de alta autoridade",
+      "Formulário inteligente de captação de clientes",
+      "Integração com e-mail e WhatsApp",
+      "Código limpo com Next.js, React e TypeScript",
+      "Certificado de Segurança SSL incluso"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "serv-sistema-web",
+    "name": "Sistema Web & Painel Administrativo Sob Medida",
+    "description": "Plataforma web personalizada com autenticação de usuários, dashboard, fluxo operacional e controle de dados.",
+    "type": "DESENVOLVIMENTO",
+    "price": 2900,
+    "recurrence": "UNICA",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Painel administrativo completo e responsivo",
+      "Controle de níveis de acesso (Admin, Usuário, Cliente)",
+      "Banco de dados relacional seguro",
+      "Exportação de relatórios e relatórios operacionais",
+      "APIs REST / Webhooks integrados"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "serv-plano-hospedagem",
+    "name": "Plano Hospedagem Gerenciada",
+    "description": "Hospedagem em nuvem de alta velocidade com monitoramento de estabilidade, SSL e suporte técnico.",
+    "type": "HOSPEDAGEM",
+    "price": 39.9,
+    "recurrence": "MENSAL",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Infraestrutura em nuvem gerenciada pela mzTech",
+      "Certificado SSL automático e renovado",
+      "Configuração de DNS e domínio próprio",
+      "Monitoramento contínuo de uptime",
+      "Suporte para dúvidas e estabilidade"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "serv-plano-completo",
+    "name": "Plano Hospedagem + Manutenção Técnica",
+    "description": "Nosso plano mais recomendado: hospedagem em nuvem, atualizações contínuas de segurança, pequenas alterações e suporte prioritário via WhatsApp.",
+    "type": "MANUTENCAO",
+    "price": 79.9,
+    "recurrence": "MENSAL",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Tudo incluído no Plano Hospedagem",
+      "Manutenção preventiva e patches de segurança",
+      "Pequenas alterações de textos, telefones e imagens",
+      "Rotinas de backup e validação",
+      "Suporte prioritário direto com os desenvolvedores (Roberto & Morvan)"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "serv-suporte-dedicado",
+    "name": "Plano Manutenção & Suporte Dedicado",
+    "description": "Para empresas com alta demanda que necessitam de SLA reduzido, plantão de atendimento e melhorias contínuas.",
+    "type": "SUPORTE",
+    "price": 149.9,
+    "recurrence": "MENSAL",
+    "status": "ATIVO",
+    "active": true,
+    "features": [
+      "Atendimento prioritário em tempo recorde",
+      "Backups diários automatizados",
+      "Auditorias de performance e segurança",
+      "Suporte e alterações sob demanda prioritária"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]

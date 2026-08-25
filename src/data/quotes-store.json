@@ -1,0 +1,38 @@
+[
+  {
+    "id": "quote-1787624367884-bxq2",
+    "name": "teste",
+    "company": "teste",
+    "whatsapp": "teste",
+    "email": "teste@mazzoni.com",
+    "selectedDev": "Morvan",
+    "projectType": "Site Institucional Profissional",
+    "hasDomain": "Não, preciso registrar",
+    "needsHosting": "Sim, Plano Hospedagem + Manutenção (R$ 79,90/mês)",
+    "projectDescription": null,
+    "estimatedBudget": "A definir / Sob proposta",
+    "desiredDeadline": "15 a 30 dias",
+    "status": "CONCLUIDO",
+    "notes": "Solicitação via site oficial mzTech. Sócio escolhido: Morvan",
+    "createdAt": "2026-08-25T02:19:27.884Z",
+    "updatedAt": "2026-08-25T02:21:28.883Z"
+  },
+  {
+    "id": "quote-1787624332024-ocac",
+    "name": "teste",
+    "company": "teste",
+    "whatsapp": "teste",
+    "email": "teste@mazzoni.br",
+    "selectedDev": "Roberto",
+    "projectType": "Site Institucional Profissional",
+    "hasDomain": "Não, preciso registrar",
+    "needsHosting": "Plano Hospedagem (R$ 39,90/mês)",
+    "projectDescription": null,
+    "estimatedBudget": "A definir / Sob proposta",
+    "desiredDeadline": "15 a 30 dias",
+    "status": "CONCLUIDO",
+    "notes": "Solicitação via site oficial mzTech. Sócio escolhido: Roberto",
+    "createdAt": "2026-08-25T02:18:52.024Z",
+    "updatedAt": "2026-08-25T02:27:54.232Z"
+  }
+]
