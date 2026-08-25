@@ -356,8 +356,9 @@ export default function PublicContractSignPage({ params }: { params: { id: strin
                       <span>Assinado em {formatDatePtBR(contract.providerSignedAt || '')}</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400">
-                      <Check className="w-3 h-3" /> Assinado pelo Representante mzTech
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-medium text-amber-400">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Aguardando Assinatura do Prestador</span>
                     </span>
                   )}
                 </div>
