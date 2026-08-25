@@ -445,7 +445,21 @@ export default function MzTechOrcamentosPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="font-semibold text-white">{q.name}</div>
-                        <div className="text-[11px] text-slate-400">{q.company || q.whatsapp}</div>
+                        <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-1.5 mt-0.5">
+                          {q.company && <span className="font-medium text-slate-300">{q.company} •</span>}
+                          {q.whatsapp && (
+                            <a
+                              href={`https://wa.me/55${q.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-400 hover:text-emerald-300 hover:underline font-mono inline-flex items-center gap-1"
+                              title="Conversar no WhatsApp"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>{q.whatsapp}</span>
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-slate-300 max-w-[200px] truncate">
                         {q.projectType}

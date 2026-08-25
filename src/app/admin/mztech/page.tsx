@@ -21,6 +21,9 @@ import {
   Layers,
   ArrowUpRight,
   ExternalLink,
+  Phone,
+  Mail,
+  MessageSquare,
 } from 'lucide-react';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
 import { MzDashboardMetrics, MzQuoteItem } from '@/types/mztech';
@@ -240,40 +243,85 @@ export default function MzTechDashboardPage() {
             </div>
           ) : (
             <div className="bg-slate-900 border border-slate-800 rounded-xl divide-y divide-slate-800/60 overflow-hidden">
-              {pendingQuotes.slice(0, 4).map((q) => (
+              {pendingQuotes.slice(0, 5).map((q) => (
                 <div key={q.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/30 transition-colors">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs text-cyan-400 font-bold">{q.quoteNumber || `#${q.id.substring(0, 8)}`}</span>
                       <strong className="text-xs text-white">{q.name}</strong>
                       {q.company && <span className="text-[11px] text-slate-400">({q.company})</span>}
+                      {q.selectedDev && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">
+                          {q.selectedDev}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[11px] text-slate-300 flex items-center gap-3">
-                      <span>{q.projectType}</span>
-                      <span className="text-slate-500">•</span>
+
+                    {/* Dados de Contato Direto do Cliente (WhatsApp e Email) */}
+                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                      {q.whatsapp && (
+                        <a
+                          href={`https://wa.me/55${q.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-mono font-medium hover:underline"
+                          title="Conversar no WhatsApp"
+                        >
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
+                          <span>{q.whatsapp}</span>
+                        </a>
+                      )}
+
+                      {q.email && (
+                        <a
+                          href={`mailto:${q.email}`}
+                          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 truncate max-w-[200px]"
+                          title="Enviar E-mail"
+                        >
+                          <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                          <span className="truncate">{q.email}</span>
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-2 pt-0.5">
+                      <span className="text-slate-300">{q.projectType}</span>
+                      <span className="text-slate-600">•</span>
                       <span className="font-mono font-semibold text-emerald-400">{formatCurrency(q.finalPrice || q.initialDevPrice || 1200)}</span>
                       {q.monthlyPrice && (
                         <>
-                          <span className="text-slate-500">•</span>
-                          <span className="font-mono text-slate-400">{formatCurrency(q.monthlyPrice)}/mês</span>
+                          <span className="text-slate-600">•</span>
+                          <span className="font-mono text-cyan-400">{formatCurrency(q.monthlyPrice)}/mês</span>
                         </>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    {q.whatsapp && (
+                      <a
+                        href={`https://wa.me/55${q.whatsapp.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition-colors flex items-center gap-1 text-xs font-semibold"
+                        title="Abrir WhatsApp"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">WhatsApp</span>
+                      </a>
+                    )}
                     <Link
                       href="/admin/mztech/orcamentos"
-                      className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
                     >
                       Detalhes
                     </Link>
                     <button
                       onClick={() => handleQuickApprove(q.id, q.selectedDev || 'Roberto')}
                       disabled={approvingId === q.id}
-                      className="px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-colors"
+                      className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/10 transition-all hover:scale-[1.02]"
                     >
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>Aceitar Serviço</span>
                     </button>
                   </div>
