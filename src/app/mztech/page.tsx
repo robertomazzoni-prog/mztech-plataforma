@@ -47,6 +47,22 @@ import {
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
 
+const PROJECT_DEV_PRICES: Record<string, number> = {
+  'Site Institucional Profissional': 1200,
+  'Landing Page de Conversão': 800,
+  'Sistema Web Personalizado': 2400,
+  'Sistema de Agendamento Online': 1600,
+  'Portal / Catálogo': 1800,
+  'Outro': 1200,
+};
+
+const getMonthlyPriceFromPlan = (plan: string): number => {
+  if (plan.includes('39,90')) return 39.90;
+  if (plan.includes('79,90')) return 79.90;
+  if (plan.includes('Apenas')) return 0;
+  return 79.90;
+};
+
 export default function MzTechPublicPage() {
   // Estado do FAQ Accordion
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -67,9 +83,9 @@ export default function MzTechPublicPage() {
     needsMaintenance: 'Sim',
     projectDescription: '',
     paymentMethodChoice: 'CREDIT_CARD_RECURRING' as 'CREDIT_CARD_RECURRING' | 'PIX' | 'CREDIT_CARD' | 'CARD_PLUS_PIX',
-    initialDevPrice: 1500,
+    initialDevPrice: 1200,
     monthlyPrice: 79.9,
-    estimatedBudget: 'R$ 1.500,00',
+    estimatedBudget: 'R$ 1.200,00',
     desiredDeadline: '15 a 30 dias',
     // Honeypot anti-spam
     website_url_hp: '',
@@ -83,11 +99,11 @@ export default function MzTechPublicPage() {
   };
 
   const handleSelectPlan = (planName: string) => {
-    const isHospOnly = planName.includes('39,90') || planName.toLowerCase().includes('hospedagem (');
+    const newMonthly = getMonthlyPriceFromPlan(planName);
     setFormData((prev) => ({
       ...prev,
       needsHosting: planName,
-      monthlyPrice: isHospOnly ? 39.9 : 79.9,
+      monthlyPrice: newMonthly,
     }));
     const formElement = document.getElementById('orcamento');
     if (formElement) {
@@ -1062,7 +1078,16 @@ export default function MzTechPublicPage() {
                     <label className="text-xs font-bold uppercase text-slate-400">Tipo de Projeto</label>
                     <select
                       value={formData.projectType}
-                      onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        const newDevPrice = PROJECT_DEV_PRICES[newType] || 1200;
+                        setFormData((prev) => ({
+                          ...prev,
+                          projectType: newType,
+                          initialDevPrice: newDevPrice,
+                          estimatedBudget: `R$ ${newDevPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                        }));
+                      }}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
                     >
                       <option value="Site Institucional Profissional">Site Institucional</option>
@@ -1091,7 +1116,15 @@ export default function MzTechPublicPage() {
                     <label className="text-xs font-bold uppercase text-slate-400">Plano Desejado</label>
                     <select
                       value={formData.needsHosting}
-                      onChange={(e) => setFormData({ ...formData, needsHosting: e.target.value })}
+                      onChange={(e) => {
+                        const newPlan = e.target.value;
+                        const newMonthly = getMonthlyPriceFromPlan(newPlan);
+                        setFormData((prev) => ({
+                          ...prev,
+                          needsHosting: newPlan,
+                          monthlyPrice: newMonthly,
+                        }));
+                      }}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
                     >
                       <option value="Plano Hospedagem + Manutenção (R$ 79,90/mês)">
@@ -1217,10 +1250,20 @@ export default function MzTechPublicPage() {
                     <span className="text-[11px] text-slate-500">Sem cobrança imediata</span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-slate-800/80 text-xs">
                     <div>
                       <span className="text-slate-500 text-[10px] block">Serviço:</span>
                       <strong className="text-white truncate block">{formData.projectType}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block">Plano:</span>
+                      <span className="text-cyan-400 truncate block font-medium">
+                        {formData.needsHosting.includes('79,90')
+                          ? 'Hospedagem + Manut.'
+                          : formData.needsHosting.includes('39,90')
+                          ? 'Hospedagem'
+                          : 'Apenas Dev'}
+                      </span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Valor Inicial Est.:</span>
@@ -1228,7 +1271,9 @@ export default function MzTechPublicPage() {
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Mensalidade:</span>
-                      <span className="text-slate-300 font-mono block">R$ {formData.monthlyPrice.toFixed(2)}/mês</span>
+                      <span className="text-emerald-400 font-mono font-bold block">
+                        {formData.monthlyPrice > 0 ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês` : 'Sem Mensalidade'}
+                      </span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Forma Escolhida:</span>
