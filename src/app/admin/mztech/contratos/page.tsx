@@ -180,8 +180,8 @@ export default function MzTechContractsPage() {
       title: contract.title,
       status: contract.status,
 
-      totalDevPrice: (contract.totalDevPrice || 0).toString(),
-      monthlyPrice: (contract.monthlyPrice || 79.9).toString(),
+      totalDevPrice: (contract.totalDevPrice !== undefined ? contract.totalDevPrice : 0).toString(),
+      monthlyPrice: (contract.monthlyPrice !== undefined ? contract.monthlyPrice : 0).toString(),
       discount: (contract.discount || 0).toString(),
       dueDay: (contract.dueDay || 10).toString(),
       paymentMethod: contract.paymentMethod || 'Cartão de Crédito',

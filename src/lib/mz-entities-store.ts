@@ -559,8 +559,9 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
 
   const nowStr = new Date().toISOString();
   const company = quote.company || quote.name;
-  const initialDevPrice = Number(quote.initialDevPrice || 1200);
-  const monthlyPrice = Number(quote.monthlyPrice || 79.9);
+  const isOnlyDev = Boolean(quote.needsHosting?.toLowerCase().includes('apenas'));
+  const initialDevPrice = Number(quote.initialDevPrice !== undefined ? quote.initialDevPrice : 0);
+  const monthlyPrice = isOnlyDev ? 0 : Number(quote.monthlyPrice !== undefined ? quote.monthlyPrice : 0);
   const paymentMethodChoice = quote.paymentMethodChoice || 'CREDIT_CARD_RECURRING';
 
   // 1. Criar ou Obter Cliente
@@ -588,7 +589,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       codeDelivered: false,
       backupDelivered: false,
       projects: [],
-      hostings: [{
+      hostings: isOnlyDev ? [] : [{
         id: `host-${Date.now()}`,
         clientId: newClientId,
         provider: 'Railway Cloud',
@@ -599,7 +600,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
         createdAt: nowStr,
         updatedAt: nowStr,
       }],
-      _count: { projects: 1, hostings: 1, maintenances: 0, backups: 1 },
+      _count: { projects: 1, hostings: isOnlyDev ? 0 : 1, maintenances: 0, backups: 1 },
       createdAt: nowStr,
       updatedAt: nowStr,
     };
@@ -696,8 +697,8 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       : 'Cartão de Crédito',
     periodicity: quote.billingPeriodicity || 'MENSAL',
     dueDay: quote.dueDay || 10,
-    hasHosting: true,
-    hasMaintenance: true,
+    hasHosting: !isOnlyDev,
+    hasMaintenance: !isOnlyDev,
     backupRetentionDays: 30,
     codeOwnership: 'PROPRIEDADE_CLIENTE',
     termsVersion: 'v2.0-2026',
@@ -736,9 +737,9 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     termsVersion: 'v2.0-2026',
     codeOwnershipType: 'PROPRIEDADE_CLIENTE',
     scopeDevelopment: `Desenvolvimento de ${quote.projectType} com alta performance e design responsivo.`,
-    scopeHosting: 'Hospedagem em nuvem Railway com certificado SSL incluso.',
-    scopeMaintenance: 'Manutenção preventiva, correções e suporte prioritário via WhatsApp.',
-    scopeSupport: `Atendimento direto com o sócio desenvolvedor ${chosenDev}.`,
+    scopeHosting: isOnlyDev ? 'Não contratada (Apenas Desenvolvimento)' : 'Hospedagem em nuvem Railway com certificado SSL incluso.',
+    scopeMaintenance: isOnlyDev ? 'Garantia de 90 dias após entrega do código.' : 'Manutenção preventiva, correções e suporte prioritário via WhatsApp.',
+    scopeSupport: isOnlyDev ? 'Suporte durante o período de desenvolvimento.' : `Atendimento direto com o sócio desenvolvedor ${chosenDev}.`,
     backupRetentionDays: 30,
     migrationExcluded: true,
     status: 'AGUARDANDO_PAGAMENTO',

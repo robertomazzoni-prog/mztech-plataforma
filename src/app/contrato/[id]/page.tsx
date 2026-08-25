@@ -303,14 +303,16 @@ export default function PublicContractSignPage({ params }: { params: { id: strin
                   <td className="py-2.5 px-3 font-sans text-white">{contract.title}</td>
                   <td className="py-2.5 px-3 text-slate-400">Desenvolvimento Sob Demanda</td>
                   <td className="py-2.5 px-3 text-right text-emerald-400 font-bold">
-                    {formatCurrency(contract.totalDevPrice)}
+                    {contract.totalDevPrice > 0 ? formatCurrency(contract.totalDevPrice) : 'A Definir / Proposta'}
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2.5 px-3 font-sans text-white">Hospedagem em Nuvem & Suporte Técnico</td>
-                  <td className="py-2.5 px-3 text-slate-400">Mensalidade (Vencimento todo dia {contract.dueDay || 10})</td>
-                  <td className="py-2.5 px-3 text-right text-cyan-400 font-bold">
-                    {formatCurrency(contract.monthlyPrice)}/mês
+                  <td className="py-2.5 px-3 font-sans text-white">Hospedagem em Nuvem & Manutenção Mensal</td>
+                  <td className="py-2.5 px-3 text-slate-400">
+                    {contract.monthlyPrice > 0 ? `Mensalidade (Vencimento dia ${contract.dueDay || 10})` : 'Plano Selecionado'}
+                  </td>
+                  <td className={`py-2.5 px-3 text-right font-bold ${contract.monthlyPrice > 0 ? 'text-cyan-400' : 'text-slate-400'}`}>
+                    {contract.monthlyPrice > 0 ? `${formatCurrency(contract.monthlyPrice)}/mês` : 'Não Contratada (Apenas Dev)'}
                   </td>
                 </tr>
               </tbody>

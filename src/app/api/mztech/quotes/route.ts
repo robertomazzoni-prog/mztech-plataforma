@@ -130,12 +130,13 @@ export async function POST(req: NextRequest) {
     }
 
     const dev = selectedDev || 'Roberto';
+    const isOnlyDev = Boolean(needsHosting?.toLowerCase().includes('apenas'));
 
     // Parse de valores comerciais
-    const parsedInitialPrice = initialDevPrice !== undefined ? Number(initialDevPrice) : 1200.0;
-    const parsedMonthlyPrice = monthlyPrice !== undefined ? Number(monthlyPrice) : 79.9;
+    const parsedInitialPrice = initialDevPrice !== undefined ? Number(initialDevPrice) : 0;
+    const parsedMonthlyPrice = isOnlyDev ? 0 : (monthlyPrice !== undefined ? Number(monthlyPrice) : 79.9);
     const parsedDiscount = discount !== undefined ? Number(discount) : 0;
-    const parsedFinalPrice = finalPrice !== undefined ? Number(finalPrice) : (parsedInitialPrice - parsedDiscount);
+    const parsedFinalPrice = finalPrice !== undefined ? Number(finalPrice) : (parsedInitialPrice > 0 ? parsedInitialPrice - parsedDiscount : 0);
 
     const saved = saveQuote({
       name: name.trim(),
@@ -148,16 +149,16 @@ export async function POST(req: NextRequest) {
       serviceId,
       hasDomain: hasDomain || 'Não informado',
       needsHosting: needsHosting || 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
-      needsMaintenance: needsMaintenance || 'Sim',
+      needsMaintenance: isOnlyDev ? 'Não (Apenas Desenvolvimento)' : (needsMaintenance || 'Sim'),
       projectDescription: projectDescription || null,
-      initialDevPrice: isNaN(parsedInitialPrice) ? 1200 : parsedInitialPrice,
-      monthlyPrice: isNaN(parsedMonthlyPrice) ? 79.9 : parsedMonthlyPrice,
+      initialDevPrice: isNaN(parsedInitialPrice) ? 0 : parsedInitialPrice,
+      monthlyPrice: isNaN(parsedMonthlyPrice) ? 0 : parsedMonthlyPrice,
       discount: isNaN(parsedDiscount) ? 0 : parsedDiscount,
-      finalPrice: isNaN(parsedFinalPrice) ? 1200 : parsedFinalPrice,
+      finalPrice: isNaN(parsedFinalPrice) ? 0 : parsedFinalPrice,
       paymentMethodChoice: (paymentMethodChoice as PaymentMethodChoice) || 'CREDIT_CARD_RECURRING',
       billingPeriodicity: billingPeriodicity || 'MENSAL',
       dueDay: dueDay || 10,
-      estimatedBudget: estimatedBudget || `R$ ${parsedInitialPrice.toFixed(2)}`,
+      estimatedBudget: estimatedBudget || (parsedInitialPrice > 0 ? `R$ ${parsedInitialPrice.toFixed(2)}` : 'A Definir na Proposta'),
       desiredDeadline: desiredDeadline || '15 a 30 dias',
       status: (status as QuoteStatus) || 'AGUARDANDO_ANALISE',
       notes: notes || `Solicitação via site oficial mzTech. Sócio responsável: ${dev}`,

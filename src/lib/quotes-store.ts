@@ -71,14 +71,14 @@ export function saveQuote(quote: Partial<MzQuoteItem>): MzQuoteItem {
     projectDescription: quote.projectDescription || null,
     
     // Condições comerciais
-    initialDevPrice: quote.initialDevPrice !== undefined ? Number(quote.initialDevPrice) : 1200.0,
-    monthlyPrice: quote.monthlyPrice !== undefined ? Number(quote.monthlyPrice) : 79.9,
+    initialDevPrice: quote.initialDevPrice !== undefined ? Number(quote.initialDevPrice) : 0,
+    monthlyPrice: quote.needsHosting?.toLowerCase().includes('apenas') ? 0 : (quote.monthlyPrice !== undefined ? Number(quote.monthlyPrice) : 79.9),
     discount: quote.discount !== undefined ? Number(quote.discount) : 0,
-    finalPrice: quote.finalPrice !== undefined ? Number(quote.finalPrice) : (Number(quote.initialDevPrice || 1200) - Number(quote.discount || 0)),
+    finalPrice: quote.finalPrice !== undefined ? Number(quote.finalPrice) : (quote.initialDevPrice ? Number(quote.initialDevPrice) - Number(quote.discount || 0) : 0),
     paymentMethodChoice: (quote.paymentMethodChoice as PaymentMethodChoice) || 'CREDIT_CARD_RECURRING',
     billingPeriodicity: quote.billingPeriodicity || 'MENSAL',
     dueDay: quote.dueDay || 10,
-    estimatedBudget: quote.estimatedBudget || 'Sob Proposta',
+    estimatedBudget: quote.estimatedBudget || 'A Definir na Proposta',
     desiredDeadline: quote.desiredDeadline || '15 a 30 dias',
     
     status: (quote.status as QuoteStatus) || 'AGUARDANDO_ANALISE',

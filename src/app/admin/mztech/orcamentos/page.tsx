@@ -114,10 +114,10 @@ export default function MzTechOrcamentosPage() {
       email: quote.email,
       selectedDev: quote.selectedDev || 'Roberto',
       projectType: quote.projectType,
-      initialDevPrice: (quote.initialDevPrice || 1200).toString(),
-      monthlyPrice: (quote.monthlyPrice || 79.9).toString(),
+      initialDevPrice: (quote.initialDevPrice !== undefined ? quote.initialDevPrice : 0).toString(),
+      monthlyPrice: (quote.monthlyPrice !== undefined ? quote.monthlyPrice : 0).toString(),
       discount: (quote.discount || 0).toString(),
-      finalPrice: (quote.finalPrice || quote.initialDevPrice || 1200).toString(),
+      finalPrice: (quote.finalPrice !== undefined ? quote.finalPrice : quote.initialDevPrice || 0).toString(),
       paymentMethodChoice: quote.paymentMethodChoice || 'CREDIT_CARD_RECURRING',
       billingPeriodicity: quote.billingPeriodicity || 'MENSAL',
       dueDay: (quote.dueDay || 10).toString(),
@@ -660,11 +660,15 @@ export default function MzTechOrcamentosPage() {
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Valor de Desenvolvimento:</span>
-                    <strong className="text-cyan-400 font-mono">{formatCurrency(selectedQuote.initialDevPrice || 1200)}</strong>
+                    <strong className="text-cyan-400 font-mono">
+                      {selectedQuote.initialDevPrice > 0 ? formatCurrency(selectedQuote.initialDevPrice) : 'A Definir / Proposta'}
+                    </strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Mensalidade (Hosp.+Manut.):</span>
-                    <span className="text-slate-300 font-mono">{formatCurrency(selectedQuote.monthlyPrice || 79.9)}/mês</span>
+                    <span className="text-slate-300 font-mono">
+                      {selectedQuote.monthlyPrice > 0 ? `${formatCurrency(selectedQuote.monthlyPrice)}/mês` : 'Isento (Apenas Dev)'}
+                    </span>
                   </div>
                   {selectedQuote.discount ? (
                     <div className="flex justify-between text-emerald-400">
@@ -674,7 +678,9 @@ export default function MzTechOrcamentosPage() {
                   ) : null}
                   <div className="flex justify-between pt-1 border-t border-slate-800 font-bold">
                     <span className="text-slate-300">Valor Final Inicial:</span>
-                    <span className="text-emerald-400 font-mono">{formatCurrency(selectedQuote.finalPrice || selectedQuote.initialDevPrice || 1200)}</span>
+                    <span className="text-emerald-400 font-mono">
+                      {selectedQuote.finalPrice > 0 ? formatCurrency(selectedQuote.finalPrice) : 'A Definir na Proposta'}
+                    </span>
                   </div>
                 </div>
               </div>

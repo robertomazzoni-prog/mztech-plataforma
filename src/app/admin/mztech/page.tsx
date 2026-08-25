@@ -287,8 +287,10 @@ export default function MzTechDashboardPage() {
                     <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-2 pt-0.5">
                       <span className="text-slate-300">{q.projectType}</span>
                       <span className="text-slate-600">•</span>
-                      <span className="font-mono font-semibold text-emerald-400">{formatCurrency(q.finalPrice || q.initialDevPrice || 1200)}</span>
-                      {q.monthlyPrice && (
+                      <span className="font-mono font-semibold text-emerald-400">
+                        {q.finalPrice > 0 ? formatCurrency(q.finalPrice) : (q.initialDevPrice > 0 ? formatCurrency(q.initialDevPrice) : 'A Definir')}
+                      </span>
+                      {q.monthlyPrice > 0 && (
                         <>
                           <span className="text-slate-600">•</span>
                           <span className="font-mono text-cyan-400">{formatCurrency(q.monthlyPrice)}/mês</span>
