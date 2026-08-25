@@ -38,7 +38,14 @@ export async function PATCH(
     const body = await req.json();
     const {
       action,
+      // Dados de Assinatura do Prestador
+      providerName,
+      providerSignatureDataUrl,
+      // Dados de Assinatura do Cliente
       clientName,
+      clientDocument,
+      clientSignatureDataUrl,
+      // Campos comuns
       title,
       content,
       totalDevPrice,
@@ -58,41 +65,87 @@ export async function PATCH(
       notes,
     } = body;
 
-    // Ação: ACEITE DIGITAL DO CLIENTE
-    if (action === 'ACCEPT_ONLINE') {
-      const nowStr = new Date().toISOString();
-      const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-      const userAgent = req.headers.get('user-agent') || 'Browser Web';
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Browser Web';
+    const nowStr = new Date().toISOString();
+
+    // 1. ASSINATURA DIGITAL DO PRESTADOR (Roberto / Morvan / mzTech)
+    if (action === 'SIGN_PROVIDER') {
+      const signer = providerName || 'Roberto Mazzoni';
+      const certHash = `MZ-CERT-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${new Date().getFullYear()}`;
 
       const updated = updateStoredContract(params.id, {
-        status: 'ATIVO',
-        acceptedOnline: true,
-        acceptedAt: nowStr,
-        acceptedIp: ip,
-        acceptedUserAgent: userAgent,
-        signedAt: nowStr,
+        providerSigned: true,
+        providerSignedBy: signer,
+        providerSignedAt: nowStr,
+        providerSignedIp: ip,
+        providerSignatureDataUrl: providerSignatureDataUrl || null,
+        signatureCertificateHash: certHash,
       });
 
       if (updated) {
         logActivity({
-          actor: clientName || updated.client?.contactName || 'Cliente',
-          action: 'ACEITE_CONTRATO',
+          actor: signer,
+          action: 'ASSINATURA_PRESTADOR',
           category: 'CONTRATO',
           targetId: params.id,
           targetNumber: updated.contractNumber,
-          description: `Cliente "${updated.client?.companyName || updated.client?.contactName}" aceitou e assinou digitalmente o contrato ${updated.contractNumber || params.id}.`,
-          details: { ip, userAgent, timestamp: nowStr },
+          description: `Prestador "${signer}" assinou digitalmente o contrato ${updated.contractNumber || params.id}.`,
+          details: { ip, timestamp: nowStr, certHash },
         });
       }
 
       return NextResponse.json({
         success: true,
-        message: 'Contrato aceito e assinado digitalmente com sucesso!',
+        message: `Contrato assinado digitalmente com sucesso por ${signer}!`,
         contract: updated,
       });
     }
 
-    // Atualização normal
+    // 2. ASSINATURA DIGITAL DO CLIENTE (Contratante)
+    if (action === 'SIGN_CLIENT' || action === 'ACCEPT_ONLINE') {
+      const contracts = getStoredContracts();
+      const current = contracts.find((c) => c.id === params.id);
+      const signer = clientName || current?.client?.contactName || 'Cliente';
+      const certHash = current?.signatureCertificateHash || `MZ-CERT-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${new Date().getFullYear()}`;
+
+      const updated = updateStoredContract(params.id, {
+        clientSigned: true,
+        clientSignedBy: signer,
+        clientSignedDocument: clientDocument || current?.client?.cnpjCpf || null,
+        clientSignedAt: nowStr,
+        clientSignedIp: ip,
+        clientSignedUserAgent: userAgent,
+        clientSignatureDataUrl: clientSignatureDataUrl || null,
+        acceptedOnline: true,
+        acceptedAt: nowStr,
+        acceptedIp: ip,
+        acceptedUserAgent: userAgent,
+        signedAt: nowStr,
+        signatureCertificateHash: certHash,
+        status: current?.providerSigned ? 'ATIVO' : (current?.status || 'AGUARDANDO_PAGAMENTO'),
+      });
+
+      if (updated) {
+        logActivity({
+          actor: signer,
+          action: 'ACEITE_CONTRATO',
+          category: 'CONTRATO',
+          targetId: params.id,
+          targetNumber: updated.contractNumber,
+          description: `Cliente "${updated.client?.companyName || signer}" assinou e aceitou digitalmente o contrato ${updated.contractNumber || params.id}.`,
+          details: { ip, userAgent, timestamp: nowStr, document: clientDocument },
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Contrato aceito e assinado digitalmente com sucesso pelo cliente!',
+        contract: updated,
+      });
+    }
+
+    // 3. Atualização normal de campos contratuais
     const dataToUpdate: any = {};
     if (title !== undefined) dataToUpdate.title = title;
     if (content !== undefined) dataToUpdate.content = content;

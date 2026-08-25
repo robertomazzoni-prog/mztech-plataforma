@@ -363,7 +363,26 @@ export interface MzContractItem {
   // Snapshot imutável
   snapshot?: MzContractSnapshot;
 
-  // Aceite Digital Online
+  // Assinatura Digital do Prestador (mzTech / Roberto / Morvan)
+  providerSigned?: boolean;
+  providerSignedBy?: string | null;
+  providerSignedAt?: string | null;
+  providerSignedIp?: string | null;
+  providerSignatureDataUrl?: string | null;
+
+  // Assinatura Digital do Cliente (Contratante)
+  clientSigned?: boolean;
+  clientSignedBy?: string | null;
+  clientSignedDocument?: string | null;
+  clientSignedAt?: string | null;
+  clientSignedIp?: string | null;
+  clientSignedUserAgent?: string | null;
+  clientSignatureDataUrl?: string | null;
+
+  // Certificado de Autenticidade
+  signatureCertificateHash?: string | null;
+
+  // Compatibilidade legada
   acceptedOnline?: boolean;
   acceptedAt?: string | null;
   acceptedIp?: string | null;
