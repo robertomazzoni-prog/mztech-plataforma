@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { isDatabaseOnline } from '@/lib/init-db';
-import { getStoredClients, getStoredProjects } from '@/lib/mz-entities-store';
+import {
+  getStoredClients,
+  getStoredProjects,
+  getStoredContracts,
+  getStoredPayments,
+  getStoredSubscriptions,
+} from '@/lib/mz-entities-store';
 import { getStoredQuotes } from '@/lib/quotes-store';
+import { getStoredAuditLogs } from '@/lib/audit-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,134 +16,120 @@ export async function GET(req: NextRequest) {
     const clients = getStoredClients();
     const projects = getStoredProjects();
     const quotes = getStoredQuotes();
+    const contracts = getStoredContracts();
+    const payments = getStoredPayments();
+    const subscriptions = getStoredSubscriptions();
+    const auditLogs = getStoredAuditLogs();
 
-    // 1. Se o banco PostgreSQL estiver online, consultar Prisma
-    const dbOnline = await isDatabaseOnline();
-    if (dbOnline) {
-      try {
-        const [
-          totalClients,
-          activeClients,
-          paidClients,
-          pendingClients,
-          overdueClients,
-          failedClients,
-          cancelledClients,
-          totalProjects,
-          productionProjects,
-        ] = await Promise.all([
-          prisma.mzClient.count().catch(() => clients.length),
-          prisma.mzClient.count({ where: { status: 'ATIVO' } }).catch(() => clients.length),
-          prisma.mzClient.count({ where: { financialStatus: 'EM_DIA' } }).catch(() => clients.length),
-          prisma.mzClient.count({ where: { financialStatus: 'PENDENTE' } }).catch(() => 0),
-          prisma.mzClient.count({ where: { financialStatus: 'ATRASADO' } }).catch(() => 0),
-          prisma.mzClient.count({ where: { financialStatus: 'RECUSADO' } }).catch(() => 0),
-          prisma.mzClient.count({ where: { financialStatus: 'CANCELADO' } }).catch(() => 0),
-          prisma.mzProject.count().catch(() => projects.length),
-          prisma.mzProject.count({ where: { status: 'PRODUCAO' } }).catch(() => projects.length),
-        ]);
+    // 1. Contagens de Orçamentos
+    const pendingQuotesCount = quotes.filter(
+      (q) => q.status === 'AGUARDANDO_ANALISE' || q.status === 'NOVO' || q.status === 'EM_CONTATO'
+    ).length;
 
-        return NextResponse.json({
-          totalClients,
-          activeClients,
-          cancellationRequestedClients: 0,
-          terminatedClients: 0,
-          totalProjects,
-          productionProjects,
-          totalHostings: clients.length,
-          monthlyRecurringRevenue: clients.length * 79.9,
-          pendingMaintenances: 0,
-          latestBackupsCount: 1,
-          totalServices: 4,
-          financialMetrics: {
-            paidClients,
-            pendingClients,
-            overdueClients,
-            failedClients,
-            cancelledClients,
-          },
-          providersBreakdown: [{ provider: 'Railway', count: clients.length }],
-          infrastructureStatus: {
-            platform: 'Infraestrutura em Nuvem Multi-Provedor (Railway / VPS / DigitalOcean)',
-            status: 'ONLINE',
-            lastBackupDate: new Date().toISOString(),
-            backupFile: 'backup-2026-08-24.dump',
-            storageLocation: 'D:\\MZTECH-BACKUPS\\Mazzoni-Barbers\\postgres\\backup-2026-08-24.dump',
-          },
-          recentBackups: [],
+    // 2. Contratos Ativos
+    const activeContractsCount = contracts.filter((c) => c.status === 'ATIVO').length;
+
+    // 3. Pagamentos Pendentes
+    const pendingPayments = payments.filter((p) => p.status === 'PENDING');
+    const pendingPaymentsCount = pendingPayments.length;
+
+    // 4. Receita Inicial Aprovada (soma dos valores de desenvolvimento de orçamentos aprovados ou contratos)
+    const approvedQuotes = quotes.filter(
+      (q) => q.status === 'APROVADO' || q.status === 'CONCLUIDO' || q.status === 'EM_ANDAMENTO'
+    );
+    const initialRevenueApproved = approvedQuotes.reduce(
+      (acc, q) => acc + (q.finalPrice || q.initialDevPrice || 0),
+      0
+    );
+
+    // 5. Receita Recorrente Mensal (MRR) - de contratos e assinaturas ativas
+    const activeSubs = subscriptions.filter((s) => s.status === 'ACTIVE');
+    const monthlyRecurringRevenue = activeSubs.length > 0
+      ? activeSubs.reduce((acc, s) => acc + (s.amount || 0), 0)
+      : contracts
+          .filter((c) => c.status === 'ATIVO')
+          .reduce((acc, c) => acc + (c.monthlyPrice || 0), 0);
+
+    // 6. Métricas Financeiras Consolidadas
+    const paidPayments = payments.filter((p) => p.status === 'PAID');
+    const paidRevenueTotal = paidPayments.reduce((acc, p) => acc + (p.amount || 0), 0);
+    const pendingRevenueTotal = pendingPayments.reduce((acc, p) => acc + (p.amount || 0), 0);
+    const overduePayments = payments.filter((p) => p.status === 'OVERDUE');
+    const failedPayments = payments.filter((p) => p.status === 'FAILED');
+    const cancelledPayments = payments.filter((p) => p.status === 'CANCELLED');
+
+    // 7. Próximas Cobranças
+    const upcomingBillings = payments
+      .filter((p) => p.status === 'PENDING' || p.status === 'OVERDUE')
+      .slice(0, 5)
+      .map((p) => ({
+        id: p.id,
+        transactionId: p.transactionId,
+        clientName: p.client?.companyName || p.client?.contactName || 'Cliente mzTech',
+        title: p.title || 'Cobrança',
+        amount: p.amount,
+        dueDate: p.dueDate,
+        paymentMethod: p.paymentMethod,
+        status: p.status,
+      }));
+
+    // Se não houver cobranças cadastradas ainda mas houver contratos ativos, gerar projeção
+    if (upcomingBillings.length === 0 && contracts.length > 0) {
+      contracts.slice(0, 3).forEach((c, idx) => {
+        upcomingBillings.push({
+          id: `proj-bill-${idx}`,
+          transactionId: `TXN-PROJ-${idx + 1}`,
+          clientName: c.client?.companyName || c.client?.contactName || 'Cliente mzTech',
+          title: `Mensalidade ${c.title}`,
+          amount: c.monthlyPrice || 79.9,
+          dueDate: new Date(Date.now() + 86400000 * (10 + idx * 5)).toISOString(),
+          paymentMethod: c.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+          status: 'PENDING',
         });
-      } catch (err) {}
+      });
     }
 
-    // 2. Cálculo instantâneo via Cache/Memory em < 1ms
     const activeClientsCount = clients.filter((c) => c.status === 'ATIVO').length;
-    const paidClientsCount = clients.filter((c) => c.financialStatus === 'EM_DIA' || !c.financialStatus).length;
-    const pendingClientsCount = clients.filter((c) => c.financialStatus === 'PENDENTE').length;
-    const overdueClientsCount = clients.filter((c) => c.financialStatus === 'ATRASADO').length;
-    const failedClientsCount = clients.filter((c) => c.financialStatus === 'RECUSADO').length;
-    const cancelledClientsCount = clients.filter((c) => c.financialStatus === 'CANCELADO' || c.status === 'ENCERRADO').length;
-
     const productionProjectsCount = projects.filter((p) => p.status === 'PRODUCAO').length;
 
     return NextResponse.json({
       totalClients: clients.length,
       activeClients: activeClientsCount,
-      cancellationRequestedClients: 0,
-      terminatedClients: 0,
+      pendingQuotesCount,
+      activeContractsCount,
+      pendingPaymentsCount,
+      initialRevenueApproved,
+      monthlyRecurringRevenue: monthlyRecurringRevenue || (activeClientsCount * 79.9),
       totalProjects: projects.length,
       productionProjects: productionProjectsCount,
       totalHostings: clients.length,
-      monthlyRecurringRevenue: clients.length * 79.9,
       pendingMaintenances: 0,
       latestBackupsCount: 1,
-      totalServices: 4,
+      
       financialMetrics: {
-        paidClients: paidClientsCount,
-        pendingClients: pendingClientsCount,
-        overdueClients: overdueClientsCount,
-        failedClients: failedClientsCount,
-        cancelledClients: cancelledClientsCount,
+        paidRevenueTotal,
+        pendingRevenueTotal,
+        initialRevenueApproved,
+        monthlyRecurringRevenue: monthlyRecurringRevenue || (activeClientsCount * 79.9),
+        paidCount: paidPayments.length,
+        pendingCount: pendingPaymentsCount,
+        failedCount: failedPayments.length,
+        overdueCount: overduePayments.length,
+        cancelledCount: cancelledPayments.length,
       },
-      providersBreakdown: [{ provider: 'Railway Cloud', count: clients.length }],
+
+      upcomingBillings,
+      recentActivities: auditLogs.slice(0, 8),
+
       infrastructureStatus: {
-        platform: 'Infraestrutura em Nuvem Multi-Provedor (Railway / VPS / DigitalOcean)',
+        platform: 'Railway Cloud Multi-Container (PostgreSQL / Next.js / Standalone)',
         status: 'ONLINE',
         lastBackupDate: new Date().toISOString(),
-        backupFile: 'backup-2026-08-24.dump',
-        storageLocation: 'D:\\MZTECH-BACKUPS\\Mazzoni-Barbers\\postgres\\backup-2026-08-24.dump',
+        backupFile: 'backup-2026-08-25.dump',
       },
-      recentBackups: [],
     });
   } catch (error: any) {
-    console.error('Erro ao gerar métricas mzTech:', error);
-    return NextResponse.json({
-      totalClients: 1,
-      activeClients: 1,
-      cancellationRequestedClients: 0,
-      terminatedClients: 0,
-      totalProjects: 1,
-      productionProjects: 1,
-      totalHostings: 1,
-      monthlyRecurringRevenue: 79.9,
-      pendingMaintenances: 0,
-      latestBackupsCount: 1,
-      totalServices: 4,
-      financialMetrics: {
-        paidClients: 1,
-        pendingClients: 0,
-        overdueClients: 0,
-        failedClients: 0,
-        cancelledClients: 0,
-      },
-      providersBreakdown: [{ provider: 'Railway', count: 1 }],
-      infrastructureStatus: {
-        platform: 'Infraestrutura em Nuvem Multi-Provedor (Railway / VPS / DigitalOcean)',
-        status: 'ONLINE',
-        lastBackupDate: new Date().toISOString(),
-        backupFile: 'backup-2026-08-24.dump',
-        storageLocation: 'D:\\MZTECH-BACKUPS\\Mazzoni-Barbers\\postgres\\backup-2026-08-24.dump',
-      },
-      recentBackups: [],
-    });
+    console.error('Erro ao gerar métricas do dashboard:', error);
+    return NextResponse.json({ error: 'Erro ao gerar métricas.' }, { status: 500 });
   }
 }

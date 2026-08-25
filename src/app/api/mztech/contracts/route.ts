@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
           },
         });
         if (dbContracts && dbContracts.length > 0) {
-          contracts = dbContracts;
+          contracts = dbContracts as any;
         }
       } catch (e) {}
     }
@@ -113,6 +113,10 @@ export async function POST(req: NextRequest) {
           status: 'ATIVO',
           financialStatus: 'EM_DIA',
           notes: 'Cadastrado diretamente pelo módulo de contratos.',
+          codeDelivered: false,
+          backupDelivered: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
       }
       finalClientId = matchedClient.id;

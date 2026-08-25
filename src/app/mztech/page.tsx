@@ -33,6 +33,7 @@ import {
   Users,
   UserCheck,
   UserPlus,
+  CreditCard,
 } from 'lucide-react';
 import {
   MZTECH_INFO,
@@ -62,10 +63,13 @@ export default function MzTechPublicPage() {
     selectedDev: 'Roberto' as 'Roberto' | 'Morvan' | 'Sem Preferência (Roberto ou Morvan)',
     projectType: 'Site Institucional Profissional',
     hasDomain: 'Não, preciso registrar',
-    needsHosting: 'Sim, Plano Hospedagem + Manutenção (R$ 79,90/mês)',
+    needsHosting: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
     needsMaintenance: 'Sim',
     projectDescription: '',
-    estimatedBudget: 'A definir / Sob proposta',
+    paymentMethodChoice: 'CREDIT_CARD_RECURRING' as 'CREDIT_CARD_RECURRING' | 'PIX' | 'CREDIT_CARD' | 'CARD_PLUS_PIX',
+    initialDevPrice: 1500,
+    monthlyPrice: 79.9,
+    estimatedBudget: 'R$ 1.500,00',
     desiredDeadline: '15 a 30 dias',
     // Honeypot anti-spam
     website_url_hp: '',
@@ -79,9 +83,11 @@ export default function MzTechPublicPage() {
   };
 
   const handleSelectPlan = (planName: string) => {
+    const isHospOnly = planName.includes('39,90') || planName.toLowerCase().includes('hospedagem (');
     setFormData((prev) => ({
       ...prev,
       needsHosting: planName,
+      monthlyPrice: isHospOnly ? 39.9 : 79.9,
     }));
     const formElement = document.getElementById('orcamento');
     if (formElement) {
@@ -91,7 +97,6 @@ export default function MzTechPublicPage() {
 
   const handleSubmitQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Proteção honeypot contra bots
     if (formData.website_url_hp) {
       return;
     }
@@ -104,7 +109,6 @@ export default function MzTechPublicPage() {
     setFormLoading(true);
 
     try {
-      // Registrar o orçamento no painel administrativo da mzTech (com Roberto & Morvan)
       await fetch('/api/mztech/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,6 +117,15 @@ export default function MzTechPublicPage() {
     } catch (err) {
       console.warn('Registro de orçamento gravado:', err);
     }
+
+    const payChoiceText =
+      formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING'
+        ? 'Cartão de Crédito Recorrente (Mensal)'
+        : formData.paymentMethodChoice === 'PIX'
+        ? 'PIX (À Vista / Recorrente)'
+        : formData.paymentMethodChoice === 'CARD_PLUS_PIX'
+        ? 'Entrada PIX + Mensalidade no Cartão'
+        : 'Cartão de Crédito';
 
     // Formatar mensagem para WhatsApp da mzTech
     const message = `🚀 *NOVA SOLICITAÇÃO DE ORÇAMENTO - mzTech*\n\n` +
@@ -124,6 +137,7 @@ export default function MzTechPublicPage() {
       `📂 *Tipo de Projeto:* ${formData.projectType}\n` +
       `🌐 *Possui Domínio?* ${formData.hasDomain}\n` +
       `☁️ *Plano Desejado:* ${formData.needsHosting}\n` +
+      `💳 *Forma de Pagamento:* ${payChoiceText}\n` +
       `⏱️ *Prazo Desejado:* ${formData.desiredDeadline}\n` +
       `💰 *Orçamento Estimado:* ${formData.estimatedBudget}\n` +
       `📝 *Descrição:* ${formData.projectDescription || 'Apresentação inicial.'}\n\n` +
@@ -1104,31 +1118,131 @@ export default function MzTechPublicPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-slate-400">Orçamento Estimado</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: R$ 1.500 a R$ 3.000 / A definir"
-                      value={formData.estimatedBudget}
-                      onChange={(e) => setFormData({ ...formData, estimatedBudget: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
-                    />
+                {/* SELEÇÃO DA FORMA DE PAGAMENTO */}
+                <div className="space-y-2.5 pt-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Como Você Deseja Pagar? *</span>
+                    </label>
+                    <span className="text-[11px] text-slate-500">Escolha sua preferência</span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-slate-400">Prazo Desejado</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 15 a 30 dias / Urgente"
-                      value={formData.desiredDeadline}
-                      onChange={(e) => setFormData({ ...formData, desiredDeadline: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Cartão de Crédito Recorrente */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CREDIT_CARD_RECURRING' })}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING'
+                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="text-white text-xs">Cartão de Crédito Recorrente</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Pagamento automático da mensalidade todo mês direto no cartão.
+                      </p>
+                    </button>
+
+                    {/* PIX */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, paymentMethodChoice: 'PIX' })}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'PIX'
+                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="text-white text-xs">PIX (À Vista / Recorrente)</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'PIX' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Pagamento instantâneo via QR Code e chave Pix oficial da mzTech.
+                      </p>
+                    </button>
+
+                    {/* Cartão de Crédito */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CREDIT_CARD' })}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CREDIT_CARD'
+                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="text-white text-xs">Cartão de Crédito (Parcelado)</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Pagamento do valor inicial de desenvolvimento parcelado no cartão.
+                      </p>
+                    </button>
+
+                    {/* Cartão + PIX */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CARD_PLUS_PIX' })}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CARD_PLUS_PIX'
+                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="text-white text-xs">Cartão + PIX</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CARD_PLUS_PIX' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Entrada no Pix e mensalidades no cartão de crédito recorrente.
+                      </p>
+                    </button>
                   </div>
                 </div>
 
-                <div className="pt-4">
+                {/* RESUMO DA PROPOSTA (SEÇÃO 18 DO REQUISITO) */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase font-bold text-slate-400 font-mono flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Resumo da Solicitação</span>
+                    </span>
+                    <span className="text-[11px] text-slate-500">Sem cobrança imediata</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                    <div>
+                      <span className="text-slate-500 text-[10px] block">Serviço:</span>
+                      <strong className="text-white truncate block">{formData.projectType}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block">Valor Inicial Est.:</span>
+                      <span className="text-cyan-400 font-mono font-bold block">{formData.estimatedBudget}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block">Mensalidade:</span>
+                      <span className="text-slate-300 font-mono block">R$ {formData.monthlyPrice.toFixed(2)}/mês</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block">Forma Escolhida:</span>
+                      <span className="text-slate-300 truncate block">
+                        {formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' && 'Cartão Recorrente'}
+                        {formData.paymentMethodChoice === 'PIX' && 'PIX'}
+                        {formData.paymentMethodChoice === 'CREDIT_CARD' && 'Cartão'}
+                        {formData.paymentMethodChoice === 'CARD_PLUS_PIX' && 'Cartão + PIX'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
                   <button
                     type="submit"
                     disabled={formLoading}
@@ -1139,10 +1253,10 @@ export default function MzTechPublicPage() {
                     ) : (
                       <Send className="w-5 h-5" />
                     )}
-                    <span>Enviar solicitação de orçamento</span>
+                    <span>Enviar Solicitação de Orçamento</span>
                   </button>
                   <p className="text-[11px] text-slate-500 text-center mt-3">
-                    Ao enviar, você receberá atendimento direto pelo WhatsApp com nossa equipe técnica.
+                    Ao enviar, você receberá atendimento direto pelo WhatsApp com nossa equipe técnica para análise e aprovação formal.
                   </p>
                 </div>
               </form>

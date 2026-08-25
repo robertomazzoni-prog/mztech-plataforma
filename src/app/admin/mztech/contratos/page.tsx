@@ -7,7 +7,6 @@ import {
   Edit2,
   Trash2,
   Printer,
-  Download,
   CheckCircle2,
   Clock,
   Loader2,
@@ -15,11 +14,15 @@ import {
   AlertCircle,
   Eye,
   DollarSign,
-  ShieldAlert,
   ShieldCheck,
   CreditCard,
-  Zap,
   Layers,
+  Building,
+  RefreshCw,
+  Search,
+  Filter,
+  Check,
+  Send,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -30,43 +33,62 @@ import {
   CodeOwnershipType,
 } from '@/types/mztech';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
-import { DEFAULT_CONTRACT_TEMPLATE } from '@/data/mztech-constants';
+import { DEFAULT_CONTRACT_TEMPLATE, MZTECH_INFO } from '@/data/mztech-constants';
 
 export default function MzTechContractsPage() {
   const [contracts, setContracts] = useState<MzContractItem[]>([]);
   const [clients, setClients] = useState<MzClientItem[]>([]);
   const [projects, setProjects] = useState<MzProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Modal State
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingContract, setEditingContract] = useState<MzContractItem | null>(null);
-  const [isCustomClient, setIsCustomClient] = useState(false);
-  const [newClientName, setNewClientName] = useState('');
+  // Filtros
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modais
+  const [editorModalOpen, setEditorModalOpen] = useState(false);
+  const [viewDocModalOpen, setViewDocModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<MzContractItem | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Formulário Estruturado em 4 Seções
   const [formData, setFormData] = useState({
+    id: '',
+    // Seção 1: Identificação
     clientId: '',
-    projectId: 'PLAN_HOSP_MANUT',
-    title: '',
-    content: DEFAULT_CONTRACT_TEMPLATE,
+    newClientName: '',
+    projectId: '',
+    contractNumber: '',
+    title: 'Contrato de Prestação de Serviços Digitais & Políticas Comerciais',
+    status: 'RASCUNHO' as ContractStatus,
+
+    // Seção 2: Condições Comerciais
     totalDevPrice: '1200.00',
     monthlyPrice: '79.90',
-    paymentMethod: 'Cartão de Crédito (Recorrência Mensal)',
-    termsVersion: 'v2.0-2026',
+    discount: '0.00',
+    dueDay: '10',
+    paymentMethod: 'Cartão de Crédito (Recorrência Mensal Automática)',
+    periodicity: 'Mensal',
+
+    // Seção 3: Serviços e Condições Técnicas
+    scopeDevelopment: 'Desenvolvimento de site/sistema sob medida em Next.js e TypeScript.',
+    scopeHosting: 'Hospedagem em nuvem Railway com certificado SSL incluso.',
+    scopeMaintenance: 'Manutenção preventiva e suporte prioritário via WhatsApp.',
+    scopeSupport: 'Atendimento direto com os sócios Roberto e Morvan.',
     codeOwnershipType: 'PROPRIEDADE_CLIENTE' as CodeOwnershipType,
     backupRetentionDays: '30',
     migrationExcluded: true,
-    status: 'RASCUNHO' as ContractStatus,
-    signedAt: '',
-    notes: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
-  });
-  const [submitting, setSubmitting] = useState(false);
 
-  // Modal Visualização do Contrato
-  const [viewingContract, setViewingContract] = useState<MzContractItem | null>(null);
+    // Seção 4: Cláusulas
+    content: DEFAULT_CONTRACT_TEMPLATE,
+    termsVersion: 'v2.0-2026',
+    notes: '',
+  });
 
   const loadData = async () => {
     try {
-      setLoading(true);
+      setRefreshing(true);
       const [contRes, clientRes, projRes] = await Promise.all([
         fetch('/api/mztech/contracts'),
         fetch('/api/mztech/clients'),
@@ -89,6 +111,7 @@ export default function MzTechContractsPage() {
       console.error('Erro ao buscar contratos:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -96,693 +119,691 @@ export default function MzTechContractsPage() {
     loadData();
   }, []);
 
-  const handleOpenCreateModal = () => {
-    setEditingContract(null);
+  const handleOpenCreate = () => {
+    setSelectedContract(null);
     setFormData({
+      id: '',
       clientId: clients.length > 0 ? clients[0].id : '',
-      projectId: 'PLAN_HOSP_MANUT',
+      newClientName: '',
+      projectId: projects.length > 0 ? projects[0].id : '',
+      contractNumber: `CTR-2026-${(contracts.length + 1).toString().padStart(4, '0')}`,
       title: 'Contrato de Prestação de Serviços Digitais & Políticas Comerciais',
-      content: DEFAULT_CONTRACT_TEMPLATE,
+      status: 'RASCUNHO',
+
       totalDevPrice: '1200.00',
       monthlyPrice: '79.90',
-      paymentMethod: 'Cartão de Crédito (Recorrência Mensal)',
-      termsVersion: 'v2.0-2026',
+      discount: '0.00',
+      dueDay: '10',
+      paymentMethod: 'Cartão de Crédito (Recorrência Mensal Automática)',
+      periodicity: 'Mensal',
+
+      scopeDevelopment: 'Desenvolvimento de site/sistema sob medida em Next.js e TypeScript.',
+      scopeHosting: 'Hospedagem em nuvem Railway com certificado SSL incluso.',
+      scopeMaintenance: 'Manutenção preventiva e suporte prioritário via WhatsApp.',
+      scopeSupport: 'Atendimento direto com os sócios Roberto e Morvan.',
       codeOwnershipType: 'PROPRIEDADE_CLIENTE',
       backupRetentionDays: '30',
       migrationExcluded: true,
-      status: 'RASCUNHO',
-      signedAt: '',
-      notes: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
+
+      content: DEFAULT_CONTRACT_TEMPLATE,
+      termsVersion: 'v2.0-2026',
+      notes: '',
     });
-    setModalOpen(true);
+    setEditorModalOpen(true);
   };
 
-  const handleOpenEditModal = (contract: MzContractItem) => {
-    setEditingContract(contract);
+  const handleOpenEdit = (contract: MzContractItem) => {
+    setSelectedContract(contract);
     setFormData({
+      id: contract.id,
       clientId: contract.clientId,
+      newClientName: '',
       projectId: contract.projectId || '',
+      contractNumber: contract.contractNumber || '',
       title: contract.title,
-      content: contract.content,
-      totalDevPrice: contract.totalDevPrice.toString(),
-      monthlyPrice: contract.monthlyPrice.toString(),
-      paymentMethod: contract.paymentMethod || 'Cartão de Crédito (Recorrência Mensal)',
-      termsVersion: contract.termsVersion,
+      status: contract.status,
+
+      totalDevPrice: (contract.totalDevPrice || 0).toString(),
+      monthlyPrice: (contract.monthlyPrice || 79.9).toString(),
+      discount: (contract.discount || 0).toString(),
+      dueDay: (contract.dueDay || 10).toString(),
+      paymentMethod: contract.paymentMethod || 'Cartão de Crédito',
+      periodicity: contract.periodicity || 'Mensal',
+
+      scopeDevelopment: contract.scopeDevelopment || 'Desenvolvimento sob medida.',
+      scopeHosting: contract.scopeHosting || 'Hospedagem em nuvem gerenciada.',
+      scopeMaintenance: contract.scopeMaintenance || 'Manutenção preventiva e suporte.',
+      scopeSupport: contract.scopeSupport || 'Suporte direto com a equipe mzTech.',
       codeOwnershipType: contract.codeOwnershipType || 'PROPRIEDADE_CLIENTE',
       backupRetentionDays: (contract.backupRetentionDays || 30).toString(),
       migrationExcluded: contract.migrationExcluded !== undefined ? contract.migrationExcluded : true,
-      status: contract.status,
-      signedAt: contract.signedAt ? new Date(contract.signedAt).toISOString().split('T')[0] : '',
+
+      content: contract.content || DEFAULT_CONTRACT_TEMPLATE,
+      termsVersion: contract.termsVersion || 'v2.0-2026',
       notes: contract.notes || '',
     });
-    setModalOpen(true);
+    setEditorModalOpen(true);
   };
 
-  // Manipulador de mudança de Plano ou Projeto vinculado
-  const handlePlanOrProjectChange = (val: string) => {
-    let updatedMonthly = formData.monthlyPrice;
-    let planNote = formData.notes;
-
-    if (val === 'PLAN_HOSP_MANUT') {
-      updatedMonthly = '79.90';
-      planNote = 'Plano Hospedagem + Manutenção (R$ 79,90/mês)';
-    } else if (val === 'PLAN_HOSP') {
-      updatedMonthly = '39.90';
-      planNote = 'Plano Hospedagem Cloud (R$ 39,90/mês)';
-    } else if (val === 'PLAN_DEV_ONLY') {
-      updatedMonthly = '0.00';
-      planNote = 'Apenas Desenvolvimento (Sem Mensalidade)';
-    } else if (val === 'PLAN_CUSTOM') {
-      planNote = 'Plano Sob Medida / Sistema Dedicado';
-    } else {
-      const selectedProj = projects.find((p) => p.id === val);
-      if (selectedProj) {
-        planNote = `Projeto: ${selectedProj.name}`;
-      }
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      projectId: val,
-      monthlyPrice: updatedMonthly,
-      notes: planNote,
-    }));
+  const handleOpenViewDoc = (contract: MzContractItem) => {
+    setSelectedContract(contract);
+    setViewDocModalOpen(true);
   };
 
   const handleSaveContract = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isCustomClient && !newClientName.trim()) {
-      alert('Informe o nome do novo cliente / empresa.');
-      return;
-    }
-    if (!isCustomClient && !formData.clientId) {
-      alert('Selecione o cliente ou digite um novo nome.');
-      return;
-    }
-    if (!formData.title) {
-      alert('Informe o título do contrato.');
+    if (!formData.title || (!formData.clientId && !formData.newClientName)) {
+      alert('Informe o cliente e o título do contrato.');
       return;
     }
 
     setSubmitting(true);
     try {
-      const url = editingContract
-        ? `/api/mztech/contracts/${editingContract.id}`
-        : '/api/mztech/contracts';
-      const method = editingContract ? 'PATCH' : 'POST';
-
-      const payload = {
-        ...formData,
-        newClientName: isCustomClient ? newClientName.trim() : undefined,
-      };
+      const url = formData.id ? `/api/mztech/contracts/${formData.id}` : '/api/mztech/contracts';
+      const method = formData.id ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || 'Erro ao salvar contrato.');
-        return;
+      if (res.ok) {
+        setEditorModalOpen(false);
+        loadData();
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Erro ao salvar contrato.');
       }
-
-      setModalOpen(false);
-      loadData();
     } catch (err) {
-      alert('Erro de conexão ao salvar contrato.');
+      alert('Erro de conexão.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteContract = async (id: string, title: string) => {
-    if (!confirm(`Deseja realmente excluir o contrato "${title}"?`)) return;
-
+  const handleDeleteContract = async (id: string, number?: string) => {
+    if (!confirm(`Deseja realmente excluir o contrato ${number || id}?`)) return;
     try {
-      const res = await fetch(`/api/mztech/contracts/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        loadData();
-      } else {
-        alert('Erro ao excluir contrato.');
-      }
+      setContracts((prev) => prev.filter((c) => c.id !== id));
+      await fetch(`/api/mztech/contracts/${id}`, { method: 'DELETE' });
+      loadData();
     } catch (err) {
-      alert('Erro ao excluir contrato.');
+      loadData();
     }
   };
 
+  const handlePrintDoc = () => {
+    window.print();
+  };
+
+  // Filtragem
+  const filteredContracts = contracts.filter((c) => {
+    if (statusFilter !== 'ALL' && c.status !== statusFilter) return false;
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      const matchClient = c.client?.companyName?.toLowerCase().includes(q) || c.client?.contactName?.toLowerCase().includes(q);
+      const matchNum = c.contractNumber?.toLowerCase().includes(q);
+      const matchTitle = c.title?.toLowerCase().includes(q);
+      if (!matchClient && !matchNum && !matchTitle) return false;
+    }
+    return true;
+  });
+
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+    <div className="space-y-6 pb-12">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <FileText className="w-7 h-7 text-cyan-400" />
-            <span>Gestão de Contratos mzTech</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Contratos com 12 cláusulas oficiais, planos vinculados, opções com Cartão de Crédito e políticas de entrega.
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-white tracking-tight">Gestão de Contratos Jurídicos & Termos</h1>
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              {contracts.length} emitidos
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Instrumentos formais com snapshots imutáveis, discriminação de valores, cláusulas técnicas e aceite digital.
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreateModal}
-          className="px-4 py-2.5 rounded-xl font-bold text-xs bg-cyan-500 hover:bg-cyan-400 text-slate-950 flex items-center gap-2 shadow-md shadow-cyan-500/10 transition-all self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Gerar Novo Contrato</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadData}
+            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors"
+            title="Atualizar Contratos"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={handleOpenCreate}
+            className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Novo Contrato</span>
+          </button>
+        </div>
       </div>
 
-      {/* Alerta de Diretrizes Comerciais e Contratuais */}
-      <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
-        <div>
-          <p className="font-bold text-white">Cláusulas Contratuais & Pagamento:</p>
-          <p className="text-slate-300 mt-0.5 leading-relaxed">
-            • <strong>Formas de Pagamento:</strong> Cartão de Crédito (Recorrente/Parcelado), PIX, Boleto Bancário ou Misto.<br />
-            • <strong>Planos Disponíveis:</strong> Hospedagem + Manutenção (R$ 79,90) | Hospedagem Cloud (R$ 39,90) | Dev Único | Sob Medida.<br />
-            • <strong>Encerramento:</strong> Entrega formal de ativos (código e dump). A nova hospedagem é responsabilidade do cliente.
-          </p>
+      {/* Barra de Filtros e Busca */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              statusFilter === 'ALL'
+                ? 'bg-slate-800 text-white font-semibold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Todos ({contracts.length})
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('ATIVO')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              statusFilter === 'ATIVO'
+                ? 'bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30'
+                : 'text-emerald-400/80 hover:text-emerald-300'
+            }`}
+          >
+            Ativos ({contracts.filter((c) => c.status === 'ATIVO').length})
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('AGUARDANDO_PAGAMENTO')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              statusFilter === 'AGUARDANDO_PAGAMENTO'
+                ? 'bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30'
+                : 'text-amber-400/80 hover:text-amber-300'
+            }`}
+          >
+            Aguardando Pagamento ({contracts.filter((c) => c.status === 'AGUARDANDO_PAGAMENTO').length})
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('RASCUNHO')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              statusFilter === 'RASCUNHO'
+                ? 'bg-slate-800 text-slate-200 font-semibold'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Rascunhos ({contracts.filter((c) => c.status === 'RASCUNHO').length})
+          </button>
+        </div>
+
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Buscar por número, cliente..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 w-56 sm:w-64"
+          />
         </div>
       </div>
 
       {/* Tabela de Contratos */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 space-y-3">
-            <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-            <p className="text-slate-400 text-sm">Carregando contratos...</p>
-          </div>
-        ) : contracts.length === 0 ? (
-          <div className="text-center py-16 space-y-3">
-            <FileText className="w-10 h-10 text-slate-600 mx-auto" />
-            <p className="text-slate-300 font-medium">Nenhum contrato gerado ainda.</p>
-          </div>
-        ) : (
+      {loading ? (
+        <div className="py-16 text-center space-y-2">
+          <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mx-auto" />
+          <p className="text-xs text-slate-400">Carregando contratos jurídicos...</p>
+        </div>
+      ) : filteredContracts.length === 0 ? (
+        <div className="text-center py-12 bg-slate-900/30 rounded-xl border border-dashed border-slate-800 space-y-2">
+          <FileText className="w-8 h-8 text-slate-600 mx-auto" />
+          <p className="text-sm font-semibold text-slate-300">Nenhum contrato encontrado.</p>
+          <p className="text-xs text-slate-500">Aprove um orçamento comercial para gerar o contrato automaticamente.</p>
+        </div>
+      ) : (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 font-semibold border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-4">Título & Cliente</th>
-                  <th className="px-6 py-4">Plano / Projeto</th>
-                  <th className="px-6 py-4">Valores & Pagamento</th>
-                  <th className="px-6 py-4">Regime do Código</th>
-                  <th className="px-6 py-4">Versão & Status</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-mono text-[11px] uppercase">
+                  <th className="py-3 px-4 font-semibold">Número</th>
+                  <th className="py-3 px-4 font-semibold">Cliente / Empresa</th>
+                  <th className="py-3 px-4 font-semibold">Serviço / Projeto</th>
+                  <th className="py-3 px-4 font-semibold">Valor Inicial</th>
+                  <th className="py-3 px-4 font-semibold">Mensalidade</th>
+                  <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 font-semibold">Data Emissão</th>
+                  <th className="py-3 px-4 font-semibold text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/70">
-                {contracts.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                    {/* Título & Cliente */}
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-white text-base">{c.title}</p>
-                      <p className="text-xs text-cyan-400 mt-0.5">
-                        Cliente: <strong>{c.client?.companyName}</strong> ({c.client?.contactName})
-                      </p>
-                    </td>
+              <tbody className="divide-y divide-slate-800/60">
+                {filteredContracts.map((c) => {
+                  const isActive = c.status === 'ATIVO';
+                  const isAwaitingPay = c.status === 'AGUARDANDO_PAGAMENTO';
 
-                    {/* Plano / Projeto */}
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-300">
-                      <p className="font-semibold text-white">
-                        {c.project?.name || c.notes || 'Plano mzTech'}
-                      </p>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">
-                        Retenção: {c.backupRetentionDays || 30} dias
-                      </span>
-                    </td>
-
-                    {/* Valores & Pagamento */}
-                    <td className="px-6 py-4 whitespace-nowrap text-xs space-y-0.5">
-                      <p className="text-slate-300">
-                        Dev Inicial: <strong className="text-white">{formatCurrency(c.totalDevPrice)}</strong>
-                      </p>
-                      <p className="text-emerald-400 font-semibold">
-                        Mensalidade: {formatCurrency(c.monthlyPrice)}/mês
-                      </p>
-                      <p className="text-[11px] text-cyan-300 flex items-center gap-1 font-mono">
-                        <CreditCard className="w-3 h-3 text-cyan-400" />
-                        <span>{c.paymentMethod || 'Cartão de Crédito / PIX'}</span>
-                      </p>
-                    </td>
-
-                    {/* Regime do Código */}
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-300 font-mono">
-                      <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-[11px]">
-                        {c.codeOwnershipType || 'PROPRIEDADE_CLIENTE'}
-                      </span>
-                    </td>
-
-                    {/* Status & Versão */}
-                    <td className="px-6 py-4 whitespace-nowrap text-xs">
-                      <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-mono text-[10px] block w-fit mb-1">
-                        {c.termsVersion}
-                      </span>
-                      {c.status === 'ASSINADO' ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Assinado
+                  return (
+                    <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3 px-4 font-mono font-medium text-cyan-400">
+                        {c.contractNumber || `#${c.id.substring(0, 8)}`}
+                      </td>
+                      <td className="py-3 px-4">
+                        <strong className="text-white block">{c.client?.companyName || 'Cliente mzTech'}</strong>
+                        <span className="text-[11px] text-slate-400">{c.client?.contactName}</span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-300 max-w-[200px] truncate">
+                        {c.project?.name || c.title}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                        {formatCurrency(c.totalDevPrice)}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-cyan-400">
+                        {formatCurrency(c.monthlyPrice)}/mês
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
+                            isActive
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : isAwaitingPay
+                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          {isActive && '● Ativo'}
+                          {isAwaitingPay && '○ Aguardando Pagamento'}
+                          {!isActive && !isAwaitingPay && c.status}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-amber-300 font-semibold text-xs">
-                          <Clock className="w-3.5 h-3.5" /> {c.status}
-                        </span>
-                      )}
-                    </td>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-slate-400">
+                        {formatDatePtBR(c.createdAt)}
+                      </td>
+                      <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        
+                        {/* Visualizar Documento Formal */}
+                        <button
+                          onClick={() => handleOpenViewDoc(c)}
+                          className="px-2.5 py-1 rounded bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 font-semibold text-[11px] border border-cyan-500/30 inline-flex items-center gap-1 transition-colors"
+                          title="Visualizar Contrato Formal"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>Visualizar</span>
+                        </button>
 
-                    {/* Ações */}
-                    <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                      <button
-                        onClick={() => setViewingContract(c)}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-colors"
-                        title="Visualizar / Imprimir Contrato"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleOpenEditModal(c)}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-colors"
-                        title="Editar Contrato"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteContract(c.id, c.title)}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-700 transition-colors"
-                        title="Remover Contrato"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        {/* Editar */}
+                        <button
+                          onClick={() => handleOpenEdit(c)}
+                          className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                          title="Editar Contrato"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Excluir */}
+                        <button
+                          onClick={() => handleDeleteContract(c.id, c.contractNumber)}
+                          className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
-
-      {/* Modal Visualização & Impressão do Contrato */}
-      {viewingContract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 print:hidden">
-              <div>
-                <h3 className="font-bold text-lg text-white">{viewingContract.title}</h3>
-                <p className="text-xs text-cyan-400">
-                  Cliente: {viewingContract.client?.companyName} • Versão: {viewingContract.termsVersion}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => window.print()}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Imprimir / PDF</span>
-                </button>
-                <button
-                  onClick={() => setViewingContract(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Cabeçalho do Documento */}
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs text-slate-300">
-              <p>
-                <strong>CONTRATADA:</strong> mzTech Soluções Digitais (contato@mztech.com.br)
-              </p>
-              <p>
-                <strong>CONTRATANTE:</strong> {viewingContract.client?.companyName} (Resp:{' '}
-                {viewingContract.client?.contactName} • Tel: {viewingContract.client?.whatsapp})
-              </p>
-              <p>
-                <strong>PLANO / PROJETO:</strong> {viewingContract.project?.name || viewingContract.notes || 'Plano mzTech'}
-              </p>
-              <p>
-                <strong>VALOR DESENVOLVIMENTO:</strong> {formatCurrency(viewingContract.totalDevPrice)}
-              </p>
-              <p>
-                <strong>MENSALIDADE (Hospedagem & Manutenção):</strong>{' '}
-                {formatCurrency(viewingContract.monthlyPrice)}/mês
-              </p>
-              <p>
-                <strong>REGIME DO CÓDIGO:</strong> {viewingContract.codeOwnershipType}
-              </p>
-              <p>
-                <strong>RETENÇÃO DE BACKUP:</strong> {viewingContract.backupRetentionDays || 30} dias
-              </p>
-              <p>
-                <strong>FORMA DE PAGAMENTO:</strong> {viewingContract.paymentMethod}
-              </p>
-            </div>
-
-            {/* Texto das Cláusulas */}
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800/80 font-serif text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
-              {viewingContract.content}
-            </div>
-
-            <div className="flex justify-end border-t border-slate-800 pt-4 print:hidden">
-              <button
-                onClick={() => setViewingContract(null)}
-                className="px-5 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold hover:bg-slate-700"
-              >
-                Fechar Visualização
-              </button>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Modal Formulário de Criação/Edição de Contrato */}
-      {modalOpen && (
+      {/* ============================================================ */}
+      {/* MODAL DE CRIAÇÃO / EDIÇÃO DE CONTRATO (4 SEÇÕES) */}
+      {/* ============================================================ */}
+      {editorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <FileText className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-lg text-white">
-                  {editingContract ? 'Editar Contrato' : 'Gerar Novo Contrato mzTech'}
-                </h3>
-              </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-base text-white">
+                {formData.id ? 'Editar Instrumento Contratual' : 'Criar Novo Contrato'}
+              </h3>
               <button
-                onClick={() => setModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                onClick={() => setEditorModalOpen(false)}
+                className="p-1 rounded text-slate-400 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveContract} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase text-slate-400">Cliente *</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsCustomClient(!isCustomClient);
-                        if (!isCustomClient) {
-                          setFormData((prev) => ({ ...prev, clientId: 'NEW' }));
-                        } else {
-                          setFormData((prev) => ({ ...prev, clientId: clients[0]?.id || '' }));
-                        }
-                      }}
-                      className="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold hover:underline flex items-center gap-1 transition-colors"
-                    >
-                      <span>{isCustomClient ? 'Selecionar Existente' : '+ Digitar Nome'}</span>
-                    </button>
-                  </div>
+            <form onSubmit={handleSaveContract} className="space-y-5 text-xs">
+              
+              {/* SEÇÃO 1: IDENTIFICAÇÃO */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>1. Identificação das Partes & Título</span>
+                </h4>
 
-                  {isCustomClient ? (
-                    <input
-                      type="text"
-                      required
-                      placeholder="Digite o nome da empresa / cliente..."
-                      value={newClientName}
-                      onChange={(e) => {
-                        setNewClientName(e.target.value);
-                        setFormData((prev) => ({ ...prev, clientId: 'NEW' }));
-                      }}
-                      className="w-full bg-slate-950 border border-cyan-500/60 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400 font-medium"
-                      autoFocus
-                    />
-                  ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Cliente *</label>
                     <select
-                      required
                       value={formData.clientId}
-                      onChange={(e) => {
-                        if (e.target.value === 'NEW') {
-                          setIsCustomClient(true);
-                          setFormData({ ...formData, clientId: 'NEW' });
-                        } else {
-                          setFormData({ ...formData, clientId: e.target.value });
-                        }
-                      }}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400"
+                      onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
                     >
-                      <option value="">Selecione o Cliente</option>
-                      <option value="NEW" className="text-cyan-400 font-bold bg-slate-900">
-                        ✍️ + Digitar Nome de Novo Cliente...
-                      </option>
-                      {clients.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.companyName} ({c.contactName})
+                      {clients.map((cl) => (
+                        <option key={cl.id} value={cl.id}>
+                          {cl.companyName} ({cl.contactName})
                         </option>
                       ))}
                     </select>
-                  )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Status do Contrato</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e: any) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="RASCUNHO">Rascunho</option>
+                      <option value="AGUARDANDO_PAGAMENTO">Aguardando Pagamento</option>
+                      <option value="AGUARDANDO_ACEITE">Aguardando Aceite Digital</option>
+                      <option value="ATIVO">Ativo / Assinado</option>
+                      <option value="SUSPENSO">Suspenso</option>
+                      <option value="CANCELADO">Cancelado</option>
+                      <option value="ENCERRADO">Encerrado</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* Plano / Projeto Vinculado */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Plano / Projeto Vinculado *</span>
-                  </label>
-                  <select
-                    value={formData.projectId}
-                    onChange={(e) => handlePlanOrProjectChange(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400 font-medium"
-                  >
-                    <optgroup label="⭐ Planos Oficiais mzTech">
-                      <option value="PLAN_HOSP_MANUT">
-                        Plano Hospedagem + Manutenção (R$ 79,90/mês)
-                      </option>
-                      <option value="PLAN_HOSP">
-                        Plano Hospedagem Cloud (R$ 39,90/mês)
-                      </option>
-                      <option value="PLAN_DEV_ONLY">
-                        Apenas Desenvolvimento (Sem Mensalidade - R$ 0,00)
-                      </option>
-                      <option value="PLAN_CUSTOM">
-                        Plano Sob Medida / Sistema Dedicado
-                      </option>
-                    </optgroup>
-
-                    {projects.length > 0 && (
-                      <optgroup label="📂 Projetos Específicos do Cliente">
-                        {projects.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            Projeto: {p.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-
-                    <optgroup label="Outros">
-                      <option value="">Geral / Sem vínculo específico</option>
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-400">
-                  Título do Contrato *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400">
-                    Valor Dev Inicial (R$)
-                  </label>
+                  <label className="text-slate-400 font-semibold">Título do Contrato</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={formData.totalDevPrice}
-                    onChange={(e) => setFormData({ ...formData, totalDevPrice: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400 font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400">
-                    Mensalidade (R$)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.monthlyPrice}
-                    onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400 font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value as ContractStatus })
-                    }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400"
-                  >
-                    <option value="RASCUNHO">Rascunho</option>
-                    <option value="EMITIDO">Emitido para Assinatura</option>
-                    <option value="ASSINADO">Assinado</option>
-                    <option value="CANCELADO">Cancelado</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400">
-                    Regime de Propriedade do Código
-                  </label>
-                  <select
-                    value={formData.codeOwnershipType}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        codeOwnershipType: e.target.value as CodeOwnershipType,
-                      })
-                    }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400"
-                  >
-                    <option value="PROPRIEDADE_CLIENTE">Propriedade do Cliente</option>
-                    <option value="LICENCA_USO">Licença de Uso</option>
-                    <option value="MISTO">Misto (Cliente + Bibliotecas mzTech)</option>
-                    <option value="PROPRIEDADE_MZTECH">Propriedade mzTech (SaaS)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase text-slate-400">
-                    Retenção de Backups (Dias)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.backupRetentionDays}
-                    onChange={(e) => setFormData({ ...formData, backupRetentionDays: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400 font-mono"
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
-              {/* Formas de Pagamento com Opções de Cartão e PIX */}
-              <div className="space-y-1.5">
+              {/* SEÇÃO 2: CONDIÇÕES COMERCIAIS */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>2. Condições Comerciais & Pagamento</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Valor de Desenvolvimento (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.totalDevPrice}
+                      onChange={(e) => setFormData({ ...formData, totalDevPrice: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Mensalidade (R$/mês)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.monthlyPrice}
+                      onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Dia de Vencimento</label>
+                    <input
+                      type="number"
+                      value={formData.dueDay}
+                      onChange={(e) => setFormData({ ...formData, dueDay: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-semibold">Forma de Pagamento Contratada</label>
+                  <input
+                    type="text"
+                    value={formData.paymentMethod}
+                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* SEÇÃO 3: SERVIÇOS E CONDIÇÕES TÉCNICAS */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>3. Serviços e Condições Técnicas</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Propriedade do Código-Fonte</label>
+                    <select
+                      value={formData.codeOwnershipType}
+                      onChange={(e: any) => setFormData({ ...formData, codeOwnershipType: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="PROPRIEDADE_CLIENTE">Propriedade Integral do Cliente</option>
+                      <option value="LICENCA_USO">Licença de Uso Contínua</option>
+                      <option value="MISTO">Misto (Customização + Core mzTech)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Retenção de Backup (Dias)</label>
+                    <input
+                      type="number"
+                      value={formData.backupRetentionDays}
+                      onChange={(e) => setFormData({ ...formData, backupRetentionDays: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEÇÃO 4: CLÁUSULAS */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Forma de Pagamento Acordada *</span>
-                  </label>
-                  <span className="text-[10px] text-cyan-400">Selecione ou edite abaixo</span>
-                </div>
-
-                {/* Dropdown com opções completas de pagamento */}
-                <select
-                  value={formData.paymentMethod}
-                  onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400"
-                >
-                  <option value="Cartão de Crédito (Recorrência Mensal)">
-                    💳 Cartão de Crédito (Recorrência Mensal)
-                  </option>
-                  <option value="Cartão de Crédito (À Vista ou Parcelado)">
-                    💳 Cartão de Crédito (À Vista ou Parcelado)
-                  </option>
-                  <option value="Cartão de Crédito + PIX">
-                    💳 + ⚡ Cartão de Crédito + PIX
-                  </option>
-                  <option value="PIX / Transferência Bancária">
-                    ⚡ PIX / Transferência Bancária
-                  </option>
-                  <option value="Boleto Bancário Mensal">
-                    📄 Boleto Bancário Mensal
-                  </option>
-                  <option value="PIX / Cartão de Crédito / Boleto">
-                    🌐 PIX / Cartão de Crédito / Boleto (Flexível)
-                  </option>
-                  <option value="Outro (Personalizado)">
-                    ✏️ Outro (Especificar manualmente)
-                  </option>
-                </select>
-
-                {/* Chips de Seleção Rápida */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>4. Texto do Contrato & Cláusulas Jurídicas</span>
+                  </h4>
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, paymentMethod: 'Cartão de Crédito (Recorrência Mensal)' })
-                    }
-                    className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+                    onClick={() => setFormData({ ...formData, content: DEFAULT_CONTRACT_TEMPLATE })}
+                    className="text-[11px] text-cyan-400 hover:underline"
                   >
-                    <CreditCard className="w-3 h-3 text-cyan-400" />
-                    <span>Cartão Recorrente</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, paymentMethod: 'Cartão de Crédito + PIX' })
-                    }
-                    className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-                  >
-                    <Zap className="w-3 h-3 text-amber-400" />
-                    <span>Cartão + PIX</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, paymentMethod: 'PIX / Transferência Bancária' })
-                    }
-                    className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-                  >
-                    <Zap className="w-3 h-3 text-emerald-400" />
-                    <span>PIX Direto</span>
+                    Restaurar Modelo Padrão
                   </button>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-400">
-                  Texto Completo das Cláusulas do Contrato (Editável)
-                </label>
                 <textarea
-                  rows={8}
+                  rows={6}
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
-              <div className="pt-4 flex justify-end gap-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800"
+                  onClick={() => setEditorModalOpen(false)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-cyan-500 hover:bg-cyan-400 flex items-center gap-2 shadow-md shadow-cyan-500/10"
+                  className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold"
                 >
-                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  <span>Salvar Contrato</span>
+                  {submitting ? 'Salvando...' : 'Salvar Contrato'}
                 </button>
               </div>
+
             </form>
           </div>
         </div>
       )}
+
+      {/* ============================================================ */}
+      {/* VISUALIZADOR FORMAL DE DOCUMENTO (PRINTABLE / PDF STYLE) */}
+      {/* ============================================================ */}
+      {viewDocModalOpen && selectedContract && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
+            
+            {/* Header de Ações */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 print:hidden">
+              <div>
+                <span className="text-xs font-mono text-cyan-400 font-bold">
+                  {selectedContract.contractNumber || 'INSTRUMENTO FORMAL'}
+                </span>
+                <h3 className="font-bold text-white text-base">Visualização do Contrato mzTech</h3>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrintDoc}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 flex items-center gap-1.5"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Imprimir / Gerar PDF</span>
+                </button>
+
+                <button
+                  onClick={() => setViewDocModalOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Documento Estilo Papel A4 Corporativo */}
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 sm:p-8 space-y-6 text-xs text-slate-300 leading-relaxed font-sans shadow-inner">
+              
+              {/* Cabeçalho do Documento */}
+              <div className="border-b border-slate-800 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="text-lg font-extrabold text-white">
+                    mz<span className="text-cyan-400">Tech</span> Soluções Digitais & Desenvolvimento
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    CNPJ / Titular: Roberto Mazzoni & Morvan • Belo Horizonte / MG
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    E-mail: robertomazzoni956@gmail.com • WhatsApp: (31) 98684-7049
+                  </p>
+                </div>
+                <div className="text-right sm:text-right">
+                  <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 font-mono text-cyan-400 font-bold text-xs block">
+                    {selectedContract.contractNumber || 'CTR-2026-0001'}
+                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-1">
+                    Emitido em: {formatDatePtBR(selectedContract.createdAt)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Qualificação das Partes */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg bg-slate-900/60 border border-slate-800">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">CONTRATADA</span>
+                  <strong className="text-white block">mzTech Soluções Digitais</strong>
+                  <p className="text-[11px] text-slate-400">Prestação de serviços de tecnologia, desenvolvimento de software, hospedagem gerenciada e manutenção contínua.</p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">CONTRATANTE</span>
+                  <strong className="text-white block">{selectedContract.client?.companyName || 'Empresa Cliente'}</strong>
+                  <p className="text-[11px] text-slate-400">Responsável: {selectedContract.client?.contactName || 'Não informado'}</p>
+                  <p className="text-[11px] text-slate-400 font-mono">Contato: {selectedContract.client?.whatsapp} • {selectedContract.client?.email}</p>
+                </div>
+              </div>
+
+              {/* Tabela de Discriminação de Valores */}
+              <div className="border border-slate-800 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-900 text-slate-400 font-mono text-[10px] uppercase">
+                    <tr>
+                      <th className="py-2.5 px-3">Especificação do Serviço</th>
+                      <th className="py-2.5 px-3">Modalidade</th>
+                      <th className="py-2.5 px-3 text-right">Valor Contratado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                    <tr>
+                      <td className="py-2.5 px-3 font-sans text-white">{selectedContract.title}</td>
+                      <td className="py-2.5 px-3 text-slate-400">Taxa Única de Desenvolvimento</td>
+                      <td className="py-2.5 px-3 text-right text-emerald-400 font-bold">
+                        {formatCurrency(selectedContract.totalDevPrice)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-2.5 px-3 font-sans text-white">Hospedagem em Nuvem & Manutenção Técnica</td>
+                      <td className="py-2.5 px-3 text-slate-400">Recorrência Mensal (Venc. dia {selectedContract.dueDay || 10})</td>
+                      <td className="py-2.5 px-3 text-right text-cyan-400 font-bold">
+                        {formatCurrency(selectedContract.monthlyPrice)}/mês
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Termos e Cláusulas */}
+              <div className="space-y-2">
+                <h5 className="font-bold text-white uppercase text-[11px] font-mono tracking-wider">
+                  Cláusulas e Condições de Fornecimento:
+                </h5>
+                <div className="p-4 rounded-lg bg-slate-900/40 border border-slate-800/80 whitespace-pre-line font-mono text-[11px] leading-relaxed text-slate-300 max-h-60 overflow-y-auto">
+                  {selectedContract.content}
+                </div>
+              </div>
+
+              {/* Área de Assinatura / Aceite Digital */}
+              <div className="pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="border border-dashed border-slate-800 rounded-lg p-3 text-center space-y-1">
+                  <p className="font-bold text-white">mzTech Soluções Digitais</p>
+                  <p className="text-[10px] text-slate-400">Roberto Mazzoni & Morvan</p>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
+                    <Check className="w-3 h-3" /> Assinado pelo Prestador
+                  </span>
+                </div>
+
+                <div className="border border-dashed border-slate-800 rounded-lg p-3 text-center space-y-1">
+                  <p className="font-bold text-white">{selectedContract.client?.companyName || 'Contratante'}</p>
+                  <p className="text-[10px] text-slate-400">{selectedContract.client?.contactName}</p>
+                  {selectedContract.acceptedOnline ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
+                      <ShieldCheck className="w-3 h-3" /> Aceite Digital em {formatDatePtBR(selectedContract.acceptedAt || '')}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-amber-400 font-mono">
+                      Aguardando Aceite / Assinatura do Cliente
+                    </span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

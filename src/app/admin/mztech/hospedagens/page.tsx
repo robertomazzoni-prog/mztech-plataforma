@@ -112,7 +112,7 @@ export default function MzTechHostingsPage() {
       projectId: hosting.projectId || '',
       provider: hosting.provider || 'Railway',
       serverType: hosting.serverType || 'Cloud App',
-      url: hosting.url,
+      url: hosting.url || '',
       customDomain: hosting.customDomain || '',
       platformDomain: hosting.platformDomain || '',
       startDate: hosting.startDate

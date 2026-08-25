@@ -52,8 +52,12 @@ export async function POST(req: NextRequest) {
               email: dbClient.email,
               whatsapp: dbClient.whatsapp,
               domain: dbClient.domain,
-              status: dbClient.status,
-              financialStatus: dbClient.financialStatus,
+              status: dbClient.status as any,
+              financialStatus: dbClient.financialStatus as any,
+              codeDelivered: false,
+              backupDelivered: false,
+              createdAt: dbClient.createdAt?.toISOString() || new Date().toISOString(),
+              updatedAt: dbClient.updatedAt?.toISOString() || new Date().toISOString(),
             };
           }
         } catch (err) {}

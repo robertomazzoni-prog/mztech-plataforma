@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { ensureDatabaseReady } from '@/lib/init-db';
-import { MzQuoteItem, QuoteStatus } from '@/types/mztech';
+import { MzQuoteItem, QuoteStatus, PaymentMethodChoice } from '@/types/mztech';
 import { getStoredQuotes, saveQuote } from '@/lib/quotes-store';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +27,21 @@ export async function GET(req: NextRequest) {
     }
 
     if (statusFilter && statusFilter !== 'ALL') {
-      filtered = filtered.filter((q) => q.status === statusFilter);
+      filtered = filtered.filter((q) => {
+        if (statusFilter === 'AGUARDANDO_ANALISE') {
+          return q.status === 'AGUARDANDO_ANALISE' || q.status === 'NOVO' || q.status === 'EM_CONTATO';
+        }
+        if (statusFilter === 'APROVADO') {
+          return q.status === 'APROVADO' || q.status === 'CONCLUIDO' || q.status === 'EM_ANDAMENTO';
+        }
+        if (statusFilter === 'RECUSADO') {
+          return q.status === 'RECUSADO';
+        }
+        if (statusFilter === 'CANCELADO') {
+          return q.status === 'CANCELADO' || q.status === 'ARQUIVADO';
+        }
+        return q.status === statusFilter;
+      });
     }
 
     if (query && query.trim() !== '') {
@@ -37,6 +49,8 @@ export async function GET(req: NextRequest) {
         (q) =>
           q.name.toLowerCase().includes(query) ||
           q.company?.toLowerCase().includes(query) ||
+          q.quoteNumber?.toLowerCase().includes(query) ||
+          q.cnpjCpf?.toLowerCase().includes(query) ||
           q.email.toLowerCase().includes(query) ||
           q.whatsapp.includes(query) ||
           q.projectType.toLowerCase().includes(query) ||
@@ -52,11 +66,15 @@ export async function GET(req: NextRequest) {
 
     const statusCounts = {
       all: allQuotes.length,
-      novo: allQuotes.filter((q) => q.status === 'NOVO').length,
-      emContato: allQuotes.filter((q) => q.status === 'EM_CONTATO').length,
-      emAndamento: allQuotes.filter((q) => q.status === 'EM_ANDAMENTO').length,
-      concluido: allQuotes.filter((q) => q.status === 'CONCLUIDO').length,
-      arquivado: allQuotes.filter((q) => q.status === 'ARQUIVADO' || q.status === 'CANCELADO').length,
+      aguardando: allQuotes.filter(
+        (q) => q.status === 'AGUARDANDO_ANALISE' || q.status === 'NOVO' || q.status === 'EM_CONTATO'
+      ).length,
+      emAnalise: allQuotes.filter((q) => q.status === 'EM_ANALISE').length,
+      aprovados: allQuotes.filter(
+        (q) => q.status === 'APROVADO' || q.status === 'CONCLUIDO' || q.status === 'EM_ANDAMENTO'
+      ).length,
+      recusados: allQuotes.filter((q) => q.status === 'RECUSADO').length,
+      cancelados: allQuotes.filter((q) => q.status === 'CANCELADO' || q.status === 'ARQUIVADO').length,
     };
 
     return NextResponse.json({
@@ -71,24 +89,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Erro ao buscar orçamentos mzTech:', error);
-    const fallbackQuotes = getStoredQuotes();
-    return NextResponse.json({
-      quotes: fallbackQuotes,
-      total: fallbackQuotes.length,
-      metrics: {
-        quotesForRoberto: fallbackQuotes.filter((q) => q.selectedDev?.includes('Roberto')).length,
-        quotesForMorvan: fallbackQuotes.filter((q) => q.selectedDev?.includes('Morvan')).length,
-        quotesShared: 0,
-        statusCounts: {
-          all: fallbackQuotes.length,
-          novo: fallbackQuotes.filter((q) => q.status === 'NOVO').length,
-          emContato: fallbackQuotes.filter((q) => q.status === 'EM_CONTATO').length,
-          emAndamento: fallbackQuotes.filter((q) => q.status === 'EM_ANDAMENTO').length,
-          concluido: fallbackQuotes.filter((q) => q.status === 'CONCLUIDO').length,
-          arquivado: fallbackQuotes.filter((q) => q.status === 'ARQUIVADO').length,
-        },
-      },
-    });
+    return NextResponse.json({ error: 'Erro ao buscar orçamentos.' }, { status: 500 });
   }
 }
 
@@ -98,13 +99,23 @@ export async function POST(req: NextRequest) {
     const {
       name,
       company,
+      cnpjCpf,
       whatsapp,
       email,
       selectedDev,
       projectType,
+      serviceId,
       hasDomain,
       needsHosting,
+      needsMaintenance,
       projectDescription,
+      initialDevPrice,
+      monthlyPrice,
+      discount,
+      finalPrice,
+      paymentMethodChoice,
+      billingPeriodicity,
+      dueDay,
       estimatedBudget,
       desiredDeadline,
       status,
@@ -120,59 +131,41 @@ export async function POST(req: NextRequest) {
 
     const dev = selectedDev || 'Roberto';
 
-    const newQuote: MzQuoteItem = {
-      id: `quote-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    // Parse de valores comerciais
+    const parsedInitialPrice = initialDevPrice !== undefined ? Number(initialDevPrice) : 1200.0;
+    const parsedMonthlyPrice = monthlyPrice !== undefined ? Number(monthlyPrice) : 79.9;
+    const parsedDiscount = discount !== undefined ? Number(discount) : 0;
+    const parsedFinalPrice = finalPrice !== undefined ? Number(finalPrice) : (parsedInitialPrice - parsedDiscount);
+
+    const saved = saveQuote({
       name: name.trim(),
       company: company ? company.trim() : null,
+      cnpjCpf: cnpjCpf ? cnpjCpf.trim() : null,
       whatsapp: whatsapp.trim(),
       email: email.trim(),
       selectedDev: dev,
       projectType: projectType || 'Site Institucional Profissional',
+      serviceId,
       hasDomain: hasDomain || 'Não informado',
       needsHosting: needsHosting || 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
+      needsMaintenance: needsMaintenance || 'Sim',
       projectDescription: projectDescription || null,
-      estimatedBudget: estimatedBudget || 'A definir',
+      initialDevPrice: isNaN(parsedInitialPrice) ? 1200 : parsedInitialPrice,
+      monthlyPrice: isNaN(parsedMonthlyPrice) ? 79.9 : parsedMonthlyPrice,
+      discount: isNaN(parsedDiscount) ? 0 : parsedDiscount,
+      finalPrice: isNaN(parsedFinalPrice) ? 1200 : parsedFinalPrice,
+      paymentMethodChoice: (paymentMethodChoice as PaymentMethodChoice) || 'CREDIT_CARD_RECURRING',
+      billingPeriodicity: billingPeriodicity || 'MENSAL',
+      dueDay: dueDay || 10,
+      estimatedBudget: estimatedBudget || `R$ ${parsedInitialPrice.toFixed(2)}`,
       desiredDeadline: desiredDeadline || '15 a 30 dias',
-      status: (status as QuoteStatus) || 'NOVO',
-      notes: notes || `Solicitação via site oficial mzTech. Sócio escolhido: ${dev}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      status: (status as QuoteStatus) || 'AGUARDANDO_ANALISE',
+      notes: notes || `Solicitação via site oficial mzTech. Sócio responsável: ${dev}`,
+    });
 
-    saveQuote(newQuote);
+    console.log(`✅ [mzTech] Novo orçamento gravado: ${saved.quoteNumber} para ${saved.name}!`);
 
-    // Também cadastra como cliente potencial se o banco estiver online
-    try {
-      await ensureDatabaseReady();
-      const existingClient = await prisma.mzClient.findFirst({
-        where: {
-          OR: [
-            { email: { equals: email.trim(), mode: 'insensitive' } },
-            { companyName: { equals: (company || name).trim(), mode: 'insensitive' } },
-          ],
-        },
-      });
-
-      if (!existingClient) {
-        await prisma.mzClient.create({
-          data: {
-            companyName: (company || name).trim(),
-            contactName: name.trim(),
-            whatsapp: whatsapp.trim(),
-            email: email.trim(),
-            status: 'ATIVO',
-            financialStatus: 'EM_DIA',
-            notes: `Lead cadastrado pelo site mzTech • Dev: ${dev} • Projeto: ${projectType || 'Site'}`,
-          },
-        });
-      }
-    } catch (dbErr) {
-      // Ignora erro se banco local estiver offline
-    }
-
-    console.log(`✅ [mzTech] Novo orçamento gravado: ${name} para o Dev ${dev}!`);
-
-    return NextResponse.json({ success: true, quote: newQuote }, { status: 201 });
+    return NextResponse.json({ success: true, quote: saved }, { status: 201 });
   } catch (error: any) {
     console.error('Erro ao registrar orçamento mzTech:', error);
     return NextResponse.json({ error: 'Erro ao processar solicitação.' }, { status: 500 });

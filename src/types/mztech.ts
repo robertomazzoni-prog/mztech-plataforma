@@ -20,12 +20,19 @@ export type SubscriptionStatus =
 
 export type PaymentStatus =
   | 'PENDING'
+  | 'PROCESSING'
   | 'AUTHORIZED'
   | 'PAID'
   | 'FAILED'
   | 'OVERDUE'
   | 'CANCELLED'
   | 'REFUNDED';
+
+export type PaymentMethodChoice =
+  | 'PIX'
+  | 'CREDIT_CARD'
+  | 'CREDIT_CARD_RECURRING'
+  | 'CARD_PLUS_PIX';
 
 export type PaymentMethod = 'CREDIT_CARD' | 'PIX';
 
@@ -81,14 +88,93 @@ export type CodeOwnershipType =
   | 'MISTO'
   | 'PROPRIEDADE_MZTECH';
 
-export type ContractStatus = 'RASCUNHO' | 'EMITIDO' | 'ASSINADO' | 'CANCELADO';
+export type ContractStatus =
+  | 'RASCUNHO'
+  | 'AGUARDANDO_ENVIO'
+  | 'AGUARDANDO_PAGAMENTO'
+  | 'AGUARDANDO_ACEITE'
+  | 'ATIVO'
+  | 'SUSPENSO'
+  | 'CANCELADO'
+  | 'ENCERRADO';
 
 export type BackupStatus = 'VALIDO' | 'TESTADO' | 'ARQUIVADO' | 'ENTREGUE_AO_CLIENTE';
+
+export type QuoteStatus =
+  | 'AGUARDANDO_ANALISE'
+  | 'EM_ANALISE'
+  | 'APROVADO'
+  | 'RECUSADO'
+  | 'CANCELADO'
+  // Compatibilidade com status legados
+  | 'NOVO'
+  | 'EM_CONTATO'
+  | 'PROPOSTA_ENVIADA'
+  | 'EM_ANDAMENTO'
+  | 'CONCLUIDO'
+  | 'ARQUIVADO';
+
+export interface MzAuditLogItem {
+  id: string;
+  timestamp: string;
+  actor: string; // Ex: "Roberto", "Morvan", "Sistema", "Cliente"
+  action: string; // Ex: "APROVAR_ORCAMENTO", "GERAR_CONTRATO", "PAGAMENTO_CONFIRMADO", "ACEITE_CONTRATO"
+  category: 'ORCAMENTO' | 'CONTRATO' | 'PAGAMENTO' | 'CLIENTE' | 'PROJETO' | 'SISTEMA';
+  targetId?: string;
+  targetNumber?: string; // Ex: "#MZ-000123", "#CTR-000123"
+  description: string; // Ex: "Roberto aprovou o orçamento #MZ-000123."
+  details?: any;
+}
+
+export interface MzQuoteItem {
+  id: string;
+  quoteNumber?: string; // Ex: "MZ-2026-0001"
+  name: string;
+  company?: string | null;
+  cnpjCpf?: string | null;
+  whatsapp: string;
+  email: string;
+  selectedDev: string; // "Roberto" | "Morvan" | "Sem Preferência (Roberto ou Morvan)"
+  projectType: string;
+  serviceId?: string;
+  hasDomain: string;
+  needsHosting: string;
+  needsMaintenance?: string;
+  projectDescription?: string | null;
+  
+  // Condições Comerciais Detalhadas
+  initialDevPrice: number;
+  monthlyPrice: number;
+  discount?: number;
+  finalPrice: number;
+  paymentMethodChoice: PaymentMethodChoice;
+  billingPeriodicity: 'UNICA' | 'MENSAL' | 'ANUAL';
+  dueDay?: number; // Ex: 10
+  estimatedBudget?: string | null;
+  desiredDeadline?: string | null;
+  
+  // Status e Auditoria
+  status: QuoteStatus;
+  notes?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  responsibleAdmin?: string | null;
+  
+  // Vínculos gerados após aprovação
+  linkedClientId?: string | null;
+  linkedProjectId?: string | null;
+  linkedContractId?: string | null;
+  linkedPaymentId?: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface MzClientItem {
   id: string;
   companyName: string;
   contactName: string;
+  cnpjCpf?: string | null;
   whatsapp: string;
   email: string;
   domain?: string | null;
@@ -134,7 +220,10 @@ export interface MzProjectItem {
     id: string;
     companyName: string;
     contactName: string;
+    email?: string;
+    whatsapp?: string;
   };
+  contractId?: string | null;
   name: string;
   type: string;
   status: ProjectStatus;
@@ -144,6 +233,7 @@ export interface MzProjectItem {
   hostingUrl?: string | null;
   githubRepo?: string | null;
   hostingPlatform: string;
+  responsibleDev?: string;
   notes?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -158,6 +248,7 @@ export interface MzServiceItem {
   recurrence: ServiceRecurrence;
   status: string;
   active: boolean;
+  features?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -176,7 +267,7 @@ export interface MzHostingItem {
   } | null;
   provider: HostingProvider | string;
   serverType?: string | null;
-  url: string;
+  url?: string | null;
   customDomain?: string | null;
   platformDomain?: string | null;
   startDate: string;
@@ -211,8 +302,30 @@ export interface MzMaintenanceItem {
   updatedAt: string;
 }
 
+export interface MzContractSnapshot {
+  clientName: string;
+  companyName: string;
+  email: string;
+  whatsapp: string;
+  cnpjCpf?: string | null;
+  projectName: string;
+  serviceType: string;
+  initialDevPrice: number;
+  monthlyPrice: number;
+  paymentMethod: string;
+  periodicity: string;
+  dueDay?: number;
+  hasHosting: boolean;
+  hasMaintenance: boolean;
+  backupRetentionDays: number;
+  codeOwnership: CodeOwnershipType;
+  termsVersion: string;
+  generatedAt: string;
+}
+
 export interface MzContractItem {
   id: string;
+  contractNumber?: string; // Ex: "CTR-2026-0001"
   clientId: string;
   client?: {
     id: string;
@@ -220,6 +333,7 @@ export interface MzContractItem {
     contactName: string;
     email: string;
     whatsapp: string;
+    cnpjCpf?: string | null;
   };
   projectId?: string | null;
   project?: {
@@ -227,11 +341,15 @@ export interface MzContractItem {
     name: string;
     domain?: string | null;
   } | null;
+  quoteId?: string | null;
   title: string;
   content: string;
   totalDevPrice: number;
   monthlyPrice: number;
+  discount?: number;
   paymentMethod: string;
+  periodicity?: string;
+  dueDay?: number;
   termsVersion: string;
   codeOwnershipType: CodeOwnershipType;
   scopeDevelopment?: string | null;
@@ -241,6 +359,15 @@ export interface MzContractItem {
   backupRetentionDays: number;
   migrationExcluded: boolean;
   status: ContractStatus;
+  
+  // Snapshot imutável
+  snapshot?: MzContractSnapshot;
+
+  // Aceite Digital Online
+  acceptedOnline?: boolean;
+  acceptedAt?: string | null;
+  acceptedIp?: string | null;
+  acceptedUserAgent?: string | null;
   signedAt?: string | null;
   notes?: string | null;
   createdAt: string;
@@ -271,36 +398,6 @@ export interface MzBackupItem {
   updatedAt: string;
 }
 
-export interface MzDashboardMetrics {
-  totalClients: number;
-  activeClients: number;
-  cancellationRequestedClients: number;
-  terminatedClients: number;
-  totalProjects: number;
-  productionProjects: number;
-  monthlyRecurringRevenue: number;
-  totalHostings: number;
-  pendingMaintenances: number;
-  latestBackupsCount: number;
-  providersBreakdown: {
-    provider: string;
-    count: number;
-  }[];
-  financialMetrics?: {
-    paidClients: number;
-    pendingClients: number;
-    overdueClients: number;
-    failedClients: number;
-    cancelledClients: number;
-  };
-  infrastructureStatus: {
-    platform: string;
-    status: 'ONLINE' | 'WARNING' | 'MAINTENANCE';
-    lastBackupDate: string;
-    backupFile: string;
-  };
-}
-
 export interface MzSubscriptionItem {
   id: string;
   clientId: string;
@@ -315,6 +412,7 @@ export interface MzSubscriptionItem {
     id: string;
     name: string;
   } | null;
+  contractId?: string | null;
   planName: string;
   amount: number;
   periodicity: string;
@@ -335,20 +433,24 @@ export interface MzSubscriptionItem {
 
 export interface MzPaymentItem {
   id: string;
+  transactionId?: string; // Ex: "TXN-2026-0001"
   clientId: string;
   client?: {
     id: string;
     companyName: string;
     contactName: string;
   };
+  contractId?: string | null;
   subscriptionId?: string | null;
   subscription?: {
     id: string;
     planName: string;
     status: SubscriptionStatus;
   } | null;
+  title?: string;
   amount: number;
   paymentMethod: PaymentMethod;
+  paymentType?: 'TAXA_INICIAL' | 'MENSALIDADE_REVISAO' | 'AVULSO';
   status: PaymentStatus;
   dueDate: string;
   paidAt?: string | null;
@@ -362,45 +464,50 @@ export interface MzPaymentItem {
   updatedAt: string;
 }
 
-export interface MzWebhookEventItem {
-  id: string;
-  eventId: string;
-  gateway: string;
-  eventType: string;
-  clientId?: string | null;
-  subscriptionId?: string | null;
-  paymentId?: string | null;
-  rawPayload: string;
-  processedStatus: 'PROCESSED' | 'IGNORED_DUPLICATE' | 'ERROR';
-  errorMessage?: string | null;
-  processedAt: string;
-  createdAt: string;
-}
+export interface MzDashboardMetrics {
+  totalClients: number;
+  activeClients: number;
+  pendingQuotesCount: number;
+  activeContractsCount: number;
+  pendingPaymentsCount: number;
+  initialRevenueApproved: number;
+  monthlyRecurringRevenue: number;
+  
+  cancellationRequestedClients: number;
+  terminatedClients: number;
+  totalProjects: number;
+  productionProjects: number;
+  totalHostings: number;
+  pendingMaintenances: number;
+  latestBackupsCount: number;
+  
+  financialMetrics: {
+    paidRevenueTotal: number;
+    pendingRevenueTotal: number;
+    initialRevenueApproved: number;
+    monthlyRecurringRevenue: number;
+    paidCount: number;
+    pendingCount: number;
+    failedCount: number;
+    overdueCount: number;
+    cancelledCount: number;
+  };
 
-export type QuoteStatus =
-  | 'NOVO'
-  | 'EM_CONTATO'
-  | 'PROPOSTA_ENVIADA'
-  | 'EM_ANDAMENTO'
-  | 'CONCLUIDO'
-  | 'CANCELADO'
-  | 'ARQUIVADO';
+  upcomingBillings: {
+    id: string;
+    clientName: string;
+    amount: number;
+    dueDate: string;
+    paymentMethod: string;
+    status: string;
+  }[];
 
-export interface MzQuoteItem {
-  id: string;
-  name: string;
-  company?: string | null;
-  whatsapp: string;
-  email: string;
-  selectedDev: string; // "Roberto" | "Morvan" | "Sem Preferência (Roberto ou Morvan)"
-  projectType: string;
-  hasDomain: string;
-  needsHosting: string;
-  projectDescription?: string | null;
-  estimatedBudget?: string | null;
-  desiredDeadline?: string | null;
-  status: QuoteStatus;
-  notes?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  recentActivities: MzAuditLogItem[];
+
+  infrastructureStatus: {
+    platform: string;
+    status: 'ONLINE' | 'WARNING' | 'MAINTENANCE';
+    lastBackupDate: string;
+    backupFile: string;
+  };
 }

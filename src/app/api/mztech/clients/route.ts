@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isDatabaseOnline } from '@/lib/init-db';
 import { getStoredClients, saveStoredClients } from '@/lib/mz-entities-store';
+import { MzClientItem } from '@/types/mztech';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
 
         if (dbClients && dbClients.length > 0) {
           const existingIds = new Set(dbClients.map((c) => c.id));
-          const combined = [...dbClients];
+          const combined: any[] = [...dbClients];
           for (const memC of clients) {
             if (!existingIds.has(memC.id)) {
               combined.push(memC);
@@ -110,24 +111,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newClient = {
-      id: `client-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    const newClientId = `client-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const nowStr = new Date().toISOString();
+
+    const newClient: MzClientItem = {
+      id: newClientId,
       companyName: companyName.trim(),
       contactName: contactName.trim(),
       whatsapp: whatsapp.trim(),
       email: email.trim(),
       domain: domain || null,
-      status: status || 'ATIVO',
-      financialStatus: financialStatus || 'EM_DIA',
-      startDate: startDate || new Date().toISOString(),
+      status: (status as any) || 'ATIVO',
+      financialStatus: (financialStatus as any) || 'EM_DIA',
+      startDate: startDate || nowStr,
       notes: notes || null,
       codeDelivered: true,
       backupDelivered: true,
       projects: [],
-      hostings: [{ id: `host-${Date.now()}`, provider: 'Railway', monthlyPrice: 79.90, status: 'ATIVO' }],
+      hostings: [
+        {
+          id: `host-${Date.now()}`,
+          clientId: newClientId,
+          provider: 'Railway',
+          url: null,
+          monthlyPrice: 79.9,
+          status: 'ATIVO',
+          startDate: nowStr,
+          createdAt: nowStr,
+          updatedAt: nowStr,
+        },
+      ],
       _count: { projects: 0, hostings: 1, maintenances: 0, backups: 1 },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: nowStr,
+      updatedAt: nowStr,
     };
 
     const clients = getStoredClients();

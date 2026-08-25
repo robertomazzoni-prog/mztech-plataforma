@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { MzQuoteItem, QuoteStatus } from '@/types/mztech';
+import { MzQuoteItem, QuoteStatus, PaymentMethodChoice } from '@/types/mztech';
+import { logActivity } from '@/lib/audit-store';
 
 const DATA_DIR = path.join(process.cwd(), 'src', 'data');
 const QUOTES_FILE = path.join(DATA_DIR, 'quotes-store.json');
@@ -45,38 +46,92 @@ export function getStoredQuotes(): MzQuoteItem[] {
   return globalObject[globalQuotesKey];
 }
 
-export function saveQuote(quote: MzQuoteItem): MzQuoteItem {
+export function saveQuote(quote: Partial<MzQuoteItem>): MzQuoteItem {
   const current = getStoredQuotes();
-  const existingIdx = current.findIndex((q) => q.id === quote.id);
+  const nowStr = new Date().toISOString();
+  
+  // Gerar número sequencial de proposta comercial (ex: MZ-2026-0001)
+  const count = current.length + 1;
+  const quoteNumber = quote.quoteNumber || `MZ-2026-${count.toString().padStart(4, '0')}`;
+
+  const fullQuote: MzQuoteItem = {
+    id: quote.id || `quote-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    quoteNumber,
+    name: quote.name || '',
+    company: quote.company || null,
+    cnpjCpf: quote.cnpjCpf || null,
+    whatsapp: quote.whatsapp || '',
+    email: quote.email || '',
+    selectedDev: quote.selectedDev || 'Roberto',
+    projectType: quote.projectType || 'Site Institucional Profissional',
+    serviceId: quote.serviceId,
+    hasDomain: quote.hasDomain || 'Não, preciso registrar',
+    needsHosting: quote.needsHosting || 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
+    needsMaintenance: quote.needsMaintenance || 'Sim',
+    projectDescription: quote.projectDescription || null,
+    
+    // Condições comerciais
+    initialDevPrice: quote.initialDevPrice !== undefined ? Number(quote.initialDevPrice) : 1200.0,
+    monthlyPrice: quote.monthlyPrice !== undefined ? Number(quote.monthlyPrice) : 79.9,
+    discount: quote.discount !== undefined ? Number(quote.discount) : 0,
+    finalPrice: quote.finalPrice !== undefined ? Number(quote.finalPrice) : (Number(quote.initialDevPrice || 1200) - Number(quote.discount || 0)),
+    paymentMethodChoice: (quote.paymentMethodChoice as PaymentMethodChoice) || 'CREDIT_CARD_RECURRING',
+    billingPeriodicity: quote.billingPeriodicity || 'MENSAL',
+    dueDay: quote.dueDay || 10,
+    estimatedBudget: quote.estimatedBudget || 'Sob Proposta',
+    desiredDeadline: quote.desiredDeadline || '15 a 30 dias',
+    
+    status: (quote.status as QuoteStatus) || 'AGUARDANDO_ANALISE',
+    notes: quote.notes || null,
+    approvedBy: quote.approvedBy || null,
+    approvedAt: quote.approvedAt || null,
+    responsibleAdmin: quote.responsibleAdmin || quote.selectedDev || 'Roberto',
+    
+    linkedClientId: quote.linkedClientId || null,
+    linkedProjectId: quote.linkedProjectId || null,
+    linkedContractId: quote.linkedContractId || null,
+    linkedPaymentId: quote.linkedPaymentId || null,
+
+    createdAt: quote.createdAt || nowStr,
+    updatedAt: nowStr,
+  };
+
+  const existingIdx = current.findIndex((q) => q.id === fullQuote.id);
   if (existingIdx >= 0) {
-    current[existingIdx] = quote;
+    current[existingIdx] = { ...current[existingIdx], ...fullQuote, updatedAt: nowStr };
   } else {
-    current.unshift(quote);
+    current.unshift(fullQuote);
+    
+    // Gravar auditoria da nova solicitação
+    logActivity({
+      actor: 'Cliente',
+      action: 'NOVA_SOLICITACAO_ORCAMENTO',
+      category: 'ORCAMENTO',
+      targetId: fullQuote.id,
+      targetNumber: fullQuote.quoteNumber,
+      description: `Cliente "${fullQuote.name}" (${fullQuote.company || 'Pessoa Física'}) solicitou o orçamento ${fullQuote.quoteNumber}.`,
+      details: {
+        servico: fullQuote.projectType,
+        pagamento: fullQuote.paymentMethodChoice,
+        valorInicial: fullQuote.initialDevPrice,
+        mensalidade: fullQuote.monthlyPrice,
+      },
+    });
   }
+
   globalObject[globalQuotesKey] = current;
   writeQuotesToFile(current);
-  return quote;
+  return fullQuote;
 }
 
 export function updateQuote(
   id: string,
-  updates: {
-    status?: QuoteStatus;
-    notes?: string | null;
-    selectedDev?: string;
-    estimatedBudget?: string | null;
-    desiredDeadline?: string | null;
-  }
+  updates: Partial<MzQuoteItem>
 ): MzQuoteItem | null {
   const current = getStoredQuotes();
   const quote = current.find((q) => q.id === id);
   if (quote) {
-    if (updates.status !== undefined) quote.status = updates.status;
-    if (updates.notes !== undefined) quote.notes = updates.notes;
-    if (updates.selectedDev !== undefined) quote.selectedDev = updates.selectedDev;
-    if (updates.estimatedBudget !== undefined) quote.estimatedBudget = updates.estimatedBudget;
-    if (updates.desiredDeadline !== undefined) quote.desiredDeadline = updates.desiredDeadline;
-    quote.updatedAt = new Date().toISOString();
+    Object.assign(quote, updates, { updatedAt: new Date().toISOString() });
     globalObject[globalQuotesKey] = current;
     writeQuotesToFile(current);
     return quote;
@@ -86,11 +141,24 @@ export function updateQuote(
 
 export function deleteQuote(id: string): boolean {
   let current = getStoredQuotes();
+  const quote = current.find((q) => q.id === id);
   const initialLength = current.length;
   current = current.filter((q) => q.id !== id);
   if (current.length !== initialLength) {
     globalObject[globalQuotesKey] = current;
     writeQuotesToFile(current);
+
+    if (quote) {
+      logActivity({
+        actor: 'Administrador',
+        action: 'EXCLUIR_ORCAMENTO',
+        category: 'ORCAMENTO',
+        targetId: id,
+        targetNumber: quote.quoteNumber,
+        description: `Orçamento ${quote.quoteNumber || id} foi excluído da fila comercial.`,
+      });
+    }
+
     return true;
   }
   return false;

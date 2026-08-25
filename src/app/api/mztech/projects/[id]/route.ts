@@ -37,7 +37,7 @@ export async function GET(
               backups: { orderBy: { backupDate: 'desc' } },
             },
           });
-          if (dbProj) project = dbProj;
+          if (dbProj) project = dbProj as any;
         } catch (err) {}
       }
     }
@@ -99,7 +99,7 @@ export async function PATCH(
           where: { id: params.id },
           data: dataToUpdate,
         });
-        if (!project) project = dbProj;
+        if (!project) project = dbProj as any;
       } catch (err) {}
     }
 

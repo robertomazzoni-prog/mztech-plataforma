@@ -39,7 +39,7 @@ export async function GET(
             },
           });
           if (dbClient) {
-            client = dbClient;
+            client = dbClient as any;
           }
         } catch (err) {}
       }
@@ -134,7 +134,7 @@ export async function PATCH(
           }).catch(() => {});
         }
 
-        if (!client) client = dbClient;
+        if (!client) client = dbClient as any;
       } catch (err) {}
     }
 

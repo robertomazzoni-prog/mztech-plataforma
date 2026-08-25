@@ -30,9 +30,12 @@ import {
   Play,
   Calendar,
   LogOut,
+  ChevronRight,
+  Shield,
+  Loader2,
 } from 'lucide-react';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
-import { MzClientItem, MzProjectItem, MzQuoteItem } from '@/types/mztech';
+import { MzClientItem, MzProjectItem, MzQuoteItem, MzContractItem } from '@/types/mztech';
 
 export default function ClientPortalPage() {
   const router = useRouter();
@@ -43,6 +46,9 @@ export default function ClientPortalPage() {
   // Modais de Pagamento
   const [pixModalOpen, setPixModalOpen] = useState(false);
   const [cardModalOpen, setCardModalOpen] = useState(false);
+  const [contractModalOpen, setContractModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<MzContractItem | null>(null);
+  const [acceptingContract, setAcceptingContract] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -116,30 +122,53 @@ export default function ClientPortalPage() {
     }
   };
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     setPaymentSuccess(true);
-    setTimeout(() => {
-      if (selectedInvoice) {
-        setClientData((prev: any) => {
-          if (!prev) return prev;
-          const updatedInvoices = prev.invoices.map((inv: any) =>
-            inv.id === selectedInvoice.id
-              ? { ...inv, status: 'PAID', paidAt: new Date().toISOString() }
-              : inv
-          );
-          return {
-            ...prev,
-            client: { ...prev.client, financialStatus: 'EM_DIA' },
-            invoices: updatedInvoices,
-          };
+    try {
+      if (selectedInvoice && selectedInvoice.id) {
+        await fetch('/api/mztech/payments', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: selectedInvoice.id, action: 'CONFIRM_PAID' }),
         });
       }
+    } catch (e) {}
+
+    setTimeout(() => {
+      loadClientData(selectedClientEmail);
       setTimeout(() => {
         setPixModalOpen(false);
         setCardModalOpen(false);
         setPaymentSuccess(false);
       }, 1200);
     }, 1000);
+  };
+
+  // Aceite Digital de Contrato em 1 clique
+  const handleAcceptContractOnline = async (contractId: string) => {
+    setAcceptingContract(true);
+    try {
+      const res = await fetch(`/api/mztech/contracts/${contractId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ACCEPT_ONLINE',
+          clientName: clientData?.client?.contactName || 'Cliente',
+        }),
+      });
+
+      if (res.ok) {
+        alert('Contrato aceito e assinado digitalmente com sucesso!');
+        setContractModalOpen(false);
+        loadClientData(selectedClientEmail);
+      } else {
+        alert('Erro ao registrar aceite digital.');
+      }
+    } catch (e) {
+      alert('Erro de conexão ao assinar contrato.');
+    } finally {
+      setAcceptingContract(false);
+    }
   };
 
   if (loading && !clientData) {
@@ -153,155 +182,72 @@ export default function ClientPortalPage() {
     );
   }
 
-  const client: MzClientItem = clientData?.client;
+  const client = clientData?.client;
   const projects: MzProjectItem[] = clientData?.projects || [];
   const quotes: MzQuoteItem[] = clientData?.quotes || [];
+  const contracts: MzContractItem[] = clientData?.contracts || [];
   const invoices = clientData?.invoices || [];
   const availableClients = clientData?.availableClients || [];
 
-  if (!loading && !client) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 pb-20">
-        <header className="sticky top-0 z-40 bg-slate-950/90 border-b border-slate-800/80 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
-                <Terminal className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-lg font-bold text-white tracking-tight">
-                  mz<span className="text-cyan-400">Tech</span>
-                </span>
-                <span className="block text-[10px] uppercase font-bold text-cyan-400 font-mono tracking-wider">
-                  Área do Cliente
-                </span>
-              </div>
-            </Link>
+  const pendingInvoices = invoices.filter((i: any) => i.status === 'PENDING' || i.status === 'OVERDUE');
+  const paidInvoices = invoices.filter((i: any) => i.status === 'PAID');
+  const unacceptedContract = contracts.find((c) => !c.acceptedOnline && c.status !== 'CANCELADO');
 
-            <div className="flex items-center gap-3">
-              <Link
-                href="/cliente/login"
-                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 transition-all"
-              >
-                <span>Fazer Login</span>
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-3xl mx-auto px-4 pt-16 text-center space-y-6">
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
-              <User className="w-8 h-8" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">Nenhum cliente cadastrado no momento</h2>
-            <p className="text-sm text-slate-400 max-w-lg mx-auto">
-              Para registrar seu projeto e acessar o portal do cliente, envie uma solicitação de orçamento no site oficial ou faça login com sua conta cadastrada.
-            </p>
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/#orcamento"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Solicitar Orçamento Agora</span>
-              </Link>
-              <Link
-                href="/cliente/login"
-                className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-all"
-              >
-                <span>Entrar com E-mail Cadastrado</span>
-              </Link>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const pendingInvoices = invoices.filter((inv: any) => inv.status === 'PENDING');
-  const paidInvoices = invoices.filter((inv: any) => inv.status === 'PAID');
-
-  const devAssigned = client?.notes?.includes('Morvan')
-    ? 'Morvan'
-    : 'Roberto';
+  // Desenvolvedor Responsável
+  const devAssigned = quotes[0]?.selectedDev || 'Roberto';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 pb-20">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       
-      {/* Top Navbar do Portal do Cliente */}
-      <header className="sticky top-0 z-40 bg-slate-950/90 border-b border-slate-800/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      {/* Top Navbar */}
+      <header className="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-                <Terminal className="w-5 h-5" />
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500 flex items-center justify-center text-slate-950 font-bold">
+                <Terminal className="w-4 h-4" />
               </div>
-              <div>
-                <span className="text-lg font-bold text-white tracking-tight">
-                  mz<span className="text-cyan-400">Tech</span>
-                </span>
-                <span className="block text-[10px] uppercase font-bold text-cyan-400 font-mono tracking-wider">
-                  Área do Cliente
-                </span>
-              </div>
+              <span className="font-bold text-white text-base">
+                mz<span className="text-cyan-400">Tech</span>
+              </span>
             </Link>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              PORTAL DO CLIENTE
+            </span>
           </div>
 
-          {/* Seletor de Conta / Perfil do Cliente */}
           <div className="flex items-center gap-3">
             {availableClients.length > 1 && (
-              <div className="hidden sm:flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs">
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <select
-                  value={selectedClientEmail}
-                  onChange={(e) => handleSwitchAccount(e.target.value)}
-                  className="bg-transparent text-white text-xs focus:outline-none cursor-pointer"
-                >
-                  {availableClients.map((c: any) => (
-                    <option key={c.id} value={c.email} className="bg-slate-900 text-white">
-                      {c.companyName || c.contactName} ({c.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={selectedClientEmail}
+                onChange={(e) => handleSwitchAccount(e.target.value)}
+                className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-300 focus:outline-none focus:border-cyan-400"
+              >
+                {availableClients.map((c: any) => (
+                  <option key={c.id} value={c.email}>
+                    {c.companyName} ({c.contactName})
+                  </option>
+                ))}
+              </select>
             )}
-
-            <Link
-              href="/#orcamento"
-              className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md shadow-cyan-500/20 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Solicitar Novo Projeto</span>
-            </Link>
-
-            <Link
-              href="/admin"
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-semibold transition-colors"
-              title="Acesso Administrativo mzTech OPS"
-            >
-              OPS Admin
-            </Link>
 
             <button
               onClick={handleLogout}
-              className="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
-              title="Encerrar Sessão e Fazer Logout"
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs flex items-center gap-1.5 transition-colors"
+              title="Encerrar Sessão"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Sair</span>
+              <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Banner de Boas-Vindas & Ficha do Cliente */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
@@ -312,29 +258,29 @@ export default function ClientPortalPage() {
                 Olá, {client?.contactName || 'Cliente'}!
               </h1>
               <p className="text-xs sm:text-sm text-slate-400">
-                Empresa vinculada: <strong className="text-white">{client?.companyName}</strong> • Acompanhe seus projetos, faturas e orçamentos em tempo real.
+                Empresa: <strong className="text-white">{client?.companyName}</strong> • Acompanhe propostas, contratos, faturas e projetos em tempo real.
               </p>
             </div>
 
-            {/* Card do Sócio Responsável (Roberto & Morvan) */}
+            {/* Sócio Responsável */}
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-4 min-w-[280px]">
               <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-bold text-lg">
-                {devAssigned === 'Morvan' ? 'M' : 'R'}
+                {devAssigned.charAt(0)}
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Seu Desenvolvedor Dedicado:</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400">Sócio Especialista Responsável:</p>
                 <p className="text-sm font-bold text-white flex items-center gap-1.5">
                   <span>{devAssigned}</span>
                   <span className="text-[10px] font-mono font-normal text-cyan-400">(Sócio mzTech)</span>
                 </p>
                 <a
-                  href={`https://wa.me/55${client?.whatsapp?.replace(/\D/g, '') || '31999999999'}?text=${encodeURIComponent(`Olá ${devAssigned}! Estou no meu Portal do Cliente mzTech e gostaria de tirar uma dúvida.`)}`}
+                  href={`https://wa.me/5531986847049?text=${encodeURIComponent(`Olá! Estou no Portal do Cliente da mzTech e gostaria de falar sobre meus projetos.`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline mt-0.5"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Falar com {devAssigned} no WhatsApp</span>
+                  <span>Falar no WhatsApp Oficial</span>
                 </a>
               </div>
             </div>
@@ -342,46 +288,118 @@ export default function ClientPortalPage() {
         </div>
 
         {/* ============================================================ */}
-        {/* 1. SEÇÃO DE FATURAS & COBRANÇAS (COM ALERTA DE VENCIMENTO) */}
+        {/* NOVO: STEPPER DE PROGRESSÃO DO SERVIÇO (6 ETAPAS) */}
+        {/* ============================================================ */}
+        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Progresso do Fluxo Comercial & Entrega</span>
+            </h3>
+            <span className="text-[11px] text-cyan-400 font-mono">
+              Status Atual: {projects.length > 0 && projects[0].status === 'PRODUCAO' ? '6. Ativo em Produção' : contracts.length > 0 ? '3. Contrato Gerado' : '1. Proposta Recebida'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            {[
+              { step: '1', title: 'Orçamento Enviado', done: true },
+              { step: '2', title: 'Análise Comercial', done: quotes.length > 0 },
+              { step: '3', title: 'Contrato Gerado', done: contracts.length > 0 },
+              { step: '4', title: 'Aceite / Pagamento', done: contracts.some((c) => c.acceptedOnline) || paidInvoices.length > 0 },
+              { step: '5', title: 'Desenvolvimento', done: projects.length > 0 },
+              { step: '6', title: 'Produção Ativa', done: projects.some((p) => p.status === 'PRODUCAO') },
+            ].map((st) => (
+              <div
+                key={st.step}
+                className={`p-3 rounded-xl border text-center space-y-1 ${
+                  st.done
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    : 'bg-slate-950/60 border-slate-800 text-slate-500'
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-full inline-flex items-center justify-center font-bold text-[10px] mx-auto ${
+                  st.done ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                }`}>
+                  {st.done ? '✓' : st.step}
+                </span>
+                <p className="text-[11px] font-semibold block leading-tight">{st.title}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* ALERTA: CONTRATO AGUARDANDO ACEITE DIGITAL DO CLIENTE */}
+        {/* ============================================================ */}
+        {unacceptedContract && (
+          <div className="p-5 rounded-2xl bg-indigo-500/15 border border-indigo-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
+                <FileText className="w-4 h-4 text-cyan-400" />
+                <span>Instrumento Contratual Disponível para Assinatura</span>
+              </div>
+              <h3 className="font-bold text-white text-base">
+                Contrato {unacceptedContract.contractNumber || 'Oficial'} • {unacceptedContract.title}
+              </h3>
+              <p className="text-xs text-slate-300">
+                Revise os termos de desenvolvimento, hospedagem, cláusulas de retenção de backup e realize seu aceite online com 1 clique.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setSelectedContract(unacceptedContract);
+                setContractModalOpen(true);
+              }}
+              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 whitespace-nowrap transition-all"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Ler e Aceitar Contrato Online</span>
+            </button>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* 1. SEÇÃO DE FATURAS & COBRANÇAS */}
         {/* ============================================================ */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
               <DollarSign className="w-5 h-5 text-emerald-400" />
-              <span>Controle Financeiro & Faturas</span>
+              <span>Faturas & Pagamentos</span>
             </h2>
             <span className="text-xs text-slate-400">
-              Situação da Conta:{' '}
+              Situação Financeira:{' '}
               <strong className={client?.financialStatus === 'EM_DIA' ? 'text-emerald-400' : 'text-amber-400'}>
                 {client?.financialStatus === 'EM_DIA' ? '🟢 EM DIA' : '🟡 FATURA PENDENTE'}
               </strong>
             </span>
           </div>
 
-          {/* Destaque de Faturas Prestes a Vencer */}
           {pendingInvoices.length > 0 ? (
             <div className="space-y-3">
               {pendingInvoices.map((inv: any) => (
                 <div
                   key={inv.id}
-                  className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6"
+                  className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6"
                 >
                   <div className="space-y-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
                       <Clock className="w-3.5 h-3.5 animate-pulse" />
-                      <span>Fatura Prestes a Vencer • Vencimento em {inv.daysUntilDue} dias ({formatDatePtBR(inv.dueDate)})</span>
+                      <span>Fatura Pendente • Vencimento: {formatDatePtBR(inv.dueDate)}</span>
                     </div>
 
                     <h3 className="text-lg font-bold text-white">{inv.title}</h3>
                     <p className="text-xs text-slate-400">
-                      Plano contratado: <strong className="text-slate-300">{inv.planName}</strong>
+                      Forma de Cobrança: <strong className="text-slate-300">{inv.paymentMethod || 'Cartão / Pix'}</strong>
                     </p>
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="text-right sm:text-right">
-                      <span className="text-[11px] text-slate-400 uppercase font-bold">Valor da Fatura</span>
-                      <p className="text-3xl font-black text-white font-mono text-emerald-400">
+                    <div className="text-right">
+                      <span className="text-[11px] text-slate-400 uppercase font-bold">Valor</span>
+                      <p className="text-3xl font-black text-emerald-400 font-mono">
                         {formatCurrency(inv.amount)}
                       </p>
                     </div>
@@ -389,7 +407,7 @@ export default function ClientPortalPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleOpenPixModal(inv)}
-                        className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+                        className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all"
                       >
                         <QrCode className="w-4 h-4" />
                         <span>Pagar com Pix</span>
@@ -418,66 +436,32 @@ export default function ClientPortalPage() {
               <div>
                 <h3 className="text-base font-bold text-white">Sua conta está 100% em dia!</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Não há faturas pendentes ou vencidas neste momento. Todos os seus serviços e hospedagens estão operando normalmente.
+                  Não há faturas pendentes neste momento. Todos os seus serviços e hospedagens estão operando normalmente.
                 </p>
-              </div>
-            </div>
-          )}
-
-          {/* Histórico de Faturas Pagas */}
-          {paidInvoices.length > 0 && (
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
-              <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">
-                Histórico de Faturas Pagas
-              </h4>
-              <div className="space-y-2">
-                {paidInvoices.map((inv: any) => (
-                  <div
-                    key={inv.id}
-                    className="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                  >
-                    <div className="space-y-0.5">
-                      <p className="font-bold text-white">{inv.title}</p>
-                      <p className="text-slate-400 text-[11px]">
-                        Vencimento: {formatDatePtBR(inv.dueDate)} • Pago via Pix
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-white">{formatCurrency(inv.amount)}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                        <Check className="w-3 h-3" />
-                        <span>Pago</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           )}
         </section>
 
         {/* ============================================================ */}
-        {/* 2. SEÇÃO: MEUS PROJETOS & STATUS EM TEMPO REAL */}
+        {/* 2. SEÇÃO DE PROJETOS EM ANDAMENTO */}
         {/* ============================================================ */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
               <FolderGit2 className="w-5 h-5 text-cyan-400" />
-              <span>Meus Projetos & Sistemas em Andamento</span>
+              <span>Projetos & Infraestrutura Cloud</span>
             </h2>
             <span className="text-xs text-slate-400 font-mono">
-              Total de Projetos: <strong className="text-white">{projects.length}</strong>
+              Total: <strong className="text-white">{projects.length}</strong>
             </span>
           </div>
 
           {projects.length === 0 ? (
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-3">
-              <FolderGit2 className="w-10 h-10 text-slate-600 mx-auto" />
-              <p className="text-sm font-bold text-white">Nenhum projeto ativo cadastrado no momento.</p>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Assim que sua proposta for finalizada com Roberto ou Morvan, o projeto aparecerá aqui com monitoramento online.
-              </p>
+            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-2">
+              <FolderGit2 className="w-8 h-8 text-slate-600 mx-auto" />
+              <p className="text-sm font-bold text-white">Nenhum projeto em andamento no momento.</p>
+              <p className="text-xs text-slate-400">Assim que a proposta for aprovada, o projeto aparecerá aqui.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -500,20 +484,10 @@ export default function ClientPortalPage() {
                         className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
                           isProduction
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 animate-pulse'
+                            : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
                         }`}
                       >
-                        {isProduction ? (
-                          <>
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                            <span>Em Produção</span>
-                          </>
-                        ) : (
-                          <>
-                            <Play className="w-3 h-3" />
-                            <span>Em Desenvolvimento</span>
-                          </>
-                        )}
+                        {isProduction ? '● Em Produção' : '▶ Em Desenvolvimento'}
                       </span>
                     </div>
 
@@ -528,50 +502,33 @@ export default function ClientPortalPage() {
 
                       {proj.domain && (
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-400">Domínio Oficial:</span>
+                          <span className="text-slate-400">Domínio:</span>
                           <span className="font-mono text-cyan-300">{proj.domain}</span>
                         </div>
                       )}
 
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-400">Backups Gerenciados:</span>
+                        <span className="text-slate-400">Backups:</span>
                         <span className="text-emerald-400 font-semibold flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Ativo (Retenção 30 dias)</span>
+                          <span>Retenção de 30 dias</span>
                         </span>
                       </div>
                     </div>
 
-                    {proj.notes && (
-                      <p className="text-xs text-slate-400 italic bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
-                        "{proj.notes}"
-                      </p>
-                    )}
-
-                    <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                      {proj.hostingUrl ? (
+                    {proj.hostingUrl && (
+                      <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
                         <a
                           href={proj.hostingUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-2 transition-all"
+                          className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-2"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>Acessar Projeto Online</span>
                         </a>
-                      ) : (
-                        <span className="text-xs text-slate-500">Deploy em andamento</span>
-                      )}
-
-                      <a
-                        href={`https://wa.me/55${client?.whatsapp?.replace(/\D/g, '') || '31999999999'}?text=${encodeURIComponent(`Olá! Gostaria de falar sobre o projeto "${proj.name}".`)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-slate-400 hover:text-cyan-300 underline"
-                      >
-                        Suporte do Projeto
-                      </a>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -579,87 +536,69 @@ export default function ClientPortalPage() {
           )}
         </section>
 
-        {/* ============================================================ */}
-        {/* 3. SEÇÃO: MINHAS SOLICITAÇÕES DE ORÇAMENTO */}
-        {/* ============================================================ */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
-              <FileText className="w-5 h-5 text-indigo-400" />
-              <span>Minhas Solicitações de Orçamento</span>
-            </h2>
-            <Link
-              href="/#orcamento"
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold underline flex items-center gap-1"
-            >
-              <span>+ Solicitar Outro Orçamento</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {quotes.length === 0 ? (
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-2">
-              <p className="text-sm font-bold text-white">Nenhum orçamento pendente.</p>
-              <p className="text-xs text-slate-400">
-                Você pode solicitar um novo site institucional, sistema sob medida ou landing page a qualquer momento.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quotes.map((q) => (
-                <div
-                  key={q.id}
-                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h4 className="font-bold text-white text-base">{q.projectType}</h4>
-                      <p className="text-xs text-slate-400">
-                        Desenvolvedor Escolhido:{' '}
-                        <strong className="text-cyan-300">{q.selectedDev}</strong>
-                      </p>
-                    </div>
-
-                    <span
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase ${
-                        q.status === 'NOVO'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                          : q.status === 'EM_ANDAMENTO'
-                          ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                          : q.status === 'CONCLUIDO'
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                      }`}
-                    >
-                      {q.status === 'NOVO' && '🟡 Novo'}
-                      {q.status === 'EM_CONTATO' && '💬 Em Contato'}
-                      {q.status === 'EM_ANDAMENTO' && '🚀 Em Andamento'}
-                      {q.status === 'CONCLUIDO' && '✅ Finalizado'}
-                    </span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 text-xs space-y-1 text-slate-300">
-                    <p>
-                      <strong>Plano:</strong> {q.needsHosting}
-                    </p>
-                    {q.estimatedBudget && (
-                      <p>
-                        <strong>Orçamento Estimado:</strong> {q.estimatedBudget} •{' '}
-                        <strong>Prazo:</strong> {q.desiredDeadline || 'A combinar'}
-                      </p>
-                    )}
-                    {q.projectDescription && (
-                      <p className="text-slate-400 italic pt-1 border-t border-slate-800 line-clamp-2">
-                        "{q.projectDescription}"
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </main>
+
+      {/* ============================================================ */}
+      {/* MODAL DE LEITURA E ACEITE DO CONTRATO DIGITAL */}
+      {/* ============================================================ */}
+      {contractModalOpen && selectedContract && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="bg-slate-900 border border-cyan-500/40 rounded-3xl max-w-3xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto shadow-2xl space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-6 h-6 text-cyan-400" />
+                <h3 className="font-bold text-xl text-white">
+                  Contrato de Prestação de Serviços Digitais
+                </h3>
+              </div>
+              <button
+                onClick={() => setContractModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Contrato Nº:</span>
+                <strong className="text-cyan-400 font-mono">{selectedContract.contractNumber || 'CTR-2026'}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Valor Inicial de Desenvolvimento:</span>
+                <span className="text-emerald-400 font-mono font-bold">{formatCurrency(selectedContract.totalDevPrice)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Mensalidade de Hospedagem & Suporte:</span>
+                <span className="text-white font-mono font-bold">{formatCurrency(selectedContract.monthlyPrice)}/mês</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 font-mono text-slate-300 text-xs leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
+              {selectedContract.content}
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <p className="text-[11px] text-slate-400">
+                Ao clicar em aceitar, seu endereço de IP e horário serão registrados como assinatura digital vinculante.
+              </p>
+
+              <button
+                onClick={() => handleAcceptContractOnline(selectedContract.id)}
+                disabled={acceptingContract}
+                className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {acceptingContract ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
+                <span>Confirmar e Assinar Digitalmente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ============================================================ */}
       {/* MODAL DE PAGAMENTO PIX */}
@@ -684,7 +623,7 @@ export default function ClientPortalPage() {
 
             {paymentSuccess ? (
               <div className="py-8 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/30 animate-bounce">
+                <div className="w-16 h-16 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/30">
                   <Check className="w-8 h-8 stroke-[3]" />
                 </div>
                 <h4 className="text-xl font-bold text-white">Pagamento Pix Aprovado!</h4>
@@ -701,38 +640,21 @@ export default function ClientPortalPage() {
                   </p>
                 </div>
 
-                {/* QR Code Simulado em SVG */}
-                <div className="p-4 bg-white rounded-2xl max-w-[200px] mx-auto shadow-xl flex items-center justify-center">
-                  <div className="w-40 h-40 bg-slate-950 rounded-lg p-2 flex flex-col items-center justify-center text-white space-y-2">
-                    <QrCode className="w-24 h-24 text-white" />
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">mzTech Pix Pay</span>
-                  </div>
-                </div>
-
                 <div className="space-y-2 text-left">
-                  <label className="text-[11px] uppercase font-bold text-slate-400">Pix Copia e Cola:</label>
+                  <label className="text-[11px] uppercase font-bold text-slate-400">Chave Pix Oficial mzTech:</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       readOnly
                       value={selectedInvoice.pixQrCodeText}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px] font-mono text-slate-300 focus:outline-none truncate"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px] font-mono text-cyan-300 focus:outline-none truncate"
                     />
                     <button
                       onClick={handleCopyPix}
                       className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 flex-shrink-0"
                     >
-                      {pixCopied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Copiado!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Copiar</span>
-                        </>
-                      )}
+                      {pixCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{pixCopied ? 'Copiado!' : 'Copiar'}</span>
                     </button>
                   </div>
                 </div>
@@ -743,7 +665,7 @@ export default function ClientPortalPage() {
                     className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Simular Confirmação Pix (Sandbox)</span>
+                    <span>Confirmar Pagamento Realizado</span>
                   </button>
                 </div>
               </div>
@@ -753,7 +675,7 @@ export default function ClientPortalPage() {
       )}
 
       {/* ============================================================ */}
-      {/* MODAL DE PAGAMENTO VIA CARTÃO */}
+      {/* MODAL DE PAGAMENTO COM CARTÃO */}
       {/* ============================================================ */}
       {cardModalOpen && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
@@ -761,66 +683,62 @@ export default function ClientPortalPage() {
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
                 <CreditCard className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-base text-white">Pagamento no Cartão</h3>
+                <h3 className="font-bold text-base text-white">Pagamento no Cartão de Crédito</h3>
               </div>
               <button
                 onClick={() => setCardModalOpen(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1 text-center">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-1">
               <p className="text-xs text-slate-400">{selectedInvoice.title}</p>
-              <p className="text-2xl font-black text-cyan-400 font-mono">
-                {formatCurrency(selectedInvoice.amount)}
-              </p>
+              <p className="text-3xl font-black text-cyan-400 font-mono">{formatCurrency(selectedInvoice.amount)}</p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); handleSimulatePayment(); }} className="space-y-3 text-xs">
+            <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Número do Cartão</label>
+                <label className="text-slate-400 font-semibold">Número do Cartão</label>
                 <input
                   type="text"
-                  placeholder="•••• •••• •••• 4242"
-                  defaultValue="4000 1234 5678 4242"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  placeholder="4000 1234 5678 9010"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Validade</label>
+                  <label className="text-slate-400 font-semibold">Validade</label>
                   <input
                     type="text"
-                    placeholder="12/28"
-                    defaultValue="12/28"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                    placeholder="MM/AA"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">CVV</label>
+                  <label className="text-slate-400 font-semibold">CVV</label>
                   <input
                     type="text"
                     placeholder="123"
-                    defaultValue="888"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
                   />
                 </div>
               </div>
 
               <button
-                type="submit"
-                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 mt-4 flex items-center justify-center gap-2"
+                onClick={handleSimulatePayment}
+                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md mt-2 flex items-center justify-center gap-2"
               >
-                <Check className="w-4 h-4 stroke-[3]" />
-                <span>Pagar Fatura com Cartão</span>
+                <Check className="w-4 h-4" />
+                <span>Pagar e Ativar Mensalidade Recorrente</span>
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

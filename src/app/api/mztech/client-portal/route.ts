@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStoredClients } from '@/lib/mz-entities-store';
-import { getStoredProjects } from '@/lib/mz-entities-store';
+import {
+  getStoredClients,
+  getStoredProjects,
+  getStoredContracts,
+  getStoredPayments,
+} from '@/lib/mz-entities-store';
 import { getStoredQuotes } from '@/lib/quotes-store';
 import { getStoredSettings } from '@/lib/mz-settings-store';
 import { getUserFromRequest } from '@/lib/auth';
@@ -18,6 +22,8 @@ export async function GET(req: NextRequest) {
     const clients = getStoredClients();
     const projects = getStoredProjects();
     const quotes = getStoredQuotes();
+    const contracts = getStoredContracts();
+    const payments = getStoredPayments();
     const settings = getStoredSettings();
 
     let client = null;
@@ -30,11 +36,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    if (!client && clients.length > 0) {
+      // Se não especificou email, pega o primeiro cliente
+      client = clients[0];
+    }
+
     if (!client) {
       return NextResponse.json({
         client: null,
         projects: [],
         quotes: [],
+        contracts: [],
         invoices: [],
         availableClients: [],
         settings,
@@ -57,34 +69,57 @@ export async function GET(req: NextRequest) {
         q.name?.toLowerCase() === client.contactName?.toLowerCase()
     );
 
-    // Faturas vinculadas ao cliente real
-    const today = new Date();
-    const nextDueDate = new Date();
-    nextDueDate.setDate(today.getDate() + 5);
+    // Buscar contratos do cliente
+    const clientContracts = contracts.filter(
+      (c) =>
+        c.clientId === client.id ||
+        c.client?.companyName?.toLowerCase() === client.companyName?.toLowerCase() ||
+        c.client?.email?.toLowerCase() === client.email?.toLowerCase()
+    );
+
+    // Buscar cobranças/pagamentos reais do cliente
+    const clientPayments = payments.filter((p) => p.clientId === client.id);
 
     const activePixKey = settings.pixKey || 'robertomazzoni956@gmail.com';
 
-    const invoices = client.financialStatus === 'EM_DIA'
-      ? []
-      : [
-          {
-            id: `fat-${client.id}-current`,
-            title: 'Mensalidade Hospedagem & Manutenção Técnica',
-            amount: 79.90,
-            planName: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
-            dueDate: nextDueDate.toISOString().split('T')[0],
-            status: 'PENDING',
-            daysUntilDue: 5,
-            pixKey: activePixKey,
-            pixQrCodeText: activePixKey,
-            paymentMethod: 'PIX_OR_CARD',
-          },
-        ];
+    // Se houver pagamentos cadastrados, formatar para o portal
+    let invoices = clientPayments.map((p) => ({
+      id: p.id,
+      title: p.title || 'Cobrança mzTech',
+      amount: p.amount,
+      dueDate: p.dueDate,
+      status: p.status,
+      paidAt: p.paidAt,
+      pixKey: activePixKey,
+      pixQrCodeText: activePixKey,
+      paymentMethod: p.paymentMethod,
+    }));
+
+    if (invoices.length === 0 && client.financialStatus !== 'EM_DIA') {
+      const today = new Date();
+      const nextDueDate = new Date();
+      nextDueDate.setDate(today.getDate() + 5);
+
+      invoices = [
+        {
+          id: `fat-${client.id}-current`,
+          title: 'Mensalidade Hospedagem & Manutenção Técnica',
+          amount: 79.90,
+          dueDate: nextDueDate.toISOString().split('T')[0],
+          status: 'PENDING',
+          paidAt: undefined,
+          pixKey: activePixKey,
+          pixQrCodeText: activePixKey,
+          paymentMethod: 'CREDIT_CARD',
+        },
+      ];
+    }
 
     return NextResponse.json({
       client,
       projects: clientProjects,
       quotes: clientQuotes,
+      contracts: clientContracts,
       invoices,
       settings,
       availableClients: clients.map((c) => ({

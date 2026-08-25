@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
         if (dbProjects && dbProjects.length > 0) {
           const existingIds = new Set(dbProjects.map((p) => p.id));
-          const combined = [...dbProjects];
+          const combined: any[] = [...dbProjects];
           for (const memP of projects) {
             if (!existingIds.has(memP.id)) {
               combined.push(memP);
@@ -97,6 +97,8 @@ export async function POST(req: NextRequest) {
           status: 'ATIVO',
           financialStatus: 'EM_DIA',
           notes: 'Cadastrado diretamente pelo módulo de projetos.',
+          codeDelivered: false,
+          backupDelivered: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -115,7 +117,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newProject = {
+    const newProject: any = {
       id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       clientId: finalClientId,
       client: clientObj
