@@ -47,15 +47,6 @@ import {
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
 
-const PROJECT_DEV_PRICES: Record<string, number> = {
-  'Site Institucional Profissional': 1200,
-  'Landing Page de Conversão': 800,
-  'Sistema Web Personalizado': 2400,
-  'Sistema de Agendamento Online': 1600,
-  'Portal / Catálogo': 1800,
-  'Outro': 1200,
-};
-
 const getMonthlyPriceFromPlan = (plan: string): number => {
   if (plan.includes('39,90')) return 39.90;
   if (plan.includes('79,90')) return 79.90;
@@ -83,9 +74,9 @@ export default function MzTechPublicPage() {
     needsMaintenance: 'Sim',
     projectDescription: '',
     paymentMethodChoice: 'CREDIT_CARD_RECURRING' as 'CREDIT_CARD_RECURRING' | 'PIX' | 'CREDIT_CARD' | 'CARD_PLUS_PIX',
-    initialDevPrice: 1200,
+    initialDevPrice: 0,
     monthlyPrice: 79.9,
-    estimatedBudget: 'R$ 1.200,00',
+    estimatedBudget: 'A Definir na Proposta',
     desiredDeadline: '15 a 30 dias',
     // Honeypot anti-spam
     website_url_hp: '',
@@ -1078,16 +1069,7 @@ export default function MzTechPublicPage() {
                     <label className="text-xs font-bold uppercase text-slate-400">Tipo de Projeto</label>
                     <select
                       value={formData.projectType}
-                      onChange={(e) => {
-                        const newType = e.target.value;
-                        const newDevPrice = PROJECT_DEV_PRICES[newType] || 1200;
-                        setFormData((prev) => ({
-                          ...prev,
-                          projectType: newType,
-                          initialDevPrice: newDevPrice,
-                          estimatedBudget: `R$ ${newDevPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-                        }));
-                      }}
+                      onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
                     >
                       <option value="Site Institucional Profissional">Site Institucional</option>
@@ -1241,7 +1223,7 @@ export default function MzTechPublicPage() {
                 </div>
 
                 {/* RESUMO DA PROPOSTA (SEÇÃO 18 DO REQUISITO) */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs uppercase font-bold text-slate-400 font-mono flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -1250,29 +1232,25 @@ export default function MzTechPublicPage() {
                     <span className="text-[11px] text-slate-500">Sem cobrança imediata</span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80 text-xs">
                     <div>
-                      <span className="text-slate-500 text-[10px] block">Serviço:</span>
+                      <span className="text-slate-500 text-[10px] block">Tipo de Projeto:</span>
                       <strong className="text-white truncate block">{formData.projectType}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-500 text-[10px] block">Plano:</span>
+                      <span className="text-slate-500 text-[10px] block">Modalidade:</span>
                       <span className="text-cyan-400 truncate block font-medium">
                         {formData.needsHosting.includes('79,90')
-                          ? 'Hospedagem + Manut.'
+                          ? 'Hospedagem + Manutenção'
                           : formData.needsHosting.includes('39,90')
-                          ? 'Hospedagem'
-                          : 'Apenas Dev'}
+                          ? 'Hospedagem Gerenciada'
+                          : 'Apenas Desenvolvimento'}
                       </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 text-[10px] block">Valor Inicial Est.:</span>
-                      <span className="text-cyan-400 font-mono font-bold block">{formData.estimatedBudget}</span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Mensalidade:</span>
                       <span className="text-emerald-400 font-mono font-bold block">
-                        {formData.monthlyPrice > 0 ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês` : 'Sem Mensalidade'}
+                        {formData.monthlyPrice > 0 ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês` : 'Sem Mensalidade (R$ 0,00)'}
                       </span>
                     </div>
                     <div>
@@ -1284,6 +1262,11 @@ export default function MzTechPublicPage() {
                         {formData.paymentMethodChoice === 'CARD_PLUS_PIX' && 'Cartão + PIX'}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800/50 text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span>Valor de desenvolvimento: <strong className="text-slate-300">Definido sob medida na proposta comercial após análise</strong></span>
                   </div>
                 </div>
 
