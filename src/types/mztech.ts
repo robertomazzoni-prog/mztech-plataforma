@@ -534,3 +534,25 @@ export interface MzDashboardMetrics {
     backupFile: string;
   };
 }
+
+export interface MzPortfolioItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  url: string;
+  displayUrl?: string;
+  tagline?: string;
+  subheadline?: string;
+  previewImage?: string | null;
+  favicon?: string | null;
+  features: string[];
+  badge?: string;
+  infrastructure?: string;
+  order?: number;
+  featured?: boolean;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+

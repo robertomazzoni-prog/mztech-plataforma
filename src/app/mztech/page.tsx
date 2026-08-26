@@ -61,6 +61,8 @@ export default function MzTechPublicPage() {
   // Estado dos Serviços Dinâmicos e Configurações Administrativas
   const [servicesList, setServicesList] = useState<any[]>([]);
   const [settingsData, setSettingsData] = useState<any>(null);
+  const [portfolioList, setPortfolioList] = useState<any[]>([]);
+  const [selectedPortfolioIdx, setSelectedPortfolioIdx] = useState<number>(0);
 
   // Estado do FAQ Accordion
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -101,10 +103,11 @@ export default function MzTechPublicPage() {
   useEffect(() => {
     const fetchServicesAndSettings = async () => {
       try {
-        const [servRes, settRes, meRes] = await Promise.all([
+        const [servRes, settRes, meRes, portRes] = await Promise.all([
           fetch('/api/mztech/services'),
           fetch('/api/mztech/settings'),
           fetch('/api/auth/me').catch(() => null),
+          fetch('/api/mztech/portfolio').catch(() => null),
         ]);
         if (servRes.ok) {
           const sData = await servRes.json();
@@ -116,6 +119,12 @@ export default function MzTechPublicPage() {
           const settData = await settRes.json();
           if (settData.settings) {
             setSettingsData(settData.settings);
+          }
+        }
+        if (portRes && portRes.ok) {
+          const portData = await portRes.json();
+          if (Array.isArray(portData.portfolio) && portData.portfolio.length > 0) {
+            setPortfolioList(portData.portfolio);
           }
         }
         if (meRes && meRes.ok) {
@@ -868,99 +877,146 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 5. PORTFÓLIO (CASE MAZZONI BARBERS) */}
       {/* ============================================================ */}
-      <section id="portfolio" className={`py-24 ${isDarkCyberGlow ? 'bg-[#0a0d22]/70 border-y border-violet-500/20' : 'bg-slate-900/60 border-y border-slate-800'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
-              Casos Reais em Produção
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              Portfólio de Projetos
-            </h2>
-            <p className="text-slate-400 text-base sm:text-lg mt-3">
-              Projetos construídos pela mzTech com foco em usabilidade, velocidade e geração de negócios.
-            </p>
-          </div>
+      {/* ============================================================ */}
+      {/* 5. PORTFÓLIO DE PROJETOS DINÂMICO & INTELIGENTE */}
+      {/* ============================================================ */}
+      {(() => {
+        const defaultCase = {
+          id: 'port-mazzoni-barbershop',
+          title: 'Mazzoni Barbershop',
+          category: 'Site + Sistema de Agendamento',
+          description:
+            'Plataforma web completa desenvolvida sob medida pela mzTech em Next.js e PostgreSQL para gerenciamento e atendimento de barbearia. Inclui fluxo de agendamentos 24h integrado ao WhatsApp, painel financeiro e controle operacional de equipe.',
+          url: 'https://mazzoni-barbershop-production.up.railway.app',
+          displayUrl: 'mazzoni-barbershop-production.up.railway.app',
+          tagline: 'ELEVE SEU ESTILO AO NÍVEL MÁXIMO',
+          subheadline: 'Agendamento de Horários & Presença Digital',
+          features: [
+            'Agendamento online 24h',
+            'Confirmação via WhatsApp',
+            'Painel administrativo financeiro',
+            'Gestão de equipe e serviços',
+          ],
+          badge: 'Em Produção',
+          infrastructure: 'Infraestrutura Railway',
+        };
 
-          {/* Destaque Case: Mazzoni Barbers */}
-          <div className={`${
-            isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/25 shadow-2xl' : 'bg-slate-900 border border-slate-800'
-          } rounded-3xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center`}>
-            <div className="space-y-5">
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                  Site + Sistema de Agendamento
+        const activeItems = portfolioList.length > 0 ? portfolioList : [defaultCase];
+        const currentCase = activeItems[selectedPortfolioIdx] || activeItems[0] || defaultCase;
+
+        return (
+          <section id="portfolio" className={`py-24 ${isDarkCyberGlow ? 'bg-[#0a0d22]/70 border-y border-violet-500/20' : 'bg-slate-900/60 border-y border-slate-800'}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center max-w-3xl mx-auto mb-12">
+                <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
+                  Casos Reais em Produção
                 </span>
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Em Produção
-                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
+                  Portfólio de Projetos
+                </h2>
+                <p className="text-slate-400 text-base sm:text-lg mt-3">
+                  Projetos construídos pela mzTech com foco em usabilidade, velocidade e geração de negócios.
+                </p>
               </div>
 
-              <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
-                Mazzoni Barbershop
-              </h3>
+              {/* Seletor de Cases / Abas se houver mais de 1 projeto */}
+              {activeItems.length > 1 && (
+                <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2 scrollbar-none">
+                  {activeItems.map((item, idx) => {
+                    const isSelected = idx === selectedPortfolioIdx;
+                    return (
+                      <button
+                        key={item.id || idx}
+                        onClick={() => setSelectedPortfolioIdx(idx)}
+                        className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                          isSelected
+                            ? isDarkCyberGlow
+                              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/25 scale-105'
+                              : 'bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20 scale-105'
+                            : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isSelected ? (isDarkCyberGlow ? 'bg-white' : 'bg-slate-950') : 'bg-emerald-400'}`} />
+                        <span>{item.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                Plataforma web completa desenvolvida sob medida pela mzTech em Next.js e PostgreSQL para gerenciamento e atendimento de barbearia. Inclui fluxo de agendamentos 24h integrado ao WhatsApp, painel financeiro e controle operacional de equipe.
-              </p>
+              {/* Card Destaque do Case Selecionado */}
+              <div className={`${
+                isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/25 shadow-2xl' : 'bg-slate-900 border border-slate-800'
+              } rounded-3xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center transition-all animate-in fade-in`}>
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                      {currentCase.category}
+                    </span>
+                    <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {currentCase.badge || 'Em Produção'}
+                    </span>
+                  </div>
 
-              <div className="space-y-2 pt-2">
-                <p className="text-xs uppercase font-bold text-slate-400">Funcionalidades Chave:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-                    <span>Agendamento online 24h</span>
+                  <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
+                    {currentCase.title}
+                  </h3>
+
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    {currentCase.description}
+                  </p>
+
+                  <div className="space-y-2 pt-2">
+                    <p className="text-xs uppercase font-bold text-slate-400">Funcionalidades Chave:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                      {(currentCase.features || []).map((feat: string, fIdx: number) => (
+                        <div key={fIdx} className="flex items-center gap-2">
+                          <Check className={`w-4 h-4 shrink-0 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-                    <span>Confirmação via WhatsApp</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-                    <span>Painel administrativo financeiro</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-                    <span>Gestão de equipe e serviços</span>
+
+                  <div className="pt-4 flex flex-wrap items-center gap-4">
+                    <a
+                      href={currentCase.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`px-6 py-3 rounded-xl ${
+                        isDarkCyberGlow
+                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
+                          : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
+                      } font-bold text-sm inline-flex items-center gap-2 shadow-lg transition-all hover:scale-[1.02]`}
+                    >
+                      <span>Abrir Site do Projeto (Produção)</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <span className="text-xs text-slate-500 font-mono">{currentCase.infrastructure || 'Infraestrutura Railway'}</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-4 flex flex-wrap items-center gap-4">
-                <a
-                  href="https://mazzoni-barbershop-production.up.railway.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`px-6 py-3 rounded-xl ${
-                    isDarkCyberGlow
-                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
-                      : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
-                  } font-bold text-sm inline-flex items-center gap-2 shadow-lg transition-all hover:scale-[1.02]`}
-                >
-                  <span>Abrir Site do Projeto (Produção)</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-                <span className="text-xs text-slate-500 font-mono">Infraestrutura Railway</span>
+                {/* Mockup / Visual */}
+                <div className={`rounded-2xl overflow-hidden border ${isDarkCyberGlow ? 'border-violet-500/25 bg-[#090b1c]' : 'border-slate-800 bg-slate-950'} p-2 shadow-2xl`}>
+                  <div className={`${isDarkCyberGlow ? 'bg-[#0d1028]' : 'bg-slate-900'} rounded-xl p-4 space-y-3`}>
+                    <div className={`flex items-center justify-between text-xs text-slate-400 border-b ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'} pb-2`}>
+                      <span className={`font-mono truncate max-w-[220px] ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
+                        {currentCase.displayUrl || currentCase.url?.replace(/^https?:\/\//i, '')}
+                      </span>
+                      <span className="text-emerald-400 font-semibold font-mono">100% Online</span>
+                    </div>
+                    <div className={`p-6 rounded-xl ${isDarkCyberGlow ? 'bg-[#070914] border-violet-500/20' : 'bg-slate-950 border-slate-800'} border text-center space-y-2`}>
+                      <p className="text-xs font-bold text-amber-300 uppercase tracking-wider">{currentCase.title}</p>
+                      <p className="text-base font-bold text-white uppercase">{currentCase.tagline || 'PRESENÇA DIGITAL DE ALTA PERFORMANCE'}</p>
+                      <p className="text-xs text-slate-400">{currentCase.subheadline || currentCase.category}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Mockup / Visual */}
-            <div className={`rounded-2xl overflow-hidden border ${isDarkCyberGlow ? 'border-violet-500/25 bg-[#090b1c]' : 'border-slate-800 bg-slate-950'} p-2 shadow-2xl`}>
-              <div className={`${isDarkCyberGlow ? 'bg-[#0d1028]' : 'bg-slate-900'} rounded-xl p-4 space-y-3`}>
-                <div className={`flex items-center justify-between text-xs text-slate-400 border-b ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'} pb-2`}>
-                  <span className={`font-mono ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>mazzoni-barbershop-production.up.railway.app</span>
-                  <span className="text-emerald-400 font-semibold font-mono">100% Online</span>
-                </div>
-                <div className={`p-4 rounded-xl ${isDarkCyberGlow ? 'bg-[#070914] border-violet-500/20' : 'bg-slate-950 border-slate-800'} border text-center space-y-2`}>
-                  <p className="text-xs font-bold text-amber-300 uppercase tracking-wider">Mazzoni Barbershop</p>
-                  <p className="text-base font-bold text-white">ELEVE SEU ESTILO AO NÍVEL MÁXIMO</p>
-                  <p className="text-xs text-slate-400">Agendamento de Horários & Presença Digital</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* ============================================================ */}
       {/* 6. PLANOS MZTECH & 7. EXPLICAR A MENSALIDADE */}

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "port-mazzoni-barbershop",
+    "title": "Mazzoni Barbershop",
+    "category": "Site + Sistema de Agendamento",
+    "description": "Plataforma web completa desenvolvida sob medida pela mzTech em Next.js e PostgreSQL para gerenciamento e atendimento de barbearia. Inclui fluxo de agendamentos 24h integrado ao WhatsApp, painel financeiro e controle operacional de equipe.",
+    "url": "https://mazzoni-barbershop-production.up.railway.app",
+    "displayUrl": "mazzoni-barbershop-production.up.railway.app",
+    "tagline": "ELEVE SEU ESTILO AO NÍVEL MÁXIMO",
+    "subheadline": "Agendamento de Horários & Presença Digital",
+    "previewImage": null,
+    "favicon": null,
+    "features": [
+      "Agendamento online 24h",
+      "Confirmação via WhatsApp",
+      "Painel administrativo financeiro",
+      "Gestão de equipe e serviços"
+    ],
+    "badge": "Em Produção",
+    "infrastructure": "Infraestrutura Railway",
+    "order": 1,
+    "featured": true,
+    "active": true,
+    "createdAt": "2026-08-25T00:00:00.000Z",
+    "updatedAt": "2026-08-26T18:00:00.000Z"
+  }
+]
