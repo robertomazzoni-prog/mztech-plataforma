@@ -337,3 +337,46 @@ model MzWebhookEvent {
   processedAt       DateTime  @default(now())
   createdAt         DateTime  @default(now())
 }
+
+model MzQuote {
+  id                  String    @id @default(uuid())
+  quoteNumber         String    @unique
+  name                String
+  company             String?
+  cnpjCpf             String?
+  whatsapp            String
+  email               String
+  selectedDev         String    @default("Roberto")
+  projectType         String    @default("Site Institucional Profissional")
+  serviceId           String?
+  hasDomain           String    @default("Não, preciso registrar")
+  needsHosting        String    @default("Plano Hospedagem + Manutenção (R$ 79,90/mês)")
+  needsMaintenance    String    @default("Sim")
+  projectDescription  String?   @db.Text
+  initialDevPrice     Float     @default(0.0)
+  monthlyPrice        Float     @default(79.9)
+  discount            Float     @default(0.0)
+  finalPrice          Float     @default(0.0)
+  paymentMethodChoice String    @default("CREDIT_CARD_RECURRING")
+  billingPeriodicity  String    @default("MENSAL")
+  dueDay              Int       @default(10)
+  estimatedBudget     String?
+  desiredDeadline     String?
+  status              String    @default("AGUARDANDO_ANALISE")
+  notes               String?   @db.Text
+  approvedBy          String?
+  approvedAt          DateTime?
+  responsibleAdmin    String?
+  linkedClientId      String?
+  linkedProjectId     String?
+  linkedContractId    String?
+  linkedPaymentId     String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model MzCompanySetting {
+  id                  String    @id @default("company-settings")
+  dataJson            String    @db.Text
+  updatedAt           DateTime  @updatedAt
+}

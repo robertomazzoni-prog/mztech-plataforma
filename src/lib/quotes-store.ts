@@ -46,6 +46,62 @@ export function getStoredQuotes(): MzQuoteItem[] {
   return globalObject[globalQuotesKey];
 }
 
+import { prisma } from '@/lib/db';
+
+async function syncQuoteToPrisma(quote: MzQuoteItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      const qNum = quote.quoteNumber || `MZ-${quote.id}`;
+      await prisma.mzQuote.upsert({
+        where: { quoteNumber: qNum },
+        create: {
+          id: quote.id,
+          quoteNumber: qNum,
+          name: quote.name,
+          company: quote.company,
+          cnpjCpf: quote.cnpjCpf,
+          whatsapp: quote.whatsapp,
+          email: quote.email,
+          selectedDev: quote.selectedDev || 'Roberto',
+          projectType: quote.projectType,
+          serviceId: quote.serviceId,
+          hasDomain: quote.hasDomain,
+          needsHosting: quote.needsHosting,
+          needsMaintenance: quote.needsMaintenance,
+          projectDescription: quote.projectDescription,
+          initialDevPrice: quote.initialDevPrice,
+          monthlyPrice: quote.monthlyPrice,
+          discount: quote.discount,
+          finalPrice: quote.finalPrice,
+          paymentMethodChoice: quote.paymentMethodChoice,
+          billingPeriodicity: quote.billingPeriodicity,
+          dueDay: quote.dueDay,
+          estimatedBudget: quote.estimatedBudget,
+          desiredDeadline: quote.desiredDeadline,
+          status: quote.status,
+          notes: quote.notes,
+          approvedBy: quote.approvedBy,
+          responsibleAdmin: quote.responsibleAdmin,
+          linkedClientId: quote.linkedClientId,
+          linkedProjectId: quote.linkedProjectId,
+          linkedContractId: quote.linkedContractId,
+          linkedPaymentId: quote.linkedPaymentId,
+        },
+        update: {
+          status: quote.status,
+          notes: quote.notes,
+          approvedBy: quote.approvedBy,
+          responsibleAdmin: quote.responsibleAdmin,
+          linkedClientId: quote.linkedClientId,
+          linkedProjectId: quote.linkedProjectId,
+          linkedContractId: quote.linkedContractId,
+          linkedPaymentId: quote.linkedPaymentId,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveQuote(quote: Partial<MzQuoteItem>): MzQuoteItem {
   const current = getStoredQuotes();
   const nowStr = new Date().toISOString();
@@ -121,6 +177,11 @@ export function saveQuote(quote: Partial<MzQuoteItem>): MzQuoteItem {
 
   globalObject[globalQuotesKey] = current;
   writeQuotesToFile(current);
+
+  if (process.env.DATABASE_URL) {
+    syncQuoteToPrisma(fullQuote).catch(() => {});
+  }
+
   return fullQuote;
 }
 
@@ -134,6 +195,11 @@ export function updateQuote(
     Object.assign(quote, updates, { updatedAt: new Date().toISOString() });
     globalObject[globalQuotesKey] = current;
     writeQuotesToFile(current);
+
+    if (process.env.DATABASE_URL) {
+      syncQuoteToPrisma(quote).catch(() => {});
+    }
+
     return quote;
   }
   return null;

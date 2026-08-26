@@ -178,12 +178,47 @@ export function getStoredClients(): MzClientItem[] {
   return globalObj[globalClientsKey];
 }
 
+async function syncClientToPrisma(client: MzClientItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      await prisma.mzClient.upsert({
+        where: { id: client.id },
+        create: {
+          id: client.id,
+          companyName: client.companyName,
+          contactName: client.contactName,
+          whatsapp: client.whatsapp,
+          email: client.email,
+          domain: client.domain,
+          status: client.status,
+          financialStatus: client.financialStatus,
+          notes: client.notes,
+        },
+        update: {
+          companyName: client.companyName,
+          contactName: client.contactName,
+          whatsapp: client.whatsapp,
+          email: client.email,
+          domain: client.domain,
+          status: client.status,
+          financialStatus: client.financialStatus,
+          notes: client.notes,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveStoredClients(clients: MzClientItem[]) {
   globalObj[globalClientsKey] = clients;
   try {
     ensureDir();
     fs.writeFileSync(CLIENTS_FILE, JSON.stringify(clients, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    clients.forEach((c) => syncClientToPrisma(c).catch(() => {}));
+  }
 }
 
 export function getStoredClientById(id: string): MzClientItem | null {
@@ -208,6 +243,10 @@ export function deleteStoredClient(id: string): boolean {
 
   if (clients.length !== initialCount) {
     saveStoredClients(clients);
+
+    if (process.env.DATABASE_URL) {
+      prisma.mzClient.delete({ where: { id } }).catch(() => {});
+    }
 
     // Remover também os projetos vinculados a este cliente
     let projects = getStoredProjects();
@@ -241,12 +280,46 @@ export function getStoredProjects(): MzProjectItem[] {
   return globalObj[globalProjectsKey];
 }
 
+async function syncProjectToPrisma(project: MzProjectItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      await prisma.mzProject.upsert({
+        where: { id: project.id },
+        create: {
+          id: project.id,
+          clientId: project.clientId,
+          name: project.name,
+          type: project.type,
+          status: project.status,
+          domain: project.domain,
+          hostingUrl: project.hostingUrl,
+          githubRepo: project.githubRepo,
+          notes: project.notes,
+        },
+        update: {
+          name: project.name,
+          type: project.type,
+          status: project.status,
+          domain: project.domain,
+          hostingUrl: project.hostingUrl,
+          githubRepo: project.githubRepo,
+          notes: project.notes,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveStoredProjects(projects: MzProjectItem[]) {
   globalObj[globalProjectsKey] = projects;
   try {
     ensureDir();
     fs.writeFileSync(PROJECTS_FILE, JSON.stringify(projects, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    projects.forEach((p) => syncProjectToPrisma(p).catch(() => {}));
+  }
 }
 
 export function updateStoredProject(id: string, updates: Partial<MzProjectItem>): MzProjectItem | null {
@@ -266,6 +339,9 @@ export function deleteStoredProject(id: string): boolean {
 
   if (projects.length !== initialCount) {
     saveStoredProjects(projects);
+    if (process.env.DATABASE_URL) {
+      prisma.mzProject.delete({ where: { id } }).catch(() => {});
+    }
     return true;
   }
   return false;
@@ -291,12 +367,54 @@ export function getStoredContracts(): MzContractItem[] {
   return globalObj[globalContractsKey];
 }
 
+async function syncContractToPrisma(contract: MzContractItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      await prisma.mzContract.upsert({
+        where: { id: contract.id },
+        create: {
+          id: contract.id,
+          clientId: contract.clientId,
+          projectId: contract.projectId || null,
+          title: contract.title,
+          content: contract.content || '',
+          totalDevPrice: contract.totalDevPrice || 0,
+          monthlyPrice: contract.monthlyPrice || 0,
+          paymentMethod: contract.paymentMethod || 'PIX / Cartão de Crédito',
+          termsVersion: contract.termsVersion || 'v2.0-2026',
+          codeOwnershipType: contract.codeOwnershipType || 'PROPRIEDADE_CLIENTE',
+          scopeDevelopment: contract.scopeDevelopment || null,
+          scopeHosting: contract.scopeHosting || null,
+          scopeMaintenance: contract.scopeMaintenance || null,
+          scopeSupport: contract.scopeSupport || null,
+          backupRetentionDays: contract.backupRetentionDays || 30,
+          migrationExcluded: contract.migrationExcluded !== undefined ? contract.migrationExcluded : true,
+          status: contract.status || 'RASCUNHO',
+          notes: contract.notes || null,
+        },
+        update: {
+          title: contract.title,
+          content: contract.content || '',
+          totalDevPrice: contract.totalDevPrice || 0,
+          monthlyPrice: contract.monthlyPrice || 0,
+          status: contract.status || 'RASCUNHO',
+          notes: contract.notes || null,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveStoredContracts(contracts: MzContractItem[]) {
   globalObj[globalContractsKey] = contracts;
   try {
     ensureDir();
     fs.writeFileSync(CONTRACTS_FILE, JSON.stringify(contracts, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    contracts.forEach((c) => syncContractToPrisma(c).catch(() => {}));
+  }
 }
 
 export function getStoredContractById(id: string): MzContractItem | null {
@@ -410,12 +528,43 @@ export function getStoredPayments(): MzPaymentItem[] {
   return globalObj[globalPaymentsKey];
 }
 
+async function syncPaymentToPrisma(payment: MzPaymentItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      await prisma.mzPayment.upsert({
+        where: { id: payment.id },
+        create: {
+          id: payment.id,
+          clientId: payment.clientId,
+          subscriptionId: payment.subscriptionId || null,
+          amount: payment.amount,
+          paymentMethod: payment.paymentMethod,
+          status: payment.status,
+          dueDate: new Date(payment.dueDate),
+          paidAt: payment.paidAt ? new Date(payment.paidAt) : null,
+          gateway: payment.gateway || 'SANDBOX_MOCK',
+          notes: payment.notes || null,
+        },
+        update: {
+          status: payment.status,
+          paidAt: payment.paidAt ? new Date(payment.paidAt) : null,
+          notes: payment.notes || null,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveStoredPayments(payments: MzPaymentItem[]) {
   globalObj[globalPaymentsKey] = payments;
   try {
     ensureDir();
     fs.writeFileSync(PAYMENTS_FILE, JSON.stringify(payments, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    payments.forEach((p) => syncPaymentToPrisma(p).catch(() => {}));
+  }
 }
 
 export function createStoredPayment(payment: Partial<MzPaymentItem>): MzPaymentItem {
@@ -466,9 +615,13 @@ export function updateStoredPayment(id: string, updates: Partial<MzPaymentItem>)
 export function deleteStoredPayment(id: string): boolean {
   let payments = getStoredPayments();
   const initialCount = payments.length;
-  payments = payments.filter((p) => p.id !== id && p.transactionId !== id);
+  payments = payments.filter((p) => p.id !== id);
+
   if (payments.length !== initialCount) {
     saveStoredPayments(payments);
+    if (process.env.DATABASE_URL) {
+      prisma.mzPayment.delete({ where: { id } }).catch(() => {});
+    }
     return true;
   }
   return false;
@@ -505,12 +658,44 @@ export function getStoredSubscriptions(): MzSubscriptionItem[] {
   return globalObj[globalSubscriptionsKey];
 }
 
+async function syncSubscriptionToPrisma(sub: MzSubscriptionItem) {
+  try {
+    if (process.env.DATABASE_URL) {
+      await prisma.mzSubscription.upsert({
+        where: { id: sub.id },
+        create: {
+          id: sub.id,
+          clientId: sub.clientId,
+          projectId: sub.projectId || null,
+          planName: sub.planName,
+          amount: sub.amount,
+          periodicity: sub.periodicity || 'MENSAL',
+          paymentMethod: sub.paymentMethod || 'CREDIT_CARD',
+          status: sub.status || 'ACTIVE',
+          gateway: sub.gateway || 'SANDBOX_MOCK',
+          notes: sub.notes || null,
+        },
+        update: {
+          planName: sub.planName,
+          amount: sub.amount,
+          status: sub.status,
+          notes: sub.notes,
+        },
+      });
+    }
+  } catch (e) {}
+}
+
 export function saveStoredSubscriptions(subs: MzSubscriptionItem[]) {
   globalObj[globalSubscriptionsKey] = subs;
   try {
     ensureDir();
     fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify(subs, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    subs.forEach((s) => syncSubscriptionToPrisma(s).catch(() => {}));
+  }
 }
 
 export function createStoredSubscription(sub: Partial<MzSubscriptionItem>): MzSubscriptionItem {
