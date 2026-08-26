@@ -206,6 +206,7 @@ export default function ClientPortalPage() {
   const quotes: MzQuoteItem[] = clientData?.quotes || [];
   const contracts: MzContractItem[] = clientData?.contracts || [];
   const invoices = clientData?.invoices || [];
+  const subscriptionInfo = clientData?.subscriptionInfo;
   const availableClients = clientData?.availableClients || [];
 
   const pendingInvoices = invoices.filter((i: any) => i.status === 'PENDING' || i.status === 'OVERDUE');
@@ -504,6 +505,106 @@ export default function ClientPortalPage() {
               </strong>
             </span>
           </div>
+
+          {/* Card de Mensalidade & Cartão de Crédito Salvo */}
+          {subscriptionInfo?.hasActivePlan && (
+            <div className="p-6 rounded-3xl bg-slate-900 border border-cyan-500/30 shadow-xl space-y-4 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                    <RefreshCw className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-bold text-white">Assinatura Recorrente & Mensalidade</h3>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        {client?.financialStatus === 'EM_DIA' ? '🟢 ATIVA' : '🟡 PENDENTE'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      Plano: <strong className="text-slate-200">{subscriptionInfo.planName}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-left sm:text-right">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Valor da Mensalidade</span>
+                  <p className="text-2xl font-black text-cyan-400 font-mono">
+                    {formatCurrency(subscriptionInfo.monthlyPrice)}<span className="text-xs text-slate-400 font-normal">/mês</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 relative z-10">
+                {/* Cartão de Crédito Salvo */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
+                      <CreditCard className="w-5 h-5" />
+                    </div>
+                    <div>
+                      {subscriptionInfo.savedCard ? (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">
+                              {subscriptionInfo.savedCard.brand} final •••• {subscriptionInfo.savedCard.last4}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              Salvo
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400">
+                            Débito automático ativo todo dia {subscriptionInfo.dueDay}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xs font-bold text-slate-300 block">Nenhum Cartão Salvo</span>
+                          <p className="text-[11px] text-slate-500">
+                            Pagamento manual todo mês via PIX ou Cartão
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded-lg ${
+                    subscriptionInfo.savedCard
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {subscriptionInfo.savedCard ? 'DÉBITO AUTOMÁTICO' : 'COBRANÇA MANUAL'}
+                  </span>
+                </div>
+
+                {/* Próximo Vencimento & Informações */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        Vencimento da Mensalidade
+                      </span>
+                      <p className="text-[11px] text-slate-400">
+                        Vencimento todo dia {subscriptionInfo.dueDay} de cada mês
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Status do Plano</span>
+                    <span className="text-xs font-bold text-emerald-400 font-mono">
+                      {client?.financialStatus === 'EM_DIA' ? '🟢 Regular / Em Dia' : '🟡 Pendente'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {pendingInvoices.length > 0 ? (
             <div className="space-y-3">

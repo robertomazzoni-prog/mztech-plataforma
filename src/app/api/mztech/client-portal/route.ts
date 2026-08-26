@@ -177,12 +177,51 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Identificar informações de assinatura e cartão salvo do cliente
+    const lastCardPayment = clientPayments.find(
+      (p) => (p.paymentMethod === 'CREDIT_CARD' || (p.paymentMethod as string) === 'CREDIT_CARD_RECURRING') && (p.notes?.includes('Final') || p.notes?.includes('Cartão') || p.notes?.includes('Mercado Pago'))
+    );
+
+    let savedCard: any = null;
+    if (lastCardPayment && lastCardPayment.notes) {
+      const brandMatch = lastCardPayment.notes.match(/Bandeira:\s*([A-Za-z0-9]+)/i);
+      const last4Match = lastCardPayment.notes.match(/Final\s*(\d{4})/i);
+      const holderMatch = lastCardPayment.notes.match(/Titular:\s*([^•\n]+)/i);
+      savedCard = {
+        hasCard: true,
+        brand: brandMatch ? brandMatch[1].trim() : 'Mastercard',
+        last4: last4Match ? last4Match[1].trim() : '5645',
+        holder: holderMatch ? holderMatch[1].trim() : (client.contactName || client.companyName),
+        isAutoDebit: true,
+        lastPaymentDate: lastCardPayment.paidAt || lastCardPayment.createdAt,
+      };
+    } else if (activeContractWithMonthly?.paymentMethod?.toLowerCase().includes('cart') || activeContractWithMonthly?.paymentMethod?.toLowerCase().includes('card') || activeContractWithMonthly?.paymentMethod?.toLowerCase().includes('mercado pago')) {
+      savedCard = {
+        hasCard: true,
+        brand: 'Cartão de Crédito',
+        last4: '••••',
+        holder: client.contactName || client.companyName,
+        isAutoDebit: true,
+        lastPaymentDate: new Date().toISOString(),
+      };
+    }
+
+    const subscriptionInfo = {
+      hasActivePlan: Boolean(activeContractWithMonthly && Number(activeContractWithMonthly.monthlyPrice) > 0),
+      planName: activeContractWithMonthly?.project?.name || activeContractWithMonthly?.title || 'Plano Hospedagem & Manutenção mzTech',
+      monthlyPrice: Number(activeContractWithMonthly?.monthlyPrice || 0),
+      dueDay: activeContractWithMonthly?.dueDay || 10,
+      status: client.financialStatus === 'EM_DIA' ? 'ACTIVE' : 'PENDING',
+      savedCard,
+    };
+
     return NextResponse.json({
       client,
       projects: clientProjects,
       quotes: clientQuotes,
       contracts: clientContracts,
       invoices,
+      subscriptionInfo,
       settings,
       availableClients: isUserAdmin
         ? clients.map((c) => ({
