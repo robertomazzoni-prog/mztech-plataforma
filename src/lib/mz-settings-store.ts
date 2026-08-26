@@ -44,11 +44,11 @@ export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
   tagline: 'Tecnologia que coloca sua empresa no digital.',
-  email: 'robertomazzoni123@gmail.com',
+  email: 'robertomazzoni956@gmail.com',
   emails: [
     {
       id: 'email-1',
-      address: 'robertomazzoni123@gmail.com',
+      address: 'robertomazzoni956@gmail.com',
       label: 'E-mail Principal & Atendimento',
       isPrimary: true,
     },
@@ -56,16 +56,16 @@ export const defaultCompanySettings: CompanySettings = {
   robertoName: 'Roberto',
   robertoPhone: '(31) 98684-7049',
   robertoWhatsapp: '5531986847049',
-  robertoPixKey: 'robertomazzoni123@gmail.com',
+  robertoPixKey: 'robertomazzoni956@gmail.com',
   morvanName: 'Morvan',
   morvanPhone: '(31) 99359-7136',
   morvanWhatsapp: '5531993597136',
   morvanPixKey: 'morvan@mztech.com.br',
-  pixKey: 'robertomazzoni123@gmail.com',
+  pixKey: 'robertomazzoni956@gmail.com',
   pixKeys: [
     {
       id: 'pix-roberto',
-      key: 'robertomazzoni123@gmail.com',
+      key: 'robertomazzoni956@gmail.com',
       type: 'EMAIL',
       holder: 'Roberto (Sócio mzTech)',
       bank: 'Nubank / Inter',
@@ -154,15 +154,38 @@ export function updateSettings(partial: Partial<CompanySettings>): CompanySettin
     ...partial,
   };
 
-  // Sincroniza campos legados caso tenham sido alterados via array
+  // Sincroniza e-mails
   if (Array.isArray(updated.emails) && updated.emails.length > 0) {
     const primary = updated.emails.find((e) => e.isPrimary) || updated.emails[0];
     updated.email = primary.address;
   }
 
+  // Sincroniza chaves Pix com os sócios
   if (Array.isArray(updated.pixKeys) && updated.pixKeys.length > 0) {
     const primary = updated.pixKeys.find((p) => p.isPrimary) || updated.pixKeys[0];
     updated.pixKey = primary.key;
+
+    const robertoPixItem = updated.pixKeys.find((p) => p.holder?.toLowerCase().includes('roberto') || p.id === 'pix-roberto');
+    if (robertoPixItem && robertoPixItem.key) {
+      updated.robertoPixKey = robertoPixItem.key;
+    } else if (primary && primary.key) {
+      updated.robertoPixKey = primary.key;
+    }
+
+    const morvanPixItem = updated.pixKeys.find((p) => p.holder?.toLowerCase().includes('morvan') || p.id === 'pix-morvan');
+    if (morvanPixItem && morvanPixItem.key) {
+      updated.morvanPixKey = morvanPixItem.key;
+    }
+  }
+
+  // Se o usuário atualizou diretamente robertoPixKey ou morvanPixKey
+  if (partial.robertoPixKey && Array.isArray(updated.pixKeys)) {
+    const rItem = updated.pixKeys.find((p) => p.holder?.toLowerCase().includes('roberto') || p.id === 'pix-roberto');
+    if (rItem) rItem.key = partial.robertoPixKey;
+  }
+  if (partial.morvanPixKey && Array.isArray(updated.pixKeys)) {
+    const mItem = updated.pixKeys.find((p) => p.holder?.toLowerCase().includes('morvan') || p.id === 'pix-morvan');
+    if (mItem) mItem.key = partial.morvanPixKey;
   }
 
   saveStoredSettings(updated);

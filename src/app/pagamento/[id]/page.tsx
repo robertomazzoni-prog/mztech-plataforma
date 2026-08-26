@@ -325,8 +325,8 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
               const merchantName = isMorvan ? (settings?.morvanName || 'MORVAN') : (settings?.robertoName || 'ROBERTO MAZZONI');
 
               const activePixKey = isMorvan
-                ? (settings?.morvanPixKey || settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('morvan'))?.key || 'morvan@mztech.com.br')
-                : (settings?.robertoPixKey || settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('roberto'))?.key || settings?.pixKey || pixKey);
+                ? (settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('morvan') || k.id === 'pix-morvan')?.key || settings?.morvanPixKey || 'morvan@mztech.com.br')
+                : (settings?.pixKeys?.find((k: any) => k.holder?.toLowerCase().includes('roberto') || k.id === 'pix-roberto')?.key || settings?.pixKeys?.find((k: any) => k.isPrimary)?.key || settings?.robertoPixKey || settings?.pixKey || pixKey || 'robertomazzoni956@gmail.com');
 
               const pixPayload = generatePixPayload({
                 pixKey: activePixKey,

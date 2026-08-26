@@ -207,18 +207,36 @@ export default function AdminSettingsPage() {
     field: 'key' | 'type' | 'holder' | 'bank',
     value: string
   ) => {
-    setPixKeys((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    );
+    setPixKeys((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, [field]: value } : p));
+      if (field === 'key') {
+        const item = updated.find((p) => p.id === id);
+        if (item?.holder?.toLowerCase().includes('roberto') || item?.isPrimary) {
+          setRobertoPixKey(value.trim());
+        } else if (item?.holder?.toLowerCase().includes('morvan')) {
+          setMorvanPixKey(value.trim());
+        }
+      }
+      return updated;
+    });
   };
 
   const handleSetPrimaryPixKey = (id: string) => {
-    setPixKeys((prev) =>
-      prev.map((p) => ({
+    setPixKeys((prev) => {
+      const updated = prev.map((p) => ({
         ...p,
         isPrimary: p.id === id,
-      }))
-    );
+      }));
+      const primaryItem = updated.find((p) => p.id === id);
+      if (primaryItem && primaryItem.key) {
+        if (primaryItem.holder?.toLowerCase().includes('morvan')) {
+          setMorvanPixKey(primaryItem.key);
+        } else {
+          setRobertoPixKey(primaryItem.key);
+        }
+      }
+      return updated;
+    });
   };
 
   const copyToClipboard = (text: string, id: string) => {
@@ -250,6 +268,9 @@ export default function AdminSettingsPage() {
 
       const primaryEmail = validEmails.find((e) => e.isPrimary)?.address || validEmails[0].address;
       const primaryPix = validPixKeys.find((p) => p.isPrimary)?.key || validPixKeys[0].key;
+      
+      const robertoKeyInList = validPixKeys.find((p) => p.holder.toLowerCase().includes('roberto') || p.id === 'pix-roberto')?.key || validPixKeys.find((p) => p.isPrimary)?.key || robertoPixKey;
+      const morvanKeyInList = validPixKeys.find((p) => p.holder.toLowerCase().includes('morvan') || p.id === 'pix-morvan')?.key || morvanPixKey;
 
       const res = await fetch('/api/mztech/settings', {
         method: 'PATCH',
@@ -263,12 +284,12 @@ export default function AdminSettingsPage() {
           robertoName,
           robertoPhone,
           robertoWhatsapp: robertoPhone.replace(/\D/g, ''),
-          robertoPixKey,
+          robertoPixKey: robertoKeyInList.trim(),
           morvanName,
           morvanPhone,
           morvanWhatsapp: morvanPhone.replace(/\D/g, ''),
-          morvanPixKey,
-          pixKey: primaryPix,
+          morvanPixKey: morvanKeyInList.trim(),
+          pixKey: primaryPix.trim(),
           pixKeys: validPixKeys,
           workingHours,
         }),
