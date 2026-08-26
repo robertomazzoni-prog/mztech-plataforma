@@ -68,12 +68,17 @@ export default function MzTechPublicPage() {
   // Estado do Modal de Contrato/Termos
   const [termsModalOpen, setTermsModalOpen] = useState(false);
 
+  // Estado do Usuário Logado (se houver)
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   // Estado do Formulário de Orçamento
   const [formData, setFormData] = useState({
     name: '',
     company: '',
     whatsapp: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     selectedDev: 'Roberto' as 'Roberto' | 'Morvan' | 'Sem Preferência (Roberto ou Morvan)',
     projectType: 'Site Institucional Profissional',
     hasDomain: 'Não, preciso registrar',
@@ -96,9 +101,10 @@ export default function MzTechPublicPage() {
   useEffect(() => {
     const fetchServicesAndSettings = async () => {
       try {
-        const [servRes, settRes] = await Promise.all([
+        const [servRes, settRes, meRes] = await Promise.all([
           fetch('/api/mztech/services'),
           fetch('/api/mztech/settings'),
+          fetch('/api/auth/me').catch(() => null),
         ]);
         if (servRes.ok) {
           const sData = await servRes.json();
@@ -110,6 +116,19 @@ export default function MzTechPublicPage() {
           const settData = await settRes.json();
           if (settData.settings) {
             setSettingsData(settData.settings);
+          }
+        }
+        if (meRes && meRes.ok) {
+          const meData = await meRes.json();
+          if (meData?.user && meData.user.role === 'CLIENT') {
+            setCurrentUser(meData.user);
+            setFormData((prev) => ({
+              ...prev,
+              name: prev.name || meData.user.name || '',
+              email: prev.email || meData.user.email || '',
+              whatsapp: prev.whatsapp || meData.user.phone || '',
+              company: prev.company || meData.user.companyName || '',
+            }));
           }
         }
       } catch (err) {
@@ -176,6 +195,17 @@ export default function MzTechPublicPage() {
       return;
     }
 
+    if (!currentUser) {
+      if (!formData.password || formData.password.length < 6) {
+        alert('Por favor, crie uma senha de no mínimo 6 caracteres para seu acesso ao Portal do Cliente.');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        alert('A confirmação de senha não confere com a senha digitada.');
+        return;
+      }
+    }
+
     setFormLoading(true);
 
     const hasCustom =
@@ -193,11 +223,20 @@ export default function MzTechPublicPage() {
     };
 
     try {
-      await fetch('/api/mztech/quotes', {
+      const res = await fetch('/api/mztech/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Erro ao processar solicitação de orçamento.');
+        setFormLoading(false);
+        return;
+      }
+      if (data.user) {
+        setCurrentUser(data.user);
+      }
     } catch (err) {
       console.warn('Registro de orçamento gravado:', err);
     }
@@ -1275,23 +1314,34 @@ export default function MzTechPublicPage() {
             isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/30' : 'bg-slate-900 border border-slate-800'
           } rounded-3xl p-6 sm:p-10 shadow-2xl`}>
             {formSubmitted ? (
-              <div className="text-center py-12 space-y-4">
+              <div className="text-center py-12 space-y-5 animate-in fade-in">
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">Solicitação Encaminhada com Sucesso!</h3>
-                <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-                  Abrimos uma conversa no WhatsApp com os detalhes da sua solicitação. Caso a janela não tenha aberto automaticamente, clique no botão abaixo:
-                </p>
-                <div className="pt-2">
+                <div className="space-y-2">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white">Solicitação & Conta Criadas com Sucesso!</h3>
+                  <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                    Sua conta no <strong className="text-white">Portal do Cliente</strong> foi gerada e sua proposta já está disponível para acompanhamento em tempo real.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+                  <a
+                    href="/cliente"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-violet-600/30 transition-all hover:scale-[1.02]"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Acessar Meu Portal do Cliente</span>
+                  </a>
+
                   <a
                     href={`https://wa.me/${MZTECH_INFO.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm inline-flex items-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm inline-flex items-center justify-center gap-2 transition-all"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    <span>Falar Agora no WhatsApp</span>
+                    <span>Falar no WhatsApp</span>
                   </a>
                 </div>
               </div>
@@ -1308,6 +1358,44 @@ export default function MzTechPublicPage() {
                   tabIndex={-1}
                   autoComplete="off"
                 />
+
+                {/* Banner de Usuário Logado ou Criação de Conta */}
+                {currentUser ? (
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white block">Conectado como {currentUser.name}</span>
+                        <span className="text-emerald-400/90 font-mono text-[11px]">{currentUser.email} • Sua proposta será vinculada à sua conta</span>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-[10px] uppercase tracking-wider">
+                      Conta Ativa
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white block">Criação Obrigatória de Conta no Portal do Cliente</span>
+                        <span className="text-slate-300 text-[11px]">
+                          Para solicitar o orçamento, preencha os dados e defina sua senha para acompanhar o projeto e contratos no portal.
+                        </span>
+                      </div>
+                    </div>
+                    <a
+                      href="/cliente/login"
+                      className="text-violet-300 hover:text-violet-200 underline font-bold text-[11px] whitespace-nowrap self-start sm:self-auto"
+                    >
+                      Já tem uma conta? Entrar
+                    </a>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -1354,7 +1442,7 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-slate-400">E-mail Comercial *</label>
+                    <label className="text-xs font-bold uppercase text-slate-400">E-mail Comercial (Login do Portal) *</label>
                     <input
                       type="email"
                       required
@@ -1367,6 +1455,50 @@ export default function MzTechPublicPage() {
                     />
                   </div>
                 </div>
+
+                {/* Campos de Senha Obrigatórios (se não estiver autenticado) */}
+                {!currentUser && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-[#090b1e]/90 border border-violet-500/20">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase text-violet-300 flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-violet-400" />
+                          <span>Definir Senha de Acesso *</span>
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-mono">Mínimo 6 dígitos</span>
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className={`w-full ${
+                          isDarkCyberGlow ? 'bg-[#080918] border-violet-500/40 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                        } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold uppercase text-violet-300 flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-violet-400" />
+                        <span>Confirmar Senha *</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        className={`w-full ${
+                          isDarkCyberGlow ? 'bg-[#080918] border-violet-500/40 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                        } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Seleção do Desenvolvedor / Sócio Responsável */}
                 <div className="space-y-2.5 pt-1">
