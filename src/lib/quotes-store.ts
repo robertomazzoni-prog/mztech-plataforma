@@ -122,13 +122,13 @@ export function saveQuote(quote: Partial<MzQuoteItem>): MzQuoteItem {
     projectType: quote.projectType || 'Site Institucional Profissional',
     serviceId: quote.serviceId,
     hasDomain: quote.hasDomain || 'Não, preciso registrar',
-    needsHosting: quote.needsHosting || 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
-    needsMaintenance: quote.needsMaintenance || 'Sim',
+    needsHosting: quote.needsHosting || 'A Definir na Proposta Comercial',
+    needsMaintenance: quote.needsMaintenance || 'A Definir',
     projectDescription: quote.projectDescription || null,
     
     // Condições comerciais
     initialDevPrice: quote.initialDevPrice !== undefined ? Number(quote.initialDevPrice) : 0,
-    monthlyPrice: quote.needsHosting?.toLowerCase().includes('apenas') ? 0 : (quote.monthlyPrice !== undefined ? Number(quote.monthlyPrice) : 79.9),
+    monthlyPrice: quote.monthlyPrice !== undefined ? Number(quote.monthlyPrice) : (quote.needsHosting?.includes('79,90') ? 79.9 : quote.needsHosting?.includes('39,90') ? 39.9 : 0),
     discount: quote.discount !== undefined ? Number(quote.discount) : 0,
     finalPrice: quote.finalPrice !== undefined ? Number(quote.finalPrice) : (quote.initialDevPrice ? Number(quote.initialDevPrice) - Number(quote.discount || 0) : 0),
     paymentMethodChoice: (quote.paymentMethodChoice as PaymentMethodChoice) || 'CREDIT_CARD_RECURRING',

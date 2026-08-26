@@ -78,12 +78,12 @@ export default function MzTechPublicPage() {
     projectType: 'Site Institucional Profissional',
     hasDomain: 'Não, preciso registrar',
     customDomain: '',
-    needsHosting: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
-    needsMaintenance: 'Sim',
+    needsHosting: 'A Definir na Proposta Comercial',
+    needsMaintenance: 'A Definir',
     projectDescription: '',
     paymentMethodChoice: 'CREDIT_CARD_RECURRING' as 'CREDIT_CARD_RECURRING' | 'PIX' | 'CREDIT_CARD' | 'CARD_PLUS_PIX',
     initialDevPrice: 0,
-    monthlyPrice: 79.9,
+    monthlyPrice: 0,
     estimatedBudget: 'A Definir na Proposta',
     desiredDeadline: '15 a 30 dias',
     // Honeypot anti-spam
@@ -1548,18 +1548,33 @@ export default function MzTechPublicPage() {
                       value={formData.needsHosting}
                       onChange={(e) => {
                         const newPlan = e.target.value;
-                        const matchingPlan = monthlyPlans.find((p) => newPlan.includes(p.name));
-                        const newMonthly = matchingPlan ? matchingPlan.price : getMonthlyPriceFromPlan(newPlan, monthlyPlans);
-                        setFormData((prev) => ({
-                          ...prev,
-                          needsHosting: newPlan,
-                          monthlyPrice: newMonthly,
-                        }));
+                        if (newPlan.toLowerCase().includes('definir')) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            needsHosting: 'A Definir na Proposta Comercial',
+                            monthlyPrice: 0,
+                          }));
+                        } else if (newPlan === 'Apenas Desenvolvimento') {
+                          setFormData((prev) => ({
+                            ...prev,
+                            needsHosting: 'Apenas Desenvolvimento',
+                            monthlyPrice: 0,
+                          }));
+                        } else {
+                          const matchingPlan = monthlyPlans.find((p) => newPlan.includes(p.name));
+                          const newMonthly = matchingPlan ? matchingPlan.price : getMonthlyPriceFromPlan(newPlan, monthlyPlans);
+                          setFormData((prev) => ({
+                            ...prev,
+                            needsHosting: newPlan,
+                            monthlyPrice: newMonthly,
+                          }));
+                        }
                       }}
                       className={`w-full ${
                         isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
                       } border rounded-xl px-3 py-3 text-white text-xs focus:outline-none`}
                     >
+                      <option value="A Definir na Proposta Comercial">A Definir na Proposta Comercial</option>
                       {monthlyPlans.map((p: any) => (
                         <option key={p.id || p.name} value={`${p.name} (${formatCurrency(p.price)}/mês)`}>
                           {p.name} ({formatCurrency(p.price)}/mês)
@@ -1733,17 +1748,23 @@ export default function MzTechPublicPage() {
                     <div>
                       <span className="text-slate-500 text-[10px] block">Modalidade:</span>
                       <span className={`${isDarkCyberGlow ? 'text-violet-300' : 'text-cyan-400'} truncate block font-medium`}>
-                        {formData.needsHosting.includes('79,90')
+                        {formData.needsHosting?.includes('79,90') || formData.needsHosting?.includes('Hospedagem + Manutenção')
                           ? 'Hospedagem + Manutenção'
-                          : formData.needsHosting.includes('39,90')
+                          : formData.needsHosting?.includes('39,90') || formData.needsHosting?.includes('Hospedagem Gerenciada')
                           ? 'Hospedagem Gerenciada'
-                          : 'Apenas Desenvolvimento'}
+                          : formData.needsHosting === 'Apenas Desenvolvimento'
+                          ? 'Apenas Desenvolvimento'
+                          : 'A Definir'}
                       </span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Mensalidade:</span>
-                      <span className="text-emerald-400 font-mono font-bold block">
-                        {formData.monthlyPrice > 0 ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês` : 'Sem Mensalidade (R$ 0,00)'}
+                      <span className={`${formData.monthlyPrice > 0 ? 'text-emerald-400 font-bold' : 'text-slate-300'} font-mono block`}>
+                        {formData.monthlyPrice > 0
+                          ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês`
+                          : formData.needsHosting === 'Apenas Desenvolvimento'
+                          ? 'Sem Mensalidade (R$ 0,00)'
+                          : 'A Definir na Proposta'}
                       </span>
                     </div>
                     <div>
