@@ -43,6 +43,7 @@ export default function MzTechContractsPage() {
   const [contracts, setContracts] = useState<MzContractItem[]>([]);
   const [clients, setClients] = useState<MzClientItem[]>([]);
   const [projects, setProjects] = useState<MzProjectItem[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -103,10 +104,11 @@ export default function MzTechContractsPage() {
   const loadData = async () => {
     try {
       setRefreshing(true);
-      const [contRes, clientRes, projRes] = await Promise.all([
+      const [contRes, clientRes, projRes, payRes] = await Promise.all([
         fetch('/api/mztech/contracts'),
         fetch('/api/mztech/clients'),
         fetch('/api/mztech/projects'),
+        fetch('/api/mztech/payments'),
       ]);
 
       if (contRes.ok) {
@@ -124,6 +126,10 @@ export default function MzTechContractsPage() {
       if (projRes.ok) {
         const pData = await projRes.json();
         setProjects(pData.projects || []);
+      }
+      if (payRes.ok) {
+        const pyData = await payRes.json();
+        setPayments(pyData.payments || []);
       }
     } catch (err) {
       console.error('Erro ao carregar dados de contratos:', err);
@@ -484,6 +490,7 @@ export default function MzTechContractsPage() {
                   <th className="py-3 px-4 font-semibold">Mensalidade</th>
                   <th className="py-3 px-4 font-semibold">Assinatura Prestador</th>
                   <th className="py-3 px-4 font-semibold">Assinatura Cliente</th>
+                  <th className="py-3 px-4 font-semibold">Status / Pagamento</th>
                   <th className="py-3 px-4 font-semibold text-right">Ações</th>
                 </tr>
               </thead>
@@ -491,6 +498,7 @@ export default function MzTechContractsPage() {
                 {filteredContracts.map((c) => {
                   const isProviderSigned = Boolean(c.providerSigned);
                   const isClientSigned = Boolean(c.clientSigned || c.acceptedOnline);
+                  const isPaid = (c.status === 'ATIVO' && (c.clientSigned || c.acceptedOnline)) || payments.some((p) => (p.contractId === c.id || p.clientId === c.clientId) && p.status === 'PAID');
                   const devName = c.assignedDev || (c as any).snapshot?.assignedDev || (c.providerSignedBy ? c.providerSignedBy.split(' ')[0] : 'Roberto');
                   const isMorvan = devName.toLowerCase().includes('morvan');
 
@@ -547,19 +555,45 @@ export default function MzTechContractsPage() {
                           </span>
                         )}
                       </td>
+                      <td className="py-3 px-4">
+                        {isPaid || c.status === 'ATIVO' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20">
+                            <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                            <span>PAGO & ATIVO</span>
+                          </span>
+                        ) : isProviderSigned && isClientSigned ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            <Clock className="w-3 h-3 text-amber-400 animate-pulse" />
+                            <span>AGUARDANDO PAGTO</span>
+                          </span>
+                        ) : isClientSigned ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                            Falta Prestador
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                            {c.status || 'RASCUNHO'}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
                         
-                        {/* Se ambos assinaram, mostrar botão do Link de Pagamento */}
-                        {isProviderSigned && isClientSigned && (
+                        {/* Se o pagamento já foi identificado */}
+                        {isPaid || c.status === 'ATIVO' ? (
+                          <span className="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 font-bold text-[11px] border border-emerald-500/30 inline-flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>Pago</span>
+                          </span>
+                        ) : isProviderSigned && isClientSigned ? (
                           <button
                             onClick={() => handleCopyPaymentLink(c.id)}
-                            className="px-2.5 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-semibold text-[11px] border border-emerald-500/30 inline-flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-semibold text-[11px] border border-amber-500/30 inline-flex items-center gap-1 transition-colors"
                             title="Copiar Link de Pagamento Gerado"
                           >
                             <DollarSign className="w-3 h-3" />
                             <span>Link Pagto</span>
                           </button>
-                        )}
+                        ) : null}
 
                         {/* Visualizar e Assinar */}
                         <button
