@@ -138,6 +138,7 @@ export interface MzQuoteItem {
   projectType: string;
   serviceId?: string;
   hasDomain: string;
+  customDomain?: string | null;
   needsHosting: string;
   needsMaintenance?: string;
   projectDescription?: string | null;

@@ -77,6 +77,7 @@ export default function MzTechPublicPage() {
     selectedDev: 'Roberto' as 'Roberto' | 'Morvan' | 'Sem Preferência (Roberto ou Morvan)',
     projectType: 'Site Institucional Profissional',
     hasDomain: 'Não, preciso registrar',
+    customDomain: '',
     needsHosting: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
     needsMaintenance: 'Sim',
     projectDescription: '',
@@ -177,11 +178,25 @@ export default function MzTechPublicPage() {
 
     setFormLoading(true);
 
+    const hasCustom =
+      (formData.hasDomain.toLowerCase().includes('sim') || formData.hasDomain.toLowerCase().includes('já possuo')) &&
+      formData.customDomain?.trim();
+
+    const domainDisplay = hasCustom
+      ? `Sim, já possuo (${formData.customDomain.trim()})`
+      : formData.hasDomain;
+
+    const payload = {
+      ...formData,
+      hasDomain: domainDisplay,
+      customDomain: formData.customDomain?.trim() || null,
+    };
+
     try {
       await fetch('/api/mztech/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
     } catch (err) {
       console.warn('Registro de orçamento gravado:', err);
@@ -204,7 +219,7 @@ export default function MzTechPublicPage() {
       `✉️ *E-mail:* ${formData.email}\n` +
       `👨‍💻 *Desenvolvedor Escolhido:* ${formData.selectedDev}\n` +
       `📂 *Tipo de Projeto:* ${formData.projectType}\n` +
-      `🌐 *Possui Domínio?* ${formData.hasDomain}\n` +
+      `🌐 *Possui Domínio?* ${domainDisplay}\n` +
       `☁️ *Plano Desejado:* ${formData.needsHosting}\n` +
       `💳 *Forma de Pagamento:* ${payChoiceText}\n` +
       `⏱️ *Prazo Desejado:* ${formData.desiredDeadline}\n` +
@@ -1165,6 +1180,31 @@ export default function MzTechPublicPage() {
                     </select>
                   </div>
                 </div>
+
+                {/* Campo condicional para inserir o Domínio Próprio */}
+                {(formData.hasDomain?.toLowerCase().includes('sim') || formData.hasDomain?.toLowerCase().includes('já possuo')) && (
+                  <div className="bg-slate-900/90 border border-emerald-500/40 rounded-xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200 shadow-lg shadow-emerald-950/20">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase text-emerald-400 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Qual é o seu Domínio Próprio? *</span>
+                      </label>
+                      <span className="text-[11px] font-bold text-emerald-400/90 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        Configuração DNS Inclusa
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ex: suaempresa.com.br, seunegocio.com ou minhaclinica.com.br"
+                      value={formData.customDomain || ''}
+                      onChange={(e) => setFormData({ ...formData, customDomain: e.target.value })}
+                      className="w-full bg-slate-950 border border-emerald-500/50 rounded-xl px-4 py-3 text-white text-sm font-mono placeholder:text-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/50"
+                    />
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      💡 A equipe técnica da mzTech cuidará de todos os apontamentos de DNS, vinculação dos servidores e instalação do Certificado de Segurança SSL no seu domínio registrado.
+                    </p>
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase text-slate-400">

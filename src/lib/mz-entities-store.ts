@@ -757,6 +757,17 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       c.email?.toLowerCase() === quote.email.toLowerCase()
   );
 
+  // Extrair domínio próprio informado pelo cliente
+  const extractedDomain =
+    quote.customDomain ||
+    (quote.hasDomain && quote.hasDomain.includes('(') && quote.hasDomain.includes(')')
+      ? quote.hasDomain.substring(quote.hasDomain.indexOf('(') + 1, quote.hasDomain.indexOf(')')).trim()
+      : quote.hasDomain && quote.hasDomain.includes(':')
+      ? quote.hasDomain.split(':')[1]?.trim()
+      : null);
+
+  const clientDomain = extractedDomain || (quote.hasDomain?.toLowerCase().includes('sim') ? `${company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com.br` : null);
+
   if (!client) {
     const newClientId = `client-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     client = {
@@ -766,7 +777,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       cnpjCpf: quote.cnpjCpf || null,
       whatsapp: quote.whatsapp,
       email: quote.email,
-      domain: quote.hasDomain?.includes('Sim') ? `${company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com.br` : null,
+      domain: clientDomain,
       status: 'ATIVO',
       financialStatus: 'PENDENTE',
       startDate: nowStr,
@@ -778,7 +789,8 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
         id: `host-${Date.now()}`,
         clientId: newClientId,
         provider: 'Railway Cloud',
-        url: quote.hasDomain?.includes('Sim') ? `https://${company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com.br` : 'https://app.mztech.dev',
+        url: clientDomain ? (clientDomain.startsWith('http') ? clientDomain : `https://${clientDomain}`) : 'https://app.mztech.dev',
+        customDomain: clientDomain,
         monthlyPrice,
         status: 'ATIVO',
         startDate: nowStr,

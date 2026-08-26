@@ -627,7 +627,9 @@ export default function MzTechOrcamentosPage() {
                     {selectedQuote.hasDomain?.toLowerCase().includes('sim') || selectedQuote.hasDomain?.toLowerCase().includes('já possuo') ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                         <Globe className="w-3.5 h-3.5" />
-                        <span>Sim, já possui domínio registrado (Configuração DNS Inclusa)</span>
+                        <span>
+                          Sim, já possui domínio registrado: <strong className="text-white underline">{selectedQuote.customDomain || (selectedQuote.hasDomain.includes('(') ? selectedQuote.hasDomain.substring(selectedQuote.hasDomain.indexOf('(') + 1, selectedQuote.hasDomain.indexOf(')')) : 'Configuração DNS Inclusa')}</strong>
+                        </span>
                       </span>
                     ) : selectedQuote.hasDomain?.toLowerCase().includes('não') ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
