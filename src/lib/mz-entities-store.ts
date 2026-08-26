@@ -25,12 +25,285 @@ const SERVICES_FILE = path.join(DATA_DIR, 'services-store.json');
 const PAYMENTS_FILE = path.join(DATA_DIR, 'payments-store.json');
 const SUBSCRIPTIONS_FILE = path.join(DATA_DIR, 'subscriptions-store.json');
 
-// Bases padrão
-const defaultClients: MzClientItem[] = [];
-const defaultProjects: MzProjectItem[] = [];
-const defaultContracts: MzContractItem[] = [];
-const defaultPayments: MzPaymentItem[] = [];
-const defaultSubscriptions: MzSubscriptionItem[] = [];
+// Bases padrão permanentes (Garantem que nenhum dado de cliente seja perdido entre deploys)
+const defaultClients: MzClientItem[] = [
+  {
+    id: "client-tete",
+    companyName: "tete",
+    contactName: "tete",
+    whatsapp: "5531986847049",
+    email: "tete@mazzoni.com.br",
+    domain: "tete.com.br",
+    status: "ATIVO",
+    financialStatus: "EM_DIA",
+    startDate: "2026-08-25T20:00:00.000Z",
+    notes: "Cliente originado do orçamento MZ-2026-0003 • Roberto",
+    codeDelivered: true,
+    backupDelivered: true,
+    projects: [
+      {
+        id: "proj-tete",
+        clientId: "client-tete",
+        name: "Site Institucional Profissional - tete",
+        type: "SITE_INSTITUCIONAL",
+        status: "PRODUCAO",
+        startDate: "2026-08-25T20:00:00.000Z",
+        deliveryDate: null,
+        domain: "tete.com.br",
+        hostingUrl: "https://tete.com.br",
+        hostingPlatform: "Railway Cloud",
+        responsibleDev: "Roberto",
+        notes: "Projeto entregue e ativo em produção.",
+        createdAt: "2026-08-25T20:00:00.000Z",
+        updatedAt: "2026-08-25T22:30:00.000Z"
+      }
+    ],
+    hostings: [
+      {
+        id: "host-tete",
+        clientId: "client-tete",
+        provider: "Railway Cloud",
+        url: "https://tete.com.br",
+        customDomain: "tete.com.br",
+        monthlyPrice: 39.9,
+        status: "ATIVO",
+        startDate: "2026-08-25T20:00:00.000Z",
+        createdAt: "2026-08-25T20:00:00.000Z",
+        updatedAt: "2026-08-25T22:30:00.000Z"
+      }
+    ],
+    _count: { projects: 1, hostings: 1, maintenances: 0, backups: 1 },
+    createdAt: "2026-08-25T20:00:00.000Z",
+    updatedAt: "2026-08-25T22:30:00.000Z"
+  },
+  {
+    id: "client-teste-morvan",
+    companyName: "teste",
+    contactName: "teste",
+    whatsapp: "5531993597136",
+    email: "teste@mazzoni.com",
+    domain: null,
+    status: "ATIVO",
+    financialStatus: "EM_DIA",
+    startDate: "2026-08-25T02:19:27.884Z",
+    notes: "Cliente originado do orçamento MZ-2026-0002 • Morvan",
+    codeDelivered: true,
+    backupDelivered: true,
+    projects: [
+      {
+        id: "proj-teste-morvan",
+        clientId: "client-teste-morvan",
+        name: "Site Institucional Profissional - teste",
+        type: "SITE_INSTITUCIONAL",
+        status: "PRODUCAO",
+        startDate: "2026-08-25T02:19:27.884Z",
+        deliveryDate: null,
+        hostingPlatform: "Railway Cloud",
+        responsibleDev: "Morvan",
+        createdAt: "2026-08-25T02:19:27.884Z",
+        updatedAt: "2026-08-25T02:21:28.883Z"
+      }
+    ],
+    hostings: [
+      {
+        id: "host-teste-morvan",
+        clientId: "client-teste-morvan",
+        provider: "Railway Cloud",
+        monthlyPrice: 79.9,
+        status: "ATIVO",
+        startDate: "2026-08-25T02:19:27.884Z",
+        createdAt: "2026-08-25T02:19:27.884Z",
+        updatedAt: "2026-08-25T02:21:28.883Z"
+      }
+    ],
+    _count: { projects: 1, hostings: 1, maintenances: 0, backups: 1 },
+    createdAt: "2026-08-25T02:19:27.884Z",
+    updatedAt: "2026-08-25T02:21:28.883Z"
+  },
+  {
+    id: "client-teste-roberto",
+    companyName: "teste",
+    contactName: "teste",
+    whatsapp: "5531986847049",
+    email: "teste@mazzoni.br",
+    domain: null,
+    status: "ATIVO",
+    financialStatus: "EM_DIA",
+    startDate: "2026-08-25T02:18:52.024Z",
+    notes: "Cliente originado do orçamento MZ-2026-0001 • Roberto",
+    codeDelivered: true,
+    backupDelivered: true,
+    projects: [
+      {
+        id: "proj-teste-roberto",
+        clientId: "client-teste-roberto",
+        name: "Site Institucional Profissional - teste",
+        type: "SITE_INSTITUCIONAL",
+        status: "PRODUCAO",
+        startDate: "2026-08-25T02:18:52.024Z",
+        deliveryDate: null,
+        hostingPlatform: "Railway Cloud",
+        responsibleDev: "Roberto",
+        createdAt: "2026-08-25T02:18:52.024Z",
+        updatedAt: "2026-08-25T02:27:54.232Z"
+      }
+    ],
+    hostings: [
+      {
+        id: "host-teste-roberto",
+        clientId: "client-teste-roberto",
+        provider: "Railway Cloud",
+        monthlyPrice: 39.9,
+        status: "ATIVO",
+        startDate: "2026-08-25T02:18:52.024Z",
+        createdAt: "2026-08-25T02:18:52.024Z",
+        updatedAt: "2026-08-25T02:27:54.232Z"
+      }
+    ],
+    _count: { projects: 1, hostings: 1, maintenances: 0, backups: 1 },
+    createdAt: "2026-08-25T02:18:52.024Z",
+    updatedAt: "2026-08-25T02:27:54.232Z"
+  }
+];
+
+const defaultProjects: MzProjectItem[] = [
+  {
+    id: "proj-tete",
+    clientId: "client-tete",
+    client: {
+      id: "client-tete",
+      companyName: "tete",
+      contactName: "tete",
+      email: "tete@mazzoni.com.br",
+      whatsapp: "5531986847049"
+    },
+    name: "Site Institucional Profissional - tete",
+    type: "SITE_INSTITUCIONAL",
+    status: "PRODUCAO",
+    startDate: "2026-08-25T20:00:00.000Z",
+    deliveryDate: null,
+    domain: "tete.com.br",
+    hostingUrl: "https://tete.com.br",
+    hostingPlatform: "Railway Cloud",
+    responsibleDev: "Roberto",
+    notes: "Projeto vinculado ao orçamento MZ-2026-0003. Desenvolvedor especialista: Roberto.",
+    createdAt: "2026-08-25T20:00:00.000Z",
+    updatedAt: "2026-08-25T22:30:00.000Z"
+  },
+  {
+    id: "proj-teste-morvan",
+    clientId: "client-teste-morvan",
+    client: {
+      id: "client-teste-morvan",
+      companyName: "teste",
+      contactName: "teste",
+      email: "teste@mazzoni.com",
+      whatsapp: "5531993597136"
+    },
+    name: "Site Institucional Profissional - teste",
+    type: "SITE_INSTITUCIONAL",
+    status: "PRODUCAO",
+    startDate: "2026-08-25T02:19:27.884Z",
+    deliveryDate: null,
+    hostingPlatform: "Railway Cloud",
+    responsibleDev: "Morvan",
+    notes: "Projeto vinculado ao orçamento MZ-2026-0002. Desenvolvedor especialista: Morvan.",
+    createdAt: "2026-08-25T02:19:27.884Z",
+    updatedAt: "2026-08-25T02:21:28.883Z"
+  },
+  {
+    id: "proj-teste-roberto",
+    clientId: "client-teste-roberto",
+    client: {
+      id: "client-teste-roberto",
+      companyName: "teste",
+      contactName: "teste",
+      email: "teste@mazzoni.br",
+      whatsapp: "5531986847049"
+    },
+    name: "Site Institucional Profissional - teste",
+    type: "SITE_INSTITUCIONAL",
+    status: "PRODUCAO",
+    startDate: "2026-08-25T02:18:52.024Z",
+    deliveryDate: null,
+    hostingPlatform: "Railway Cloud",
+    responsibleDev: "Roberto",
+    notes: "Projeto vinculado ao orçamento MZ-2026-0001. Desenvolvedor especialista: Roberto.",
+    createdAt: "2026-08-25T02:18:52.024Z",
+    updatedAt: "2026-08-25T02:27:54.232Z"
+  }
+];
+
+const defaultContracts: MzContractItem[] = [
+  {
+    id: "contract-tete",
+    contractNumber: "CTR-2026-0003",
+    clientId: "client-tete",
+    projectId: "proj-tete",
+    title: "Site Institucional Profissional - tete",
+    content: "CONTRATO DE PRESTAÇÃO DE SERVIÇOS DIGITAIS mzTech...",
+    totalDevPrice: 0,
+    monthlyPrice: 39.9,
+    paymentMethod: "PIX",
+    termsVersion: "v2.0-2026",
+    codeOwnershipType: "PROPRIEDADE_CLIENTE",
+    scopeDevelopment: "Desenvolvimento e deploy do site tete.",
+    scopeHosting: "Hospedagem Gerenciada Railway Cloud com SSL.",
+    scopeMaintenance: "Sim",
+    scopeSupport: "Suporte especializado direto com Roberto.",
+    backupRetentionDays: 30,
+    migrationExcluded: true,
+    status: "ATIVO",
+    acceptedOnline: true,
+    clientSigned: true,
+    signedAt: "2026-08-25T20:00:00.000Z",
+    notes: "Contrato assinado digitalmente pelo cliente tete.",
+    createdAt: "2026-08-25T20:00:00.000Z",
+    updatedAt: "2026-08-25T22:30:00.000Z"
+  }
+];
+
+const defaultPayments: MzPaymentItem[] = [
+  {
+    id: "pay-tete-1",
+    transactionId: "TXN-2026-0003",
+    clientId: "client-tete",
+    contractId: "contract-tete",
+    title: "Mensalidade — Site Institucional Profissional - tete",
+    amount: 39.9,
+    paymentMethod: "PIX",
+    paymentType: "TAXA_MENSAL",
+    status: "PENDING",
+    dueDate: "2026-09-10T00:00:00.000Z",
+    paidAt: null,
+    gateway: "SANDBOX_MOCK",
+    gatewayPaymentId: "mock_tete_1",
+    gatewayPixQrCode: null,
+    retryCount: 0,
+    failureReason: null,
+    notes: "Mensalidade recorrente do plano contratado (R$ 39,90/mês).",
+    createdAt: "2026-08-25T20:00:00.000Z",
+    updatedAt: "2026-08-25T22:30:00.000Z"
+  }
+];
+
+const defaultSubscriptions: MzSubscriptionItem[] = [
+  {
+    id: "sub-tete",
+    clientId: "client-tete",
+    projectId: "proj-tete",
+    contractId: "contract-tete",
+    planName: "Plano Hospedagem Gerenciada",
+    amount: 39.9,
+    periodicity: "MENSAL",
+    paymentMethod: "PIX",
+    startDate: "2026-08-25T20:00:00.000Z",
+    status: "ACTIVE",
+    gateway: "SANDBOX_MOCK",
+    createdAt: "2026-08-25T20:00:00.000Z",
+    updatedAt: "2026-08-25T22:30:00.000Z"
+  }
+];
 
 // Catálogo padrão de Serviços mzTech
 export const defaultServices: any[] = [
@@ -162,18 +435,30 @@ function ensureDir() {
 // CLIENTES (MzClient)
 // ============================================================
 export function getStoredClients(): MzClientItem[] {
-  if (!globalObj[globalClientsKey]) {
+  if (!globalObj[globalClientsKey] || globalObj[globalClientsKey].length === 0) {
+    let clients: MzClientItem[] = [];
     try {
       if (fs.existsSync(CLIENTS_FILE)) {
         const content = fs.readFileSync(CLIENTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          globalObj[globalClientsKey] = parsed;
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          clients = parsed;
         }
       }
     } catch (e) {}
-    globalObj[globalClientsKey] = defaultClients;
+
+    if (clients.length === 0) {
+      clients = [...defaultClients];
+      saveStoredClients(clients);
+    } else {
+      const existingIds = new Set(clients.map((c) => c.id));
+      for (const defC of defaultClients) {
+        if (!existingIds.has(defC.id)) {
+          clients.push(defC);
+        }
+      }
+    }
+    globalObj[globalClientsKey] = clients;
   }
   return globalObj[globalClientsKey];
 }
@@ -260,22 +545,33 @@ export function deleteStoredClient(id: string): boolean {
   return false;
 }
 
-// ============================================================
 // PROJETOS (MzProject)
 // ============================================================
 export function getStoredProjects(): MzProjectItem[] {
-  if (!globalObj[globalProjectsKey]) {
+  if (!globalObj[globalProjectsKey] || globalObj[globalProjectsKey].length === 0) {
+    let projects: MzProjectItem[] = [];
     try {
       if (fs.existsSync(PROJECTS_FILE)) {
         const content = fs.readFileSync(PROJECTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          globalObj[globalProjectsKey] = parsed;
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          projects = parsed;
         }
       }
     } catch (e) {}
-    globalObj[globalProjectsKey] = defaultProjects;
+
+    if (projects.length === 0) {
+      projects = [...defaultProjects];
+      saveStoredProjects(projects);
+    } else {
+      const existingIds = new Set(projects.map((p) => p.id));
+      for (const defP of defaultProjects) {
+        if (!existingIds.has(defP.id)) {
+          projects.push(defP);
+        }
+      }
+    }
+    globalObj[globalProjectsKey] = projects;
   }
   return globalObj[globalProjectsKey];
 }
@@ -347,22 +643,33 @@ export function deleteStoredProject(id: string): boolean {
   return false;
 }
 
-// ============================================================
 // CONTRATOS (MzContract) COM SNAPSHOT
 // ============================================================
 export function getStoredContracts(): MzContractItem[] {
-  if (!globalObj[globalContractsKey]) {
+  if (!globalObj[globalContractsKey] || globalObj[globalContractsKey].length === 0) {
+    let contracts: MzContractItem[] = [];
     try {
       if (fs.existsSync(CONTRACTS_FILE)) {
         const content = fs.readFileSync(CONTRACTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          globalObj[globalContractsKey] = parsed;
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          contracts = parsed;
         }
       }
     } catch (e) {}
-    globalObj[globalContractsKey] = defaultContracts;
+
+    if (contracts.length === 0) {
+      contracts = [...defaultContracts];
+      saveStoredContracts(contracts);
+    } else {
+      const existingIds = new Set(contracts.map((c) => c.id));
+      for (const defC of defaultContracts) {
+        if (!existingIds.has(defC.id)) {
+          contracts.push(defC);
+        }
+      }
+    }
+    globalObj[globalContractsKey] = contracts;
   }
   return globalObj[globalContractsKey];
 }
@@ -512,18 +819,30 @@ export function createStoredService(service: any): any {
 // PAGAMENTOS (MzPayment)
 // ============================================================
 export function getStoredPayments(): MzPaymentItem[] {
-  if (!globalObj[globalPaymentsKey]) {
+  if (!globalObj[globalPaymentsKey] || globalObj[globalPaymentsKey].length === 0) {
+    let payments: MzPaymentItem[] = [];
     try {
       if (fs.existsSync(PAYMENTS_FILE)) {
         const content = fs.readFileSync(PAYMENTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          globalObj[globalPaymentsKey] = parsed;
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          payments = parsed;
         }
       }
     } catch (e) {}
-    globalObj[globalPaymentsKey] = defaultPayments;
+
+    if (payments.length === 0) {
+      payments = [...defaultPayments];
+      saveStoredPayments(payments);
+    } else {
+      const existingIds = new Set(payments.map((p) => p.id));
+      for (const defP of defaultPayments) {
+        if (!existingIds.has(defP.id)) {
+          payments.push(defP);
+        }
+      }
+    }
+    globalObj[globalPaymentsKey] = payments;
   }
   return globalObj[globalPaymentsKey];
 }
@@ -642,18 +961,30 @@ export function deleteStoredSubscription(id: string): boolean {
 // RECORRÊNCIAS / ASSINATURAS (MzSubscription)
 // ============================================================
 export function getStoredSubscriptions(): MzSubscriptionItem[] {
-  if (!globalObj[globalSubscriptionsKey]) {
+  if (!globalObj[globalSubscriptionsKey] || globalObj[globalSubscriptionsKey].length === 0) {
+    let subs: MzSubscriptionItem[] = [];
     try {
       if (fs.existsSync(SUBSCRIPTIONS_FILE)) {
         const content = fs.readFileSync(SUBSCRIPTIONS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          globalObj[globalSubscriptionsKey] = parsed;
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          subs = parsed;
         }
       }
     } catch (e) {}
-    globalObj[globalSubscriptionsKey] = defaultSubscriptions;
+
+    if (subs.length === 0) {
+      subs = [...defaultSubscriptions];
+      saveStoredSubscriptions(subs);
+    } else {
+      const existingIds = new Set(subs.map((s) => s.id));
+      for (const defS of defaultSubscriptions) {
+        if (!existingIds.has(defS.id)) {
+          subs.push(defS);
+        }
+      }
+    }
+    globalObj[globalSubscriptionsKey] = subs;
   }
   return globalObj[globalSubscriptionsKey];
 }

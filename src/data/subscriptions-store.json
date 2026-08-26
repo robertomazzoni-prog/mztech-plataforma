@@ -1,0 +1,15 @@
+[
+  {
+    "id": "sub-tete",
+    "clientId": "client-tete",
+    "projectId": "proj-tete",
+    "contractId": "contract-tete",
+    "planName": "Plano Hospedagem Gerenciada",
+    "amount": 39.9,
+    "periodicity": "MENSAL",
+    "paymentMethod": "PIX",
+    "status": "ACTIVE",
+    "createdAt": "2026-08-25T20:00:00.000Z",
+    "updatedAt": "2026-08-25T22:30:00.000Z"
+  }
+]
