@@ -238,32 +238,51 @@ export default function MzTechPublicPage() {
     window.open(whatsappUrl, '_blank');
   };
 
+  const currentTheme: 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' =
+    settingsData?.siteTheme === 'CYBER_DARK'
+      ? 'CYBER_DARK'
+      : settingsData?.siteTheme === 'STUDIO_PREMIUM'
+      ? 'STUDIO_PREMIUM'
+      : 'DARK_CYBER_GLOW';
+
+  const isDarkCyberGlow = currentTheme === 'DARK_CYBER_GLOW';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950 flex flex-col font-sans">
+    <div className={`min-h-screen ${
+      isDarkCyberGlow
+        ? 'bg-[#080915] text-slate-100 selection:bg-violet-500 selection:text-white'
+        : 'bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950'
+    } antialiased flex flex-col font-sans`}>
       
       {/* Top Bar de Status da Infraestrutura */}
-      <div className="bg-slate-900/90 border-b border-slate-800 px-4 py-2 text-center text-xs text-slate-400 backdrop-blur-md">
+      <div className={`${
+        isDarkCyberGlow ? 'bg-[#0b0e22]/95 border-b border-violet-500/20' : 'bg-slate-900/90 border-b border-slate-800'
+      } px-4 py-2 text-center text-xs text-slate-400 backdrop-blur-md`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-slate-300 font-semibold">mzTech Cloud Infrastructure:</span>
-            <span className="text-emerald-400 font-mono font-bold hidden sm:inline">100% Online & Seguro</span>
+            <span className={`${isDarkCyberGlow ? 'text-violet-300' : 'text-emerald-400'} font-mono font-bold hidden sm:inline`}>100% Online & Seguro</span>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 text-xs">
             <Link
               href="/cliente/cadastro"
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 font-bold transition-all shadow-sm group hover:scale-105"
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${
+                isDarkCyberGlow
+                  ? 'bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 hover:text-violet-200 border border-violet-500/40'
+                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40'
+              } font-bold transition-all shadow-sm group hover:scale-105`}
             >
-              <UserPlus className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-transform" />
+              <UserPlus className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-emerald-400'} group-hover:rotate-12 transition-transform`} />
               <span>Cadastre-se</span>
             </Link>
 
             <Link
               href="/cliente"
-              className="text-slate-300 hover:text-cyan-300 font-semibold flex items-center gap-1.5 transition-colors"
+              className={`text-slate-300 ${isDarkCyberGlow ? 'hover:text-violet-300' : 'hover:text-cyan-300'} font-semibold flex items-center gap-1.5 transition-colors`}
             >
-              <Users className="w-3.5 h-3.5 text-cyan-400" />
+              <Users className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
               <span>Área do Cliente</span>
             </Link>
           </div>
@@ -271,18 +290,24 @@ export default function MzTechPublicPage() {
       </div>
 
       {/* Navbar Institucional */}
-      <header className="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 shadow-lg">
+      <header className={`sticky top-0 z-40 ${
+        isDarkCyberGlow ? 'bg-[#080915]/90 border-b border-violet-500/20' : 'bg-slate-950/85 border-b border-slate-800/80'
+      } backdrop-blur-xl shadow-lg`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             
             {/* Logo mzTech */}
             <Link href="/mztech" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+              <div className={`w-10 h-10 rounded-xl ${
+                isDarkCyberGlow
+                  ? 'bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 shadow-violet-500/25'
+                  : 'bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 shadow-cyan-500/20'
+              } flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform`}>
                 <Terminal className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-xl sm:text-2xl font-bold tracking-tight text-white block">
-                  mz<span className="text-cyan-400">Tech</span>
+                  mz<span className={isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}>Tech</span>
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium block -mt-1 tracking-wider uppercase">
                   Soluções Digitais
@@ -292,19 +317,19 @@ export default function MzTechPublicPage() {
 
             {/* Links de Navegação */}
             <nav className="hidden md:flex items-center space-x-7 text-sm font-medium text-slate-300">
-              <Link href="#servicos" className="hover:text-cyan-400 transition-colors">
+              <Link href="#servicos" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 O Que Fazemos
               </Link>
-              <Link href="#como-funciona" className="hover:text-cyan-400 transition-colors">
+              <Link href="#como-funciona" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 Como Funciona
               </Link>
-              <Link href="#portfolio" className="hover:text-cyan-400 transition-colors">
+              <Link href="#portfolio" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 Portfólio
               </Link>
-              <Link href="#planos" className="hover:text-cyan-400 transition-colors">
+              <Link href="#planos" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 Planos & Preços
               </Link>
-              <Link href="#faq" className="hover:text-cyan-400 transition-colors">
+              <Link href="#faq" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 FAQ
               </Link>
               <Link href="/cliente" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
@@ -316,15 +341,23 @@ export default function MzTechPublicPage() {
             <div className="flex items-center gap-2.5">
               <Link
                 href="/cliente/cadastro"
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-cyan-200 border border-cyan-500/40 hover:border-cyan-400 shadow-md shadow-cyan-500/10 hover:scale-105 transition-all"
+                className={`hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs ${
+                  isDarkCyberGlow
+                    ? 'bg-[#0f1330] hover:bg-[#161c42] text-violet-200 border border-violet-500/30 hover:border-violet-400 shadow-violet-500/10'
+                    : 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-cyan-200 border border-cyan-500/40 hover:border-cyan-400 shadow-cyan-500/10'
+                } shadow-md hover:scale-105 transition-all`}
               >
-                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <UserPlus className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                 <span>Criar Conta</span>
               </Link>
 
               <Link
                 href="#orcamento"
-                className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm ${
+                  isDarkCyberGlow
+                    ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
+                } shadow-lg hover:scale-105 transition-all`}
               >
                 Solicitar Orçamento
               </Link>
@@ -334,9 +367,145 @@ export default function MzTechPublicPage() {
       </header>
 
       {/* ============================================================ */}
-      {/* 2. HERO SECTION (DINÂMICO: ESTILO 1 CYBER DARK OU ESTILO 2 STUDIO PRO) */}
+      {/* 2. HERO SECTION (DINÂMICO: DARK CYBER GLOW, STUDIO PRO OU CYBER DARK) */}
       {/* ============================================================ */}
-      {settingsData?.siteTheme === 'STUDIO_PREMIUM' ? (
+      {currentTheme === 'DARK_CYBER_GLOW' ? (
+        /* NOVO TEMA: DARK CYBER & GLOW (ROXO/VIOLETA, 2 COLUNAS & TECH ARCHITECTURE PREVIEW) */
+        <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
+          {/* Subtle Ambient Radial Lighting */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-violet-600/15 via-purple-600/10 to-indigo-600/0 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              
+              {/* Coluna Esquerda: Conteúdo & Conversão */}
+              <div className="lg:col-span-7 text-left space-y-6">
+                
+                {/* Badge de Posicionamento Oficial */}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#121638]/90 border border-violet-500/30 text-violet-300 text-xs sm:text-sm font-semibold shadow-md shadow-violet-500/10">
+                  <Sparkles className="w-4 h-4 text-violet-400" />
+                  <span>{settingsData?.tagline || MZTECH_INFO.tagline}</span>
+                </div>
+
+                {/* Headline Principal Oficial */}
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+                  Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-300 to-indigo-300">presença digital profissional.</span>
+                </h1>
+
+                {/* Subtítulo Oficial */}
+                <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl font-normal">
+                  {MZTECH_INFO.description}
+                </p>
+
+                {/* Botões CTA */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                  <Link
+                    href="#orcamento"
+                    className="px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-violet-600/25 hover:scale-[1.02] transition-all flex items-center justify-center gap-2.5"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Solicitar orçamento</span>
+                  </Link>
+
+                  <Link
+                    href="#servicos"
+                    className="px-7 py-4 rounded-xl bg-[#10142e]/90 hover:bg-[#161c3e] text-slate-200 border border-violet-500/30 hover:border-violet-400 font-semibold text-base flex items-center justify-center gap-2 transition-all"
+                  >
+                    <span>Conhecer nossos serviços</span>
+                    <ArrowRight className="w-4 h-4 text-violet-400" />
+                  </Link>
+                </div>
+
+                {/* Mini Pilares de Confiança */}
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4 border-t border-violet-500/15 text-xs text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-violet-400 shrink-0" />
+                    <span>Código Próprio em Next.js</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-violet-400 shrink-0" />
+                    <span>Nuvem Gerenciada & SSL</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-violet-400 shrink-0" />
+                    <span>Suporte Técnico Direto</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coluna Direita: Tech Architecture & Cloud Stack Interactive Preview */}
+              <div className="lg:col-span-5 relative">
+                {/* Glow Backdrop */}
+                <div className="absolute -inset-1.5 bg-gradient-to-r from-violet-600/30 via-purple-600/20 to-indigo-600/30 rounded-3xl blur-2xl opacity-70 pointer-events-none" />
+                
+                <div className="relative rounded-2xl bg-[#0c0f24] border border-violet-500/30 shadow-2xl overflow-hidden backdrop-blur-xl">
+                  
+                  {/* Janela IDE Header */}
+                  <div className="px-4 py-3 bg-[#090b1c] border-b border-violet-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-red-500/70" />
+                      <span className="w-3 h-3 rounded-full bg-amber-500/70" />
+                      <span className="w-3 h-3 rounded-full bg-emerald-500/70" />
+                      <span className="text-[11px] font-mono text-slate-400 ml-2 font-medium">mztech-engine.config.ts</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>PRODUCTION</span>
+                    </div>
+                  </div>
+
+                  {/* Code Snippet / Arquitetura Real */}
+                  <div className="p-5 font-mono text-xs text-slate-300 space-y-2 bg-[#0b0e22]/95">
+                    <p className="text-slate-500">// mzTech Full-Stack Architecture 2026</p>
+                    <p>
+                      <span className="text-purple-400">export const</span> <span className="text-violet-300">mzEngine</span> = &#123;
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">framework</span>: <span className="text-emerald-300">&apos;Next.js 14 (App Router)&apos;</span>,
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">database</span>: <span className="text-emerald-300">&apos;PostgreSQL Relacional Dedicado&apos;</span>,
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">cloudHosting</span>: <span className="text-emerald-300">&apos;Railway Cloud + SSL TLS 1.3&apos;</span>,
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">founders</span>: [<span className="text-violet-300">&apos;{settingsData?.robertoName || 'Roberto'}&apos;</span>, <span className="text-violet-300">&apos;{settingsData?.morvanName || 'Morvan'}&apos;</span>],
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">latency</span>: <span className="text-cyan-400">&apos;&lt; 38ms Edge CDN&apos;</span>,
+                    </p>
+                    <p className="pl-4">
+                      <span className="text-indigo-300">status</span>: <span className="text-emerald-400">&apos;99.99% Uptime Verified&apos;</span>,
+                    </p>
+                    <p>&#125;;</p>
+                  </div>
+
+                  {/* Indicadores de Engenharia Integrados */}
+                  <div className="p-4 bg-[#090b1c] border-t border-violet-500/20 grid grid-cols-2 gap-3">
+                    <div className="p-2.5 rounded-xl bg-[#121638]/70 border border-violet-500/20">
+                      <p className="text-[10px] uppercase font-mono text-slate-400">Tempo de Resposta</p>
+                      <p className="text-xs sm:text-sm font-bold text-violet-300 font-mono flex items-center gap-1.5 mt-0.5">
+                        <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Ultra Rápido (32ms)</span>
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[#121638]/70 border border-violet-500/20">
+                      <p className="text-[10px] uppercase font-mono text-slate-400">Engenharia</p>
+                      <p className="text-xs sm:text-sm font-bold text-white font-mono flex items-center gap-1.5 mt-0.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+                        <span>100% Nativo</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      ) : currentTheme === 'STUDIO_PREMIUM' ? (
         /* ESTILO 2: STUDIO DE ENGENHARIA & MINIMALIST PRO */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
           {/* Background Grid Sutil e Foco de Luz Tecnológico */}
@@ -459,7 +628,7 @@ export default function MzTechPublicPage() {
           </div>
         </section>
       ) : (
-        /* ESTILO 1: DARK CYBER & GLOW (PADRÃO) */
+        /* ESTILO 1: DARK CYBER & CYAN GLOW (CLÁSSICO) */
         <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
           {/* Glowing Background Orbs */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-cyan-500/20 via-blue-500/10 to-indigo-500/0 rounded-full blur-3xl pointer-events-none" />
@@ -506,10 +675,10 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 3. SEÇÃO "O QUE FAZEMOS" */}
       {/* ============================================================ */}
-      <section id="servicos" className="py-24 bg-slate-900/50 border-y border-slate-800">
+      <section id="servicos" className={`py-24 ${isDarkCyberGlow ? 'bg-[#0a0d22]/70 border-y border-violet-500/20' : 'bg-slate-900/50 border-y border-slate-800'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-mono`}>
               Soluções Completas de Software
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -522,8 +691,12 @@ export default function MzTechPublicPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-5 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-cyan-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-violet-500/15 border border-violet-500/30 text-violet-400 group-hover:bg-violet-600 group-hover:text-white' : 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <Globe className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Sites Institucionais</h3>
@@ -533,8 +706,12 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-blue-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-5 group-hover:bg-blue-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-blue-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <Code2 className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Sistemas Web & Dashboards</h3>
@@ -544,8 +721,12 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-emerald-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <Server className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Hospedagem Cloud Gerenciada</h3>
@@ -555,8 +736,12 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Card 4 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-5 group-hover:bg-indigo-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-indigo-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-purple-500/15 border border-purple-500/30 text-purple-400 group-hover:bg-purple-600 group-hover:text-white' : 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <Wrench className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Manutenção Preventiva</h3>
@@ -566,8 +751,12 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Card 5 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-purple-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5 group-hover:bg-purple-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-purple-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-violet-500/15 border border-violet-500/30 text-violet-400 group-hover:bg-violet-600 group-hover:text-white' : 'bg-purple-500/10 border border-purple-500/20 text-purple-400 group-hover:bg-purple-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Segurança & Backups</h3>
@@ -577,8 +766,12 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Card 6 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-amber-500/40 rounded-3xl p-7 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-5 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
+            <div className={`${
+              isDarkCyberGlow ? 'bg-[#0d1026] border border-violet-500/20 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-500/10' : 'bg-slate-900 border border-slate-800 hover:border-amber-500/40'
+            } rounded-3xl p-7 transition-all group`}>
+              <div className={`w-12 h-12 rounded-2xl ${
+                isDarkCyberGlow ? 'bg-amber-500/15 border border-amber-500/30 text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-950' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-950'
+              } flex items-center justify-center mb-5 transition-colors`}>
                 <Headphones className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Suporte com Desenvolvedores</h3>
@@ -593,10 +786,10 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 4. COMO FUNCIONA (5 ETAPAS) */}
       {/* ============================================================ */}
-      <section id="como-funciona" className="py-24 bg-slate-950">
+      <section id="como-funciona" className={`py-24 ${isDarkCyberGlow ? 'bg-[#080915]' : 'bg-slate-950'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
               Processo Transparente
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -611,17 +804,19 @@ export default function MzTechPublicPage() {
             {MZTECH_STEPS.map((s, idx) => (
               <div
                 key={s.step}
-                className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 relative flex flex-col justify-between hover:border-cyan-500/30 transition-colors"
+                className={`${
+                  isDarkCyberGlow ? 'bg-[#0c0f24] border-violet-500/20 hover:border-violet-500/50' : 'bg-slate-900/80 border-slate-800 hover:border-cyan-500/30'
+                } border rounded-3xl p-6 relative flex flex-col justify-between transition-colors`}
               >
                 <div>
-                  <span className="text-3xl font-black text-cyan-400/30 font-mono block mb-2">
+                  <span className={`text-3xl font-black ${isDarkCyberGlow ? 'text-violet-400/30' : 'text-cyan-400/30'} font-mono block mb-2`}>
                     {s.step}
                   </span>
                   <h3 className="font-bold text-white text-base mb-2">{s.title}</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">{s.description}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center gap-1.5 text-[11px] text-cyan-400 font-semibold">
+                <div className={`mt-4 pt-3 ${isDarkCyberGlow ? 'border-violet-500/20 text-violet-300' : 'border-slate-800/80 text-cyan-400'} border-t flex items-center gap-1.5 text-[11px] font-semibold`}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Etapa {idx + 1}</span>
                 </div>
@@ -634,10 +829,10 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 5. PORTFÓLIO (CASE MAZZONI BARBERS) */}
       {/* ============================================================ */}
-      <section id="portfolio" className="py-24 bg-slate-900/60 border-y border-slate-800">
+      <section id="portfolio" className={`py-24 ${isDarkCyberGlow ? 'bg-[#0a0d22]/70 border-y border-violet-500/20' : 'bg-slate-900/60 border-y border-slate-800'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
               Casos Reais em Produção
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -649,7 +844,9 @@ export default function MzTechPublicPage() {
           </div>
 
           {/* Destaque Case: Mazzoni Barbers */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className={`${
+            isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/25 shadow-2xl' : 'bg-slate-900 border border-slate-800'
+          } rounded-3xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center`}>
             <div className="space-y-5">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
@@ -672,19 +869,19 @@ export default function MzTechPublicPage() {
                 <p className="text-xs uppercase font-bold text-slate-400">Funcionalidades Chave:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-cyan-400" />
+                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                     <span>Agendamento online 24h</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-cyan-400" />
+                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                     <span>Confirmação via WhatsApp</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-cyan-400" />
+                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                     <span>Painel administrativo financeiro</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-cyan-400" />
+                    <Check className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                     <span>Gestão de equipe e serviços</span>
                   </div>
                 </div>
@@ -695,7 +892,11 @@ export default function MzTechPublicPage() {
                   href="https://mazzoni-barbershop-production.up.railway.app"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm inline-flex items-center gap-2 shadow-lg shadow-cyan-500/10 transition-all hover:scale-[1.02]"
+                  className={`px-6 py-3 rounded-xl ${
+                    isDarkCyberGlow
+                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
+                      : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
+                  } font-bold text-sm inline-flex items-center gap-2 shadow-lg transition-all hover:scale-[1.02]`}
                 >
                   <span>Abrir Site do Projeto (Produção)</span>
                   <ExternalLink className="w-4 h-4" />
@@ -705,13 +906,13 @@ export default function MzTechPublicPage() {
             </div>
 
             {/* Mockup / Visual */}
-            <div className="rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 p-2 shadow-2xl">
-              <div className="bg-slate-900 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
-                  <span className="font-mono text-cyan-400">mazzoni-barbershop-production.up.railway.app</span>
+            <div className={`rounded-2xl overflow-hidden border ${isDarkCyberGlow ? 'border-violet-500/25 bg-[#090b1c]' : 'border-slate-800 bg-slate-950'} p-2 shadow-2xl`}>
+              <div className={`${isDarkCyberGlow ? 'bg-[#0d1028]' : 'bg-slate-900'} rounded-xl p-4 space-y-3`}>
+                <div className={`flex items-center justify-between text-xs text-slate-400 border-b ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'} pb-2`}>
+                  <span className={`font-mono ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>mazzoni-barbershop-production.up.railway.app</span>
                   <span className="text-emerald-400 font-semibold font-mono">100% Online</span>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-2">
+                <div className={`p-4 rounded-xl ${isDarkCyberGlow ? 'bg-[#070914] border-violet-500/20' : 'bg-slate-950 border-slate-800'} border text-center space-y-2`}>
                   <p className="text-xs font-bold text-amber-300 uppercase tracking-wider">Mazzoni Barbershop</p>
                   <p className="text-base font-bold text-white">ELEVE SEU ESTILO AO NÍVEL MÁXIMO</p>
                   <p className="text-xs text-slate-400">Agendamento de Horários & Presença Digital</p>
@@ -725,11 +926,11 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 6. PLANOS MZTECH & 7. EXPLICAR A MENSALIDADE */}
       {/* ============================================================ */}
-      <section id="planos" className="py-24 bg-slate-950">
+      <section id="planos" className={`py-24 ${isDarkCyberGlow ? 'bg-[#080915]' : 'bg-slate-950'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-mono`}>
               Transparência Comercial
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -751,12 +952,18 @@ export default function MzTechPublicPage() {
                   key={plan.id || plan.name}
                   className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
                     isRec
-                      ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-cyan-950/30 border-2 border-cyan-500 shadow-2xl shadow-cyan-500/10'
+                      ? isDarkCyberGlow
+                        ? 'bg-gradient-to-b from-[#0f1332] via-[#0d1028] to-[#12163a] border-2 border-violet-500 shadow-2xl shadow-violet-500/20'
+                        : 'bg-gradient-to-b from-slate-900 via-slate-900 to-cyan-950/30 border-2 border-cyan-500 shadow-2xl shadow-cyan-500/10'
+                      : isDarkCyberGlow
+                      ? 'bg-[#0d1026] border border-violet-500/20'
                       : 'bg-slate-900/90 border border-slate-800'
                   }`}
                 >
                   {isRec && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-slate-950 font-bold text-xs shadow-md">
+                    <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full ${
+                      isDarkCyberGlow ? 'bg-violet-500 text-white' : 'bg-cyan-500 text-slate-950'
+                    } font-bold text-xs shadow-md`}>
                       {badgeText}
                     </div>
                   )}
@@ -780,23 +987,27 @@ export default function MzTechPublicPage() {
                       {plan.description}
                     </p>
 
-                    <div className="space-y-3 pt-4 border-t border-slate-800">
+                    <div className={`space-y-3 pt-4 border-t ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'}`}>
                       <p className="text-xs uppercase font-bold text-slate-400">O que está incluído:</p>
                       {Array.isArray(plan.features) && plan.features.map((feat: string, i: number) => (
                         <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200">
-                          <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                          <CheckCircle2 className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} shrink-0 mt-0.5`} />
                           <span>{feat}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-slate-800">
+                  <div className={`mt-8 pt-6 border-t ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'}`}>
                     <button
                       onClick={() => handleSelectPlan(plan)}
                       className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
                         isRec
-                          ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
+                          ? isDarkCyberGlow
+                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-violet-600/25'
+                            : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
+                          : isDarkCyberGlow
+                          ? 'bg-[#121638] hover:bg-[#181d4a] text-white border border-violet-500/30'
                           : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
                       }`}
                     >
@@ -809,9 +1020,11 @@ export default function MzTechPublicPage() {
           </div>
 
           {/* Seção Explicativa: Por que existe uma mensalidade? */}
-          <div className="mt-20 p-8 sm:p-10 rounded-3xl bg-slate-900/80 border border-slate-800 max-w-4xl mx-auto space-y-4">
+          <div className={`mt-20 p-8 sm:p-10 rounded-3xl ${
+            isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/20' : 'bg-slate-900/80 border border-slate-800'
+          } max-w-4xl mx-auto space-y-4`}>
             <h3 className="text-2xl font-bold text-white flex items-center gap-2.5">
-              <HelpCircle className="w-6 h-6 text-cyan-400" />
+              <HelpCircle className={`w-6 h-6 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
               <span>Por que existe uma mensalidade?</span>
             </h3>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
@@ -827,9 +1040,11 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 8. DESENVOLVIMENTO É COBRADO SEPARADAMENTE */}
       {/* ============================================================ */}
-      <section className="py-20 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-y border-slate-800">
+      <section className={`py-20 ${
+        isDarkCyberGlow ? 'bg-gradient-to-r from-[#080915] via-[#0d1026] to-[#080915] border-y border-violet-500/20' : 'bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-y border-slate-800'
+      }`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
+          <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-mono`}>
             Escopo Sob Medida
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
@@ -851,7 +1066,9 @@ export default function MzTechPublicPage() {
             ].map((item) => (
               <span
                 key={item}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-200"
+                className={`px-3.5 py-1.5 rounded-xl ${
+                  isDarkCyberGlow ? 'bg-[#0e1128] border border-violet-500/20 text-slate-200' : 'bg-slate-900 border border-slate-700 text-slate-200'
+                } text-xs font-semibold`}
               >
                 {item}
               </span>
@@ -861,7 +1078,11 @@ export default function MzTechPublicPage() {
           <div className="pt-4">
             <Link
               href="#orcamento"
-              className="px-8 py-3.5 rounded-xl font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm inline-flex items-center gap-2 shadow-lg shadow-cyan-500/10 transition-all"
+              className={`px-8 py-3.5 rounded-xl font-bold ${
+                isDarkCyberGlow
+                  ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 text-white shadow-violet-600/25'
+                  : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
+              } text-sm inline-flex items-center gap-2 shadow-lg transition-all`}
             >
               <span>Solicitar Orçamento Personalizado</span>
               <ArrowRight className="w-4 h-4" />
@@ -977,10 +1198,10 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 13. FAQ */}
       {/* ============================================================ */}
-      <section id="faq" className="py-24 bg-slate-950">
+      <section id="faq" className={`py-24 ${isDarkCyberGlow ? 'bg-[#080915]' : 'bg-slate-950'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
               Tire Suas Dúvidas
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -997,22 +1218,28 @@ export default function MzTechPublicPage() {
               return (
                 <div
                   key={index}
-                  className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden transition-colors"
+                  className={`${
+                    isDarkCyberGlow ? 'bg-[#0c0f24] border-violet-500/20' : 'bg-slate-900/90 border-slate-800'
+                  } border rounded-2xl overflow-hidden transition-colors`}
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-white text-sm sm:text-base hover:text-cyan-300 transition-colors"
+                    className={`w-full px-6 py-4 flex items-center justify-between text-left font-bold text-white text-sm sm:text-base hover:${
+                      isDarkCyberGlow ? 'text-violet-300' : 'text-cyan-300'
+                    } transition-colors`}
                   >
                     <span>{faq.q}</span>
                     {isOpen ? (
-                      <ChevronUp className="w-5 h-5 text-cyan-400 shrink-0" />
+                      <ChevronUp className={`w-5 h-5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} shrink-0`} />
                     ) : (
                       <ChevronDown className="w-5 h-5 text-slate-500 shrink-0" />
                     )}
                   </button>
 
                   {isOpen && (
-                    <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/80 animate-in fade-in">
+                    <div className={`px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed border-t ${
+                      isDarkCyberGlow ? 'border-violet-500/15' : 'border-slate-800/80'
+                    } animate-in fade-in`}>
                       {faq.a}
                     </div>
                   )}
@@ -1026,10 +1253,14 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 14. ÁREA DE CONTRATAÇÃO / FORMULÁRIO DE ORÇAMENTO */}
       {/* ============================================================ */}
-      <section id="orcamento" className="py-24 bg-gradient-to-b from-slate-900 to-slate-950 border-t border-slate-800">
+      <section id="orcamento" className={`py-24 ${
+        isDarkCyberGlow
+          ? 'bg-gradient-to-b from-[#0a0d22] via-[#090b1c] to-[#080915] border-t border-violet-500/20'
+          : 'bg-gradient-to-b from-slate-900 to-slate-950 border-t border-slate-800'
+      }`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
               Dê o Próximo Passo
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
@@ -1040,7 +1271,9 @@ export default function MzTechPublicPage() {
             </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl">
+          <div className={`${
+            isDarkCyberGlow ? 'bg-[#0c0f24] border border-violet-500/30' : 'bg-slate-900 border border-slate-800'
+          } rounded-3xl p-6 sm:p-10 shadow-2xl`}>
             {formSubmitted ? (
               <div className="text-center py-12 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
@@ -1085,7 +1318,9 @@ export default function MzTechPublicPage() {
                       placeholder="Ex: Carlos Silva"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
                     />
                   </div>
 
@@ -1096,7 +1331,9 @@ export default function MzTechPublicPage() {
                       placeholder="Ex: Silva & Associados"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
                     />
                   </div>
                 </div>
@@ -1110,7 +1347,9 @@ export default function MzTechPublicPage() {
                       placeholder="(31) 99999-9999"
                       value={formData.whatsapp}
                       onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
                     />
                   </div>
 
@@ -1122,7 +1361,9 @@ export default function MzTechPublicPage() {
                       placeholder="contato@suaempresa.com.br"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
                     />
                   </div>
                 </div>
@@ -1131,10 +1372,10 @@ export default function MzTechPublicPage() {
                 <div className="space-y-2.5 pt-1">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-cyan-400" />
+                      <Users className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                       <span>Escolha o Desenvolvedor / Especialista *</span>
                     </label>
-                    <span className="text-[11px] text-cyan-400 font-medium">Atendimento direto com o sócio</span>
+                    <span className={`text-[11px] ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-medium`}>Atendimento direto com o sócio</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1144,14 +1385,18 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, selectedDev: 'Roberto' })}
                       className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
                         formData.selectedDev === 'Roberto'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-lg shadow-violet-500/10 scale-[1.01]'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40 hover:bg-[#0e1128]'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">
+                            <div className={`w-6 h-6 rounded-full ${isDarkCyberGlow ? 'bg-violet-500/20 text-violet-400' : 'bg-cyan-500/20 text-cyan-400'} font-bold text-xs flex items-center justify-center`}>
                               R
                             </div>
                             <span className="font-bold text-white text-sm">Roberto</span>
@@ -1159,14 +1404,16 @@ export default function MzTechPublicPage() {
                           <span
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                               formData.selectedDev === 'Roberto'
-                                ? 'border-cyan-400 bg-cyan-500 text-slate-950'
+                                ? isDarkCyberGlow
+                                  ? 'border-violet-400 bg-violet-500 text-white'
+                                  : 'border-cyan-400 bg-cyan-500 text-slate-950'
                                 : 'border-slate-700'
                             }`}
                           >
                             {formData.selectedDev === 'Roberto' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </span>
                         </div>
-                        <p className="text-[10px] font-mono font-bold text-cyan-400">Sócio & Dev Full Stack</p>
+                        <p className={`text-[10px] font-mono font-bold ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>Sócio & Dev Full Stack</p>
                         <p className="text-[11px] text-slate-400 leading-tight mt-1">
                           Especialista em Interfaces Web, Next.js, React e Soluções Digitais
                         </p>
@@ -1179,14 +1426,18 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, selectedDev: 'Morvan' })}
                       className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
                         formData.selectedDev === 'Morvan'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          ? isDarkCyberGlow
+                            ? 'bg-indigo-500/15 border-indigo-400 shadow-lg shadow-indigo-500/10 scale-[1.01]'
+                            : 'bg-blue-500/15 border-blue-400 shadow-lg shadow-blue-500/10 scale-[1.01]'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40 hover:bg-[#0e1128]'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xs flex items-center justify-center">
+                            <div className={`w-6 h-6 rounded-full ${isDarkCyberGlow ? 'bg-indigo-500/20 text-indigo-400' : 'bg-blue-500/20 text-blue-400'} font-bold text-xs flex items-center justify-center`}>
                               M
                             </div>
                             <span className="font-bold text-white text-sm">Morvan</span>
@@ -1194,14 +1445,16 @@ export default function MzTechPublicPage() {
                           <span
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                               formData.selectedDev === 'Morvan'
-                                ? 'border-cyan-400 bg-cyan-500 text-slate-950'
+                                ? isDarkCyberGlow
+                                  ? 'border-indigo-400 bg-indigo-500 text-white'
+                                  : 'border-cyan-400 bg-cyan-500 text-slate-950'
                                 : 'border-slate-700'
                             }`}
                           >
                             {formData.selectedDev === 'Morvan' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </span>
                         </div>
-                        <p className="text-[10px] font-mono font-bold text-blue-400">Sócio & Dev Full Stack</p>
+                        <p className={`text-[10px] font-mono font-bold ${isDarkCyberGlow ? 'text-indigo-400' : 'text-blue-400'}`}>Sócio & Dev Full Stack</p>
                         <p className="text-[11px] text-slate-400 leading-tight mt-1">
                           Especialista em Sistemas Web, Banco de Dados e Arquitetura Cloud
                         </p>
@@ -1216,14 +1469,18 @@ export default function MzTechPublicPage() {
                       }
                       className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
                         formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-lg shadow-violet-500/10 scale-[1.01]'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40 hover:bg-[#0e1128]'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center">
+                            <div className={`w-6 h-6 rounded-full ${isDarkCyberGlow ? 'bg-purple-500/20 text-purple-400' : 'bg-indigo-500/20 text-indigo-400'} font-bold text-xs flex items-center justify-center`}>
                               mz
                             </div>
                             <span className="font-bold text-white text-sm">Indiferente</span>
@@ -1231,7 +1488,9 @@ export default function MzTechPublicPage() {
                           <span
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                               formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
-                                ? 'border-cyan-400 bg-cyan-500 text-slate-950'
+                                ? isDarkCyberGlow
+                                  ? 'border-violet-400 bg-violet-500 text-white'
+                                  : 'border-cyan-400 bg-cyan-500 text-slate-950'
                                 : 'border-slate-700'
                             }`}
                           >
@@ -1255,7 +1514,9 @@ export default function MzTechPublicPage() {
                     <select
                       value={formData.projectType}
                       onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-3 py-3 text-white text-xs focus:outline-none`}
                     >
                       {devServices.map((s: any) => (
                         <option key={s.id || s.name} value={s.name}>
@@ -1271,7 +1532,9 @@ export default function MzTechPublicPage() {
                     <select
                       value={formData.hasDomain}
                       onChange={(e) => setFormData({ ...formData, hasDomain: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-3 py-3 text-white text-xs focus:outline-none`}
                     >
                       <option value="Sim, já possuo domínio registrado">Sim, já possuo</option>
                       <option value="Não, preciso registrar">Não, preciso registrar</option>
@@ -1293,7 +1556,9 @@ export default function MzTechPublicPage() {
                           monthlyPrice: newMonthly,
                         }));
                       }}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white text-xs focus:outline-none focus:border-cyan-400"
+                      className={`w-full ${
+                        isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                      } border rounded-xl px-3 py-3 text-white text-xs focus:outline-none`}
                     >
                       {monthlyPlans.map((p: any) => (
                         <option key={p.id || p.name} value={`${p.name} (${formatCurrency(p.price)}/mês)`}>
@@ -1307,7 +1572,7 @@ export default function MzTechPublicPage() {
 
                 {/* Campo condicional para inserir o Domínio Próprio */}
                 {(formData.hasDomain?.toLowerCase().includes('sim') || formData.hasDomain?.toLowerCase().includes('já possuo')) && (
-                  <div className="bg-slate-900/90 border border-emerald-500/40 rounded-xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200 shadow-lg shadow-emerald-950/20">
+                  <div className="bg-[#090e24] border border-emerald-500/40 rounded-xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200 shadow-lg shadow-emerald-950/20">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold uppercase text-emerald-400 flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-emerald-400" />
@@ -1322,7 +1587,7 @@ export default function MzTechPublicPage() {
                       placeholder="Ex: suaempresa.com.br, seunegocio.com ou minhaclinica.com.br"
                       value={formData.customDomain || ''}
                       onChange={(e) => setFormData({ ...formData, customDomain: e.target.value })}
-                      className="w-full bg-slate-950 border border-emerald-500/50 rounded-xl px-4 py-3 text-white text-sm font-mono placeholder:text-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/50"
+                      className="w-full bg-[#060814] border border-emerald-500/50 rounded-xl px-4 py-3 text-white text-sm font-mono placeholder:text-slate-600 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/50"
                     />
                     <p className="text-[11px] text-slate-400 leading-relaxed">
                       💡 A equipe técnica da mzTech cuidará de todos os apontamentos de DNS, vinculação dos servidores e instalação do Certificado de Segurança SSL no seu domínio registrado.
@@ -1339,7 +1604,9 @@ export default function MzTechPublicPage() {
                     placeholder="Conte sobre o seu negócio, o que o site/sistema precisa ter, referências ou funcionalidades específicas..."
                     value={formData.projectDescription}
                     onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                    className={`w-full ${
+                      isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
+                    } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
                   />
                 </div>
 
@@ -1347,7 +1614,7 @@ export default function MzTechPublicPage() {
                 <div className="space-y-2.5 pt-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5 text-cyan-400" />
+                      <CreditCard className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                       <span>Como Você Deseja Pagar? *</span>
                     </label>
                     <span className="text-[11px] text-slate-500">Escolha sua preferência</span>
@@ -1360,13 +1627,17 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CREDIT_CARD_RECURRING' })}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-md shadow-violet-500/10'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <strong className="text-white text-xs">Cartão de Crédito Recorrente</strong>
-                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' ? isDarkCyberGlow ? 'border-violet-400 bg-violet-400' : 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
                       </div>
                       <p className="text-[11px] text-slate-400 mt-1">
                         Pagamento automático da mensalidade todo mês direto no cartão.
@@ -1379,13 +1650,17 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, paymentMethodChoice: 'PIX' })}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         formData.paymentMethodChoice === 'PIX'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-md shadow-violet-500/10'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <strong className="text-white text-xs">PIX (À Vista / Recorrente)</strong>
-                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'PIX' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'PIX' ? isDarkCyberGlow ? 'border-violet-400 bg-violet-400' : 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
                       </div>
                       <p className="text-[11px] text-slate-400 mt-1">
                         Pagamento instantâneo via QR Code e chave Pix oficial da mzTech.
@@ -1398,13 +1673,17 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CREDIT_CARD' })}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         formData.paymentMethodChoice === 'CREDIT_CARD'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-md shadow-violet-500/10'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <strong className="text-white text-xs">Cartão de Crédito (Parcelado)</strong>
-                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD' ? isDarkCyberGlow ? 'border-violet-400 bg-violet-400' : 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
                       </div>
                       <p className="text-[11px] text-slate-400 mt-1">
                         Pagamento do valor inicial de desenvolvimento parcelado no cartão.
@@ -1417,13 +1696,17 @@ export default function MzTechPublicPage() {
                       onClick={() => setFormData({ ...formData, paymentMethodChoice: 'CARD_PLUS_PIX' })}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         formData.paymentMethodChoice === 'CARD_PLUS_PIX'
-                          ? 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-md shadow-violet-500/10'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-md shadow-cyan-500/10'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40'
                           : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <strong className="text-white text-xs">Cartão + PIX</strong>
-                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CARD_PLUS_PIX' ? 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CARD_PLUS_PIX' ? isDarkCyberGlow ? 'border-violet-400 bg-violet-400' : 'border-cyan-400 bg-cyan-400' : 'border-slate-700'}`} />
                       </div>
                       <p className="text-[11px] text-slate-400 mt-1">
                         Entrada no Pix e mensalidades no cartão de crédito recorrente.
@@ -1433,23 +1716,23 @@ export default function MzTechPublicPage() {
                 </div>
 
                 {/* RESUMO DA PROPOSTA (SEÇÃO 18 DO REQUISITO) */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className={`p-4 rounded-2xl ${isDarkCyberGlow ? 'bg-[#080918] border-violet-500/20' : 'bg-slate-950 border-slate-800'} border space-y-3`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs uppercase font-bold text-slate-400 font-mono flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className={`text-xs uppercase font-bold ${isDarkCyberGlow ? 'text-violet-400' : 'text-slate-400'} font-mono flex items-center gap-1.5`}>
+                      <Sparkles className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                       <span>Resumo da Solicitação</span>
                     </span>
                     <span className="text-[11px] text-slate-500">Sem cobrança imediata</span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+                  <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t ${isDarkCyberGlow ? 'border-violet-500/15' : 'border-slate-800/80'} text-xs`}>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Tipo de Projeto:</span>
                       <strong className="text-white truncate block">{formData.projectType}</strong>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block">Modalidade:</span>
-                      <span className="text-cyan-400 truncate block font-medium">
+                      <span className={`${isDarkCyberGlow ? 'text-violet-300' : 'text-cyan-400'} truncate block font-medium`}>
                         {formData.needsHosting.includes('79,90')
                           ? 'Hospedagem + Manutenção'
                           : formData.needsHosting.includes('39,90')
@@ -1474,8 +1757,8 @@ export default function MzTechPublicPage() {
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-800/50 text-[11px] text-slate-400 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <div className={`pt-2 border-t ${isDarkCyberGlow ? 'border-violet-500/15' : 'border-slate-800/50'} text-[11px] text-slate-400 flex items-center gap-1.5`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isDarkCyberGlow ? 'bg-violet-400' : 'bg-cyan-400'}`} />
                     <span>Valor de desenvolvimento: <strong className="text-slate-300">Definido sob medida na proposta comercial após análise</strong></span>
                   </div>
                 </div>
@@ -1484,7 +1767,11 @@ export default function MzTechPublicPage() {
                   <button
                     type="submit"
                     disabled={formLoading}
-                    className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                    className={`w-full py-4 rounded-xl ${
+                      isDarkCyberGlow
+                        ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/30'
+                        : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
+                    } font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
                   >
                     {formLoading ? (
                       <Activity className="w-5 h-5 animate-spin" />
@@ -1508,10 +1795,12 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {termsModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="bg-slate-900 border border-cyan-500/40 rounded-3xl max-w-3xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto shadow-2xl space-y-6">
+          <div className={`${
+            isDarkCyberGlow ? 'bg-[#0c0f24] border-violet-500/40' : 'bg-slate-900 border-cyan-500/40'
+          } border rounded-3xl max-w-3xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto shadow-2xl space-y-6`}>
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <FileText className="w-6 h-6 text-cyan-400" />
+                <FileText className={`w-6 h-6 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
                 <h3 className="font-bold text-xl text-white">
                   Contrato de Prestação de Serviços mzTech
                 </h3>
@@ -1531,7 +1820,7 @@ export default function MzTechPublicPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 font-serif text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+            <div className={`p-6 rounded-2xl ${isDarkCyberGlow ? 'bg-[#080918] border-violet-500/20' : 'bg-slate-950 border-slate-800'} border font-serif text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap`}>
               {DEFAULT_CONTRACT_TEMPLATE}
             </div>
 
@@ -1550,7 +1839,7 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       {/* 17. RODAPÉ */}
       {/* ============================================================ */}
-      <footer className="bg-slate-950 border-t border-slate-800/80 pt-16 pb-12 mt-auto">
+      <footer className={`${isDarkCyberGlow ? 'bg-[#060814] border-violet-500/20' : 'bg-slate-950 border-slate-800/80'} border-t pt-16 pb-12 mt-auto`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -1558,11 +1847,15 @@ export default function MzTechPublicPage() {
             {/* Coluna 1: Marca & Descrição */}
             <div className="space-y-4 md:col-span-1">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 flex items-center justify-center text-white">
+                <div className={`w-9 h-9 rounded-xl ${
+                  isDarkCyberGlow
+                    ? 'bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 shadow-violet-500/20'
+                    : 'bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 shadow-cyan-500/20'
+                } flex items-center justify-center text-white shadow-md`}>
                   <Terminal className="w-5 h-5" />
                 </div>
                 <span className="text-xl font-bold text-white">
-                  mz<span className="text-cyan-400">Tech</span>
+                  mz<span className={isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}>Tech</span>
                 </span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
@@ -1576,32 +1869,32 @@ export default function MzTechPublicPage() {
             {/* Coluna 2: Navegação */}
             <div className="space-y-3">
               <p className="text-xs uppercase font-bold text-white tracking-wider">Navegação</p>
-              <ul className="space-y-2 text-xs text-slate-400">
-                <li><Link href="#servicos" className="hover:text-cyan-400">O Que Fazemos</Link></li>
-                <li><Link href="#como-funciona" className="hover:text-cyan-400">Como Funciona</Link></li>
-                <li><Link href="#portfolio" className="hover:text-cyan-400">Portfólio</Link></li>
-                <li><Link href="#planos" className="hover:text-cyan-400">Planos mzTech</Link></li>
-                <li><Link href="#faq" className="hover:text-cyan-400">FAQ</Link></li>
-                <li><Link href="#orcamento" className="hover:text-cyan-400">Solicitar Orçamento</Link></li>
+              <ul className={`space-y-2 text-xs text-slate-400 ${isDarkCyberGlow ? '[&_a:hover]:text-violet-400' : '[&_a:hover]:text-cyan-400'}`}>
+                <li><Link href="#servicos">O Que Fazemos</Link></li>
+                <li><Link href="#como-funciona">Como Funciona</Link></li>
+                <li><Link href="#portfolio">Portfólio</Link></li>
+                <li><Link href="#planos">Planos mzTech</Link></li>
+                <li><Link href="#faq">FAQ</Link></li>
+                <li><Link href="#orcamento">Solicitar Orçamento</Link></li>
               </ul>
             </div>
 
             {/* Coluna 3: Legal & Contratos */}
             <div className="space-y-3">
               <p className="text-xs uppercase font-bold text-white tracking-wider">Termos & Legal</p>
-              <ul className="space-y-2 text-xs text-slate-400">
+              <ul className={`space-y-2 text-xs text-slate-400 ${isDarkCyberGlow ? '[&_button:hover]:text-violet-400 [&_a:hover]:text-violet-400' : '[&_button:hover]:text-cyan-400 [&_a:hover]:text-cyan-400'}`}>
                 <li>
-                  <button onClick={() => setTermsModalOpen(true)} className="hover:text-cyan-400 text-left">
+                  <button onClick={() => setTermsModalOpen(true)} className="text-left">
                     Termos de Serviço / Contrato
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setTermsModalOpen(true)} className="hover:text-cyan-400 text-left">
+                  <button onClick={() => setTermsModalOpen(true)} className="text-left">
                     Política de Privacidade
                   </button>
                 </li>
                 <li>
-                  <Link href="/cliente" className="text-cyan-400 hover:underline">
+                  <Link href="/cliente" className={`${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} hover:underline`}>
                     Portal do Cliente
                   </Link>
                 </li>
@@ -1615,26 +1908,26 @@ export default function MzTechPublicPage() {
                 <li className="flex items-center gap-2">
                   <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
                   <a href={`https://wa.me/${MZTECH_INFO.robertoWhatsapp}`} target="_blank" rel="noreferrer" className="hover:underline">
-                    <span>{MZTECH_INFO.robertoPhone}</span> <strong className="text-slate-300 font-normal">(Roberto)</strong>
+                    <span>{settingsData?.robertoPhone || MZTECH_INFO.robertoPhone}</span> <strong className="text-slate-300 font-normal">({settingsData?.robertoName || 'Roberto'})</strong>
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
                   <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
                   <a href={`https://wa.me/${MZTECH_INFO.morvanWhatsapp}`} target="_blank" rel="noreferrer" className="hover:underline">
-                    <span>{MZTECH_INFO.morvanPhone}</span> <strong className="text-slate-300 font-normal">(Morvan)</strong>
+                    <span>{settingsData?.morvanPhone || MZTECH_INFO.morvanPhone}</span> <strong className="text-slate-300 font-normal">({settingsData?.morvanName || 'Morvan'})</strong>
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <a href={`mailto:${MZTECH_INFO.email}`} className="hover:underline text-cyan-400 break-all">
-                    {MZTECH_INFO.email}
+                  <a href={`mailto:${settingsData?.email || MZTECH_INFO.email}`} className={`hover:underline ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} break-all`}>
+                    {settingsData?.email || MZTECH_INFO.email}
                   </a>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div className={`pt-8 border-t ${isDarkCyberGlow ? 'border-violet-500/15' : 'border-slate-800/80'} flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500`}>
             <p>© {MZTECH_INFO.year} mzTech. Todos os direitos reservados.</p>
             <p className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />

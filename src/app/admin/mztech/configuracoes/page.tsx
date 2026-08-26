@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
   const [name, setName] = useState('mzTech');
   const [legalName, setLegalName] = useState('mzTech Soluções Digitais & Desenvolvimento');
   const [tagline, setTagline] = useState('Tecnologia que coloca sua empresa no digital.');
-  const [siteTheme, setSiteTheme] = useState<'CYBER_DARK' | 'STUDIO_PREMIUM'>('CYBER_DARK');
+  const [siteTheme, setSiteTheme] = useState<'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM'>('DARK_CYBER_GLOW');
   
   // E-mails dinâmicos
   const [emails, setEmails] = useState<CompanyEmailItem[]>([
@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
         setName(s.name || 'mzTech');
         setLegalName(s.legalName || 'mzTech Soluções Digitais & Desenvolvimento');
         setTagline(s.tagline || 'Tecnologia que coloca sua empresa no digital.');
-        setSiteTheme(s.siteTheme || 'CYBER_DARK');
+        setSiteTheme(s.siteTheme || 'DARK_CYBER_GLOW');
         setRobertoName(s.robertoName || 'Roberto');
         setRobertoPhone(s.robertoPhone || '(31) 98684-7049');
         setRobertoPixKey(s.robertoPixKey || 'robertomazzoni956@gmail.com');
@@ -384,21 +384,25 @@ export default function AdminSettingsPage() {
           {/* ============================================================ */}
           {/* BLOCO 0: SELETOR DINÂMICO DE ESTILO & TEMA DA LANDING PAGE */}
           {/* ============================================================ */}
-          <div className="bg-slate-900/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+          <div className="bg-slate-900/90 border border-violet-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                <div className="w-10 h-10 rounded-2xl bg-violet-500/20 border border-violet-500/40 flex items-center justify-center text-violet-300">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <span>Identidade Visual & Tema do Site Oficial</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-bold">
-                      {siteTheme === 'STUDIO_PREMIUM' ? 'Estilo 2: Studio Pro' : 'Estilo 1: Dark Cyber'}
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono font-bold">
+                      {siteTheme === 'DARK_CYBER_GLOW'
+                        ? '★ Dark Cyber & Glow (Ativo)'
+                        : siteTheme === 'STUDIO_PREMIUM'
+                        ? 'Estilo Studio Pro'
+                        : 'Estilo Dark Cyber & Cyan'}
                     </span>
                   </h3>
                   <p className="text-xs text-slate-400">
-                    Escolha qual estilo visual fica no ar para os visitantes. Você pode alternar quando quiser.
+                    Escolha qual estilo visual fica no ar para os visitantes. Todos os estilos estão preservados e podem ser alternados a qualquer momento.
                   </p>
                 </div>
               </div>
@@ -410,27 +414,81 @@ export default function AdminSettingsPage() {
                   rel="noreferrer"
                   className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
                 >
-                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                  <Globe className="w-3.5 h-3.5 text-violet-400" />
                   <span>Ver Site no Ar</span>
                 </a>
               </div>
             </div>
 
-            {/* Grid de Seleção dos 2 Estilos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Estilo 1: Dark Cyber & Terminal */}
+            {/* Grid de Seleção dos 3 Estilos */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Estilo NOVO: Dark Cyber & Glow (Roxo & Violeta) */}
+              <div
+                onClick={() => setSiteTheme('DARK_CYBER_GLOW')}
+                className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative flex flex-col justify-between ${
+                  siteTheme === 'DARK_CYBER_GLOW'
+                    ? 'bg-violet-500/10 border-violet-400 shadow-xl shadow-violet-500/15 scale-[1.02]'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-violet-500/40 hover:bg-slate-900/40'
+                }`}
+              >
+                {siteTheme === 'DARK_CYBER_GLOW' && (
+                  <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-violet-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                    <span>TEMA ATIVO</span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-sm">
+                      ★
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">Dark Cyber & Glow</h4>
+                      <p className="text-[11px] text-violet-400 font-mono">Roxo • Violeta • Hero 2 Colunas</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                    Design premium com roxo/violeta, azul-violeta complementar, superfícies escuras refinadas, Hero em 2 colunas com Tech Architecture Preview e alta conversão.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-[#0a0d20] border border-violet-500/20 text-left space-y-1 mt-2">
+                    <span className="text-[10px] text-violet-400 font-mono block">✨ {tagline}</span>
+                    <strong className="text-white text-xs block">Seu negócio merece uma presença digital profissional.</strong>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800/80 mt-4 flex items-center justify-between">
+                  <span className="text-xs text-violet-400 font-bold">Tema Oficial</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSiteTheme('DARK_CYBER_GLOW');
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      siteTheme === 'DARK_CYBER_GLOW'
+                        ? 'bg-violet-600 text-white shadow-md'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {siteTheme === 'DARK_CYBER_GLOW' ? 'Selecionado' : 'Ativar Este Estilo'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Estilo 1: Dark Cyber & Cyan Glow (Clássico) */}
               <div
                 onClick={() => setSiteTheme('CYBER_DARK')}
                 className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative flex flex-col justify-between ${
                   siteTheme === 'CYBER_DARK'
-                    ? 'bg-cyan-500/10 border-cyan-400 shadow-xl shadow-cyan-500/10 scale-[1.01]'
+                    ? 'bg-cyan-500/10 border-cyan-400 shadow-xl shadow-cyan-500/10 scale-[1.02]'
                     : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40'
                 }`}
               >
                 {siteTheme === 'CYBER_DARK' && (
                   <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
                     <Check className="w-3 h-3 stroke-[3]" />
-                    <span>Tema Ativo</span>
+                    <span>TEMA ATIVO</span>
                   </div>
                 )}
                 <div className="space-y-2">
@@ -439,22 +497,22 @@ export default function AdminSettingsPage() {
                       1
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-base">Estilo 1: Dark Cyber & Glow</h4>
-                      <p className="text-[11px] text-cyan-400 font-mono">Moderno • Glows Neon • Terminal</p>
+                      <h4 className="font-bold text-white text-base">Dark Cyber & Cyan Glow</h4>
+                      <p className="text-[11px] text-cyan-400 font-mono">Ciano • Orbs Neon • Terminal</p>
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed pt-1">
-                    Visual clássico escuro com badges brilhantes, headline com gradiente azul/ciano e layout dinâmico focado em tecnologia e presença digital.
+                    Visual clássico escuro com badges brilhantes, headline centralizada com gradiente azul/ciano e layout dinâmico focado em tecnologia.
                   </p>
 
                   <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1 mt-2">
-                    <span className="text-[10px] text-cyan-400 font-mono block">✨ Tecnologia que coloca sua empresa no digital.</span>
+                    <span className="text-[10px] text-cyan-400 font-mono block">✨ {tagline}</span>
                     <strong className="text-white text-xs block">Seu negócio merece uma presença digital profissional.</strong>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-slate-800/80 mt-4 flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-medium">Layout Dinâmico</span>
+                  <span className="text-xs text-slate-400 font-medium">Layout Clássico</span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -477,14 +535,14 @@ export default function AdminSettingsPage() {
                 onClick={() => setSiteTheme('STUDIO_PREMIUM')}
                 className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative flex flex-col justify-between ${
                   siteTheme === 'STUDIO_PREMIUM'
-                    ? 'bg-blue-500/10 border-blue-400 shadow-xl shadow-blue-500/10 scale-[1.01]'
+                    ? 'bg-blue-500/10 border-blue-400 shadow-xl shadow-blue-500/10 scale-[1.02]'
                     : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40'
                 }`}
               >
                 {siteTheme === 'STUDIO_PREMIUM' && (
                   <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-blue-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
                     <Check className="w-3 h-3 stroke-[3]" />
-                    <span>Tema Ativo</span>
+                    <span>TEMA ATIVO</span>
                   </div>
                 )}
                 <div className="space-y-2">
@@ -493,16 +551,16 @@ export default function AdminSettingsPage() {
                       2
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-base">Estilo 2: Studio de Software Pro</h4>
-                      <p className="text-[11px] text-blue-400 font-mono">Alta Autoridade • Fundadores • Vercel/Linear Style</p>
+                      <h4 className="font-bold text-white text-base">Studio de Software Pro</h4>
+                      <p className="text-[11px] text-blue-400 font-mono">Alta Autoridade • Fundadores</p>
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed pt-1">
-                    Visual sofisticado de estúdio de engenharia de software internacional, com malha geométrica técnica, apresentação dos fundadores Roberto e Morvan e métricas de infraestrutura.
+                    Visual sofisticado de estúdio de engenharia de software internacional, com malha geométrica técnica, apresentação dos fundadores Roberto e Morvan.
                   </p>
 
                   <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1 mt-2">
-                    <span className="text-[10px] text-blue-400 font-mono block">mzTech • Estúdio de Software & Desenvolvimento</span>
+                    <span className="text-[10px] text-blue-400 font-mono block">mzTech • Estúdio de Software</span>
                     <strong className="text-white text-xs block">Engenharia de software de alta performance e sistemas sob medida.</strong>
                   </div>
                 </div>

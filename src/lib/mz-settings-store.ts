@@ -17,7 +17,7 @@ export interface CompanyPixItem {
   isPrimary?: boolean;
 }
 
-export type SiteThemeStyle = 'CYBER_DARK' | 'STUDIO_PREMIUM';
+export type SiteThemeStyle = 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM';
 
 export interface CompanySettings {
   name: string;
@@ -47,7 +47,7 @@ export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
   tagline: 'Tecnologia que coloca sua empresa no digital.',
-  siteTheme: 'CYBER_DARK',
+  siteTheme: 'DARK_CYBER_GLOW',
   email: 'robertomazzoni956@gmail.com',
   emails: [
     {
@@ -130,6 +130,11 @@ export function getStoredSettings(): CompanySettings {
                 isPrimary: true,
               },
             ];
+          }
+
+          // Garante que siteTheme tenha fallback
+          if (!merged.siteTheme) {
+            merged.siteTheme = 'DARK_CYBER_GLOW';
           }
 
           globalObj[globalSettingsKey] = merged;
