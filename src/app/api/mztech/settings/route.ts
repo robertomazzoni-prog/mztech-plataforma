@@ -6,9 +6,22 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const session = getUserFromRequest(req);
     const settings = getStoredSettings();
+    
+    // Se não for admin autenticado, mascarar o Access Token sensível do Mercado Pago
+    const safeSettings = {
+      ...settings,
+      mercadoPagoAccessToken:
+        session?.role === 'ADMIN'
+          ? settings.mercadoPagoAccessToken
+          : settings.mercadoPagoAccessToken
+          ? '••••••••••••••••'
+          : '',
+    };
+
     return NextResponse.json(
-      { settings },
+      { settings: safeSettings },
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
