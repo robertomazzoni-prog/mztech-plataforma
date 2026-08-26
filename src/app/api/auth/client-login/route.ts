@@ -30,38 +30,62 @@ export async function POST(req: NextRequest) {
         c.whatsapp?.replace(/\D/g, '').includes(cleanEmail.replace(/\D/g, ''))
     );
 
-    // 2. Se não encontrou na memória e o banco estiver online, busca no Prisma
-    if (!matchedClient) {
-      const dbOnline = await isDatabaseOnline();
-      if (dbOnline) {
-        try {
-          const dbClient = await prisma.mzClient.findFirst({
+    // 2. Se não encontrou na memória, busca no Prisma (mzClient ou User)
+    const dbOnline = await isDatabaseOnline();
+    if (!matchedClient && dbOnline) {
+      try {
+        const dbClient = await prisma.mzClient.findFirst({
+          where: {
+            OR: [
+              { email: { equals: cleanEmail, mode: 'insensitive' } },
+              { companyName: { equals: cleanEmail, mode: 'insensitive' } },
+              { contactName: { equals: cleanEmail, mode: 'insensitive' } },
+            ],
+          },
+        });
+        if (dbClient) {
+          matchedClient = {
+            id: dbClient.id,
+            companyName: dbClient.companyName,
+            contactName: dbClient.contactName,
+            email: dbClient.email,
+            whatsapp: dbClient.whatsapp,
+            domain: dbClient.domain,
+            status: dbClient.status as any,
+            financialStatus: dbClient.financialStatus as any,
+            codeDelivered: false,
+            backupDelivered: false,
+            createdAt: dbClient.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: dbClient.updatedAt?.toISOString() || new Date().toISOString(),
+          };
+        } else {
+          // Busca na tabela de Usuários
+          const dbUser = await prisma.user.findFirst({
             where: {
               OR: [
                 { email: { equals: cleanEmail, mode: 'insensitive' } },
-                { companyName: { equals: cleanEmail, mode: 'insensitive' } },
-                { contactName: { equals: cleanEmail, mode: 'insensitive' } },
+                { phone: { contains: cleanEmail.replace(/\D/g, '') } },
               ],
             },
           });
-          if (dbClient) {
+          if (dbUser) {
             matchedClient = {
-              id: dbClient.id,
-              companyName: dbClient.companyName,
-              contactName: dbClient.contactName,
-              email: dbClient.email,
-              whatsapp: dbClient.whatsapp,
-              domain: dbClient.domain,
-              status: dbClient.status as any,
-              financialStatus: dbClient.financialStatus as any,
+              id: dbUser.id,
+              companyName: dbUser.name || 'Cliente',
+              contactName: dbUser.name || 'Cliente',
+              email: dbUser.email,
+              whatsapp: dbUser.phone || '',
+              domain: null,
+              status: 'ATIVO',
+              financialStatus: 'EM_DIA',
               codeDelivered: false,
               backupDelivered: false,
-              createdAt: dbClient.createdAt?.toISOString() || new Date().toISOString(),
-              updatedAt: dbClient.updatedAt?.toISOString() || new Date().toISOString(),
+              createdAt: dbUser.createdAt?.toISOString() || new Date().toISOString(),
+              updatedAt: dbUser.updatedAt?.toISOString() || new Date().toISOString(),
             };
           }
-        } catch (err) {}
-      }
+        }
+      } catch (err) {}
     }
 
     if (!matchedClient) {

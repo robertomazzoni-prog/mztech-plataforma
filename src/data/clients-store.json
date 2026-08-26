@@ -1,5 +1,50 @@
 [
   {
+    "id": "client-robertotech",
+    "companyName": "RobertoTECH",
+    "contactName": "Roberto",
+    "whatsapp": "5531986847049",
+    "email": "robertomazzoni123@gmail.com",
+    "domain": "robertotech.com.br",
+    "status": "ATIVO",
+    "financialStatus": "EM_DIA",
+    "startDate": "2026-08-26T16:00:00.000Z",
+    "notes": "Cliente oficial mzTech • RobertoTECH",
+    "codeDelivered": true,
+    "backupDelivered": true,
+    "projects": [
+      {
+        "id": "proj-robertotech",
+        "clientId": "client-robertotech",
+        "name": "Site Institucional Profissional - RobertoTECH",
+        "type": "SITE_INSTITUCIONAL",
+        "status": "PRODUCAO",
+        "startDate": "2026-08-26T16:00:00.000Z",
+        "deliveryDate": null,
+        "domain": "robertotech.com.br",
+        "hostingUrl": "https://robertotech.com.br",
+        "hostingPlatform": "Railway Cloud",
+        "responsibleDev": "Roberto",
+        "notes": "Projeto entregue e ativo em produção."
+      }
+    ],
+    "hostings": [
+      {
+        "id": "host-robertotech",
+        "clientId": "client-robertotech",
+        "provider": "Railway Cloud",
+        "url": "https://robertotech.com.br",
+        "customDomain": "robertotech.com.br",
+        "monthlyPrice": 39.9,
+        "status": "ATIVO",
+        "startDate": "2026-08-26T16:00:00.000Z"
+      }
+    ],
+    "_count": { "projects": 1, "hostings": 1, "maintenances": 0, "backups": 1 },
+    "createdAt": "2026-08-26T16:00:00.000Z",
+    "updatedAt": "2026-08-26T16:00:00.000Z"
+  },
+  {
     "id": "client-tete",
     "companyName": "tete",
     "contactName": "tete",
