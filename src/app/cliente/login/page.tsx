@@ -45,9 +45,12 @@ export default function ClientLoginPage() {
 
       if (typeof window !== 'undefined') {
         localStorage.setItem('mztech_client_session', JSON.stringify(data.user || data.client));
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectPath = urlParams.get('redirect') || '/cliente';
+        router.push(redirectPath);
+      } else {
+        router.push('/cliente');
       }
-
-      router.push('/cliente');
     } catch (err) {
       setError('Erro de conexão ao processar login.');
     } finally {

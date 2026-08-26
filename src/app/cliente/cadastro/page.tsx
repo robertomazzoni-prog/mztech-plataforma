@@ -83,8 +83,8 @@ export default function ClientRegisterPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/cliente');
-      }, 1200);
+        router.push('/#orcamento');
+      }, 1000);
     } catch (err) {
       setError('Erro de conexão ao processar o cadastro.');
     } finally {
@@ -110,7 +110,7 @@ export default function ClientRegisterPage() {
             Criar Conta de Cliente mz<span className="text-cyan-400">Tech</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400">
-            Cadastre sua empresa para acompanhar seus projetos, faturas e orçamentos
+            Cadastre sua empresa para solicitar seu orçamento e acompanhar seus projetos em tempo real
           </p>
         </div>
 
@@ -122,13 +122,13 @@ export default function ClientRegisterPage() {
         )}
 
         {success ? (
-          <div className="py-8 text-center space-y-3">
+          <div className="py-8 text-center space-y-3 animate-in fade-in">
             <div className="w-16 h-16 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/30 animate-bounce">
               <CheckCircle2 className="w-8 h-8 stroke-[3]" />
             </div>
             <h3 className="text-xl font-bold text-white">Conta Criada com Sucesso!</h3>
-            <p className="text-xs text-slate-400">
-              Redirecionando para seu Portal do Cliente...
+            <p className="text-xs text-slate-300">
+              Redirecionando você diretamente para o formulário de orçamento...
             </p>
           </div>
         ) : (
