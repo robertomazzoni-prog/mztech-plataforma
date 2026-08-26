@@ -12,6 +12,7 @@ import {
   getStoredContractById,
   updateStoredContract,
 } from '@/lib/mz-entities-store';
+import { MzPaymentItem } from '@/types/mztech';
 import { logActivity } from '@/lib/audit-store';
 
 export const dynamic = 'force-dynamic';
@@ -92,33 +93,92 @@ export async function POST(req: NextRequest) {
 
     const client = getStoredClientById(clientId);
 
-    const newPayment = createStoredPayment({
-      clientId,
-      client: client
-        ? { id: client.id, companyName: client.companyName, contactName: client.contactName }
-        : undefined,
-      contractId: contractId || null,
-      subscriptionId: subscriptionId || null,
-      title: title || 'Cobrança Avulsa mzTech',
-      amount: parseFloat(amount),
-      paymentMethod: paymentMethod || 'CREDIT_CARD',
-      paymentType: paymentType || 'TAXA_INICIAL',
-      status: status || 'PENDING',
-      dueDate: dueDate || new Date().toISOString(),
-      notes: notes || null,
-    });
+    const payments = getStoredPayments();
+    let paymentRecord: MzPaymentItem;
+
+    // Se for confirmação de pagamento do checkout e já existir cobrança inicial pendente para este contrato:
+    const existingPendingInitPayment = contractId
+      ? payments.find((p) => p.contractId === contractId && p.paymentType === 'TAXA_INICIAL' && p.status === 'PENDING')
+      : null;
+
+    if (existingPendingInitPayment && status === 'PAID') {
+      paymentRecord = updateStoredPayment(existingPendingInitPayment.id, {
+        status: 'PAID',
+        paidAt: new Date().toISOString(),
+        paymentMethod: paymentMethod || existingPendingInitPayment.paymentMethod,
+        notes: notes || existingPendingInitPayment.notes,
+      })!;
+    } else {
+      paymentRecord = createStoredPayment({
+        clientId,
+        client: client
+          ? { id: client.id, companyName: client.companyName, contactName: client.contactName }
+          : undefined,
+        contractId: contractId || null,
+        subscriptionId: subscriptionId || null,
+        title: title || 'Cobrança Avulsa mzTech',
+        amount: parseFloat(amount),
+        paymentMethod: paymentMethod || 'CREDIT_CARD',
+        paymentType: paymentType || 'TAXA_INICIAL',
+        status: status || 'PENDING',
+        dueDate: dueDate || new Date().toISOString(),
+        notes: notes || null,
+      });
+    }
+
+    if (status === 'PAID' && clientId) {
+      updateStoredClient(clientId, { financialStatus: 'EM_DIA' });
+      if (contractId) {
+        const contract = getStoredContractById(contractId);
+        if (contract) {
+          updateStoredContract(contractId, { status: 'ATIVO' });
+
+          // Se o contrato tem mensalidade contratada (plano), gerar a próxima fatura mensal recorrente para o cliente
+          if (contract.monthlyPrice > 0) {
+            const hasExistingMonthlyPending = payments.some(
+              (p) => p.contractId === contractId && p.paymentType === 'TAXA_MENSAL' && p.status === 'PENDING'
+            );
+
+            if (!hasExistingMonthlyPending) {
+              const nextMonthDate = new Date();
+              nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+              if (contract.dueDay) {
+                nextMonthDate.setDate(Math.min(contract.dueDay, 28));
+              }
+
+              createStoredPayment({
+                clientId: contract.clientId,
+                client: {
+                  id: contract.clientId,
+                  companyName: client?.companyName || 'Cliente',
+                  contactName: client?.contactName || 'Contato',
+                },
+                contractId: contract.id,
+                title: `Mensalidade — ${contract.project?.name || contract.title || 'Plano de Hospedagem & Manutenção'}`,
+                amount: contract.monthlyPrice,
+                paymentMethod: paymentMethod || 'CREDIT_CARD',
+                paymentType: 'TAXA_MENSAL',
+                status: 'PENDING',
+                dueDate: nextMonthDate.toISOString(),
+                notes: `Mensalidade recorrente do plano contratado (R$ ${contract.monthlyPrice.toFixed(2)}/mês).`,
+              });
+            }
+          }
+        }
+      }
+    }
 
     const user = getUserFromRequest(req);
     logActivity({
       actor: user?.name || 'Administrador',
       action: 'CRIAR_COBRANCA',
       category: 'PAGAMENTO',
-      targetId: newPayment.id,
-      targetNumber: newPayment.transactionId,
-      description: `Cobrança ${newPayment.transactionId} de R$ ${newPayment.amount.toFixed(2)} criada para "${client?.companyName || clientId}".`,
+      targetId: paymentRecord.id,
+      targetNumber: paymentRecord.transactionId,
+      description: `Cobrança ${paymentRecord.transactionId} de R$ ${paymentRecord.amount.toFixed(2)} (${paymentRecord.status}) para "${client?.companyName || clientId}".`,
     });
 
-    return NextResponse.json({ success: true, payment: newPayment }, { status: 201 });
+    return NextResponse.json({ success: true, payment: paymentRecord }, { status: 201 });
   } catch (error: any) {
     console.error('Erro ao criar cobrança:', error);
     return NextResponse.json({ error: 'Erro ao criar cobrança.' }, { status: 500 });
@@ -160,10 +220,41 @@ export async function PATCH(req: NextRequest) {
       // Se tiver contrato vinculado e estiver aguardando pagamento, ativar contrato
       if (updatedPayment.contractId) {
         const contract = getStoredContractById(updatedPayment.contractId);
-        if (contract && (contract.status === 'AGUARDANDO_PAGAMENTO' || contract.status === 'RASCUNHO')) {
-          updateStoredContract(updatedPayment.contractId, {
-            status: 'ATIVO',
-          });
+        if (contract) {
+          if (contract.status === 'AGUARDANDO_PAGAMENTO' || contract.status === 'RASCUNHO') {
+            updateStoredContract(updatedPayment.contractId, {
+              status: 'ATIVO',
+            });
+          }
+
+          // Se for taxa inicial paga e o contrato tiver mensalidade, gerar a próxima fatura de mensalidade do plano
+          if (updatedPayment.paymentType === 'TAXA_INICIAL' && contract.monthlyPrice > 0) {
+            const allPayments = getStoredPayments();
+            const hasMonthlyPending = allPayments.some(
+              (p) => p.contractId === contract.id && p.paymentType === 'TAXA_MENSAL' && p.status === 'PENDING'
+            );
+
+            if (!hasMonthlyPending) {
+              const nextMonthDate = new Date();
+              nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+              if (contract.dueDay) {
+                nextMonthDate.setDate(Math.min(contract.dueDay, 28));
+              }
+
+              createStoredPayment({
+                clientId: contract.clientId,
+                client: updatedPayment.client,
+                contractId: contract.id,
+                title: `Mensalidade — ${contract.project?.name || contract.title || 'Plano de Hospedagem & Manutenção'}`,
+                amount: contract.monthlyPrice,
+                paymentMethod: updatedPayment.paymentMethod || 'CREDIT_CARD',
+                paymentType: 'TAXA_MENSAL',
+                status: 'PENDING',
+                dueDate: nextMonthDate.toISOString(),
+                notes: `Mensalidade recorrente do plano contratado (R$ ${contract.monthlyPrice.toFixed(2)}/mês).`,
+              });
+            }
+          }
         }
       }
     }

@@ -82,8 +82,23 @@ export async function GET(req: NextRequest) {
 
     const activePixKey = settings.pixKey || 'robertomazzoni956@gmail.com';
 
+    // Identificar contratos que já tiveram a taxa inicial paga
+    const paidInitialContractIds = new Set(
+      clientPayments
+        .filter((p) => p.paymentType === 'TAXA_INICIAL' && p.status === 'PAID' && p.contractId)
+        .map((p) => p.contractId)
+    );
+
+    // Filtrar pagamentos para não exibir taxa inicial pendente duplicada caso já tenha sido paga
+    const cleanPayments = clientPayments.filter((p) => {
+      if (p.paymentType === 'TAXA_INICIAL' && p.status === 'PENDING' && p.contractId && paidInitialContractIds.has(p.contractId)) {
+        return false;
+      }
+      return true;
+    });
+
     // Se houver pagamentos cadastrados, formatar para o portal
-    let invoices = clientPayments.map((p) => ({
+    let invoices = cleanPayments.map((p) => ({
       id: p.id,
       title: p.title || 'Cobrança mzTech',
       amount: p.amount,
@@ -95,24 +110,33 @@ export async function GET(req: NextRequest) {
       paymentMethod: p.paymentMethod,
     }));
 
-    if (invoices.length === 0 && client.financialStatus !== 'EM_DIA') {
-      const today = new Date();
-      const nextDueDate = new Date();
-      nextDueDate.setDate(today.getDate() + 5);
+    // Se o cliente tem contrato assinado/ativo com mensalidade, mas ainda não gerou a fatura da mensalidade recorrente:
+    const activeContractWithMonthly = clientContracts.find(
+      (c) => (c.status === 'ATIVO' || c.clientSigned || c.acceptedOnline) && Number(c.monthlyPrice) > 0
+    );
 
-      invoices = [
-        {
-          id: `fat-${client.id}-current`,
-          title: 'Mensalidade Hospedagem & Manutenção Técnica',
-          amount: 79.90,
-          dueDate: nextDueDate.toISOString().split('T')[0],
-          status: 'PENDING',
-          paidAt: undefined,
-          pixKey: activePixKey,
-          pixQrCodeText: activePixKey,
-          paymentMethod: 'CREDIT_CARD',
-        },
-      ];
+    const hasMonthlyInvoice = invoices.some(
+      (i) => i.title.toLowerCase().includes('mensal') || i.title.toLowerCase().includes('hospedagem')
+    );
+
+    if (activeContractWithMonthly && !hasMonthlyInvoice) {
+      const nextDueDate = new Date();
+      nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+      if (activeContractWithMonthly.dueDay) {
+        nextDueDate.setDate(Math.min(activeContractWithMonthly.dueDay, 28));
+      }
+
+      invoices.unshift({
+        id: `fat-${client.id}-plan-monthly`,
+        title: `Mensalidade — ${activeContractWithMonthly.project?.name || activeContractWithMonthly.title || 'Plano Hospedagem & Manutenção'}`,
+        amount: Number(activeContractWithMonthly.monthlyPrice),
+        dueDate: nextDueDate.toISOString().split('T')[0],
+        status: 'PENDING',
+        paidAt: undefined,
+        pixKey: activePixKey,
+        pixQrCodeText: activePixKey,
+        paymentMethod: activeContractWithMonthly.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+      });
     }
 
     return NextResponse.json({

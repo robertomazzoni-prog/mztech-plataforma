@@ -472,7 +472,7 @@ export interface MzPaymentItem {
   title?: string;
   amount: number;
   paymentMethod: PaymentMethod;
-  paymentType?: 'TAXA_INICIAL' | 'MENSALIDADE_REVISAO' | 'AVULSO';
+  paymentType?: 'TAXA_INICIAL' | 'MENSALIDADE_REVISAO' | 'TAXA_MENSAL' | 'AVULSO';
   status: PaymentStatus;
   dueDate: string;
   paidAt?: string | null;
