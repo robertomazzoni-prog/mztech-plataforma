@@ -435,28 +435,21 @@ function ensureDir() {
 // CLIENTES (MzClient)
 // ============================================================
 export function getStoredClients(): MzClientItem[] {
-  if (!globalObj[globalClientsKey] || globalObj[globalClientsKey].length === 0) {
+  if (!globalObj[globalClientsKey]) {
     let clients: MzClientItem[] = [];
     try {
       if (fs.existsSync(CLIENTS_FILE)) {
         const content = fs.readFileSync(CLIENTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           clients = parsed;
         }
+      } else {
+        clients = [...defaultClients];
+        saveStoredClients(clients);
       }
-    } catch (e) {}
-
-    if (clients.length === 0) {
-      clients = [...defaultClients];
-      saveStoredClients(clients);
-    } else {
-      const existingIds = new Set(clients.map((c) => c.id));
-      for (const defC of defaultClients) {
-        if (!existingIds.has(defC.id)) {
-          clients.push(defC);
-        }
-      }
+    } catch (e) {
+      clients = [];
     }
     globalObj[globalClientsKey] = clients;
   }
@@ -548,28 +541,21 @@ export function deleteStoredClient(id: string): boolean {
 // PROJETOS (MzProject)
 // ============================================================
 export function getStoredProjects(): MzProjectItem[] {
-  if (!globalObj[globalProjectsKey] || globalObj[globalProjectsKey].length === 0) {
+  if (!globalObj[globalProjectsKey]) {
     let projects: MzProjectItem[] = [];
     try {
       if (fs.existsSync(PROJECTS_FILE)) {
         const content = fs.readFileSync(PROJECTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           projects = parsed;
         }
+      } else {
+        projects = [...defaultProjects];
+        saveStoredProjects(projects);
       }
-    } catch (e) {}
-
-    if (projects.length === 0) {
-      projects = [...defaultProjects];
-      saveStoredProjects(projects);
-    } else {
-      const existingIds = new Set(projects.map((p) => p.id));
-      for (const defP of defaultProjects) {
-        if (!existingIds.has(defP.id)) {
-          projects.push(defP);
-        }
-      }
+    } catch (e) {
+      projects = [];
     }
     globalObj[globalProjectsKey] = projects;
   }
@@ -646,28 +632,21 @@ export function deleteStoredProject(id: string): boolean {
 // CONTRATOS (MzContract) COM SNAPSHOT
 // ============================================================
 export function getStoredContracts(): MzContractItem[] {
-  if (!globalObj[globalContractsKey] || globalObj[globalContractsKey].length === 0) {
+  if (!globalObj[globalContractsKey]) {
     let contracts: MzContractItem[] = [];
     try {
       if (fs.existsSync(CONTRACTS_FILE)) {
         const content = fs.readFileSync(CONTRACTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           contracts = parsed;
         }
+      } else {
+        contracts = [...defaultContracts];
+        saveStoredContracts(contracts);
       }
-    } catch (e) {}
-
-    if (contracts.length === 0) {
-      contracts = [...defaultContracts];
-      saveStoredContracts(contracts);
-    } else {
-      const existingIds = new Set(contracts.map((c) => c.id));
-      for (const defC of defaultContracts) {
-        if (!existingIds.has(defC.id)) {
-          contracts.push(defC);
-        }
-      }
+    } catch (e) {
+      contracts = [];
     }
     globalObj[globalContractsKey] = contracts;
   }
@@ -819,28 +798,21 @@ export function createStoredService(service: any): any {
 // PAGAMENTOS (MzPayment)
 // ============================================================
 export function getStoredPayments(): MzPaymentItem[] {
-  if (!globalObj[globalPaymentsKey] || globalObj[globalPaymentsKey].length === 0) {
+  if (!globalObj[globalPaymentsKey]) {
     let payments: MzPaymentItem[] = [];
     try {
       if (fs.existsSync(PAYMENTS_FILE)) {
         const content = fs.readFileSync(PAYMENTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           payments = parsed;
         }
+      } else {
+        payments = [...defaultPayments];
+        saveStoredPayments(payments);
       }
-    } catch (e) {}
-
-    if (payments.length === 0) {
-      payments = [...defaultPayments];
-      saveStoredPayments(payments);
-    } else {
-      const existingIds = new Set(payments.map((p) => p.id));
-      for (const defP of defaultPayments) {
-        if (!existingIds.has(defP.id)) {
-          payments.push(defP);
-        }
-      }
+    } catch (e) {
+      payments = [];
     }
     globalObj[globalPaymentsKey] = payments;
   }
@@ -961,28 +933,21 @@ export function deleteStoredSubscription(id: string): boolean {
 // RECORRÊNCIAS / ASSINATURAS (MzSubscription)
 // ============================================================
 export function getStoredSubscriptions(): MzSubscriptionItem[] {
-  if (!globalObj[globalSubscriptionsKey] || globalObj[globalSubscriptionsKey].length === 0) {
+  if (!globalObj[globalSubscriptionsKey]) {
     let subs: MzSubscriptionItem[] = [];
     try {
       if (fs.existsSync(SUBSCRIPTIONS_FILE)) {
         const content = fs.readFileSync(SUBSCRIPTIONS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           subs = parsed;
         }
+      } else {
+        subs = [...defaultSubscriptions];
+        saveStoredSubscriptions(subs);
       }
-    } catch (e) {}
-
-    if (subs.length === 0) {
-      subs = [...defaultSubscriptions];
-      saveStoredSubscriptions(subs);
-    } else {
-      const existingIds = new Set(subs.map((s) => s.id));
-      for (const defS of defaultSubscriptions) {
-        if (!existingIds.has(defS.id)) {
-          subs.push(defS);
-        }
-      }
+    } catch (e) {
+      subs = [];
     }
     globalObj[globalSubscriptionsKey] = subs;
   }

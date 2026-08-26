@@ -62,7 +62,7 @@ export async function PATCH(
 ) {
   try {
     const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
+    if (user && user.role !== 'ADMIN' && user.role !== 'BARBER') {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
@@ -74,6 +74,7 @@ export async function PATCH(
       email,
       domain,
       status,
+      financialStatus,
       startDate,
       notes,
       cancellationDate,
@@ -94,6 +95,7 @@ export async function PATCH(
     if (email !== undefined) dataToUpdate.email = email;
     if (domain !== undefined) dataToUpdate.domain = domain;
     if (status !== undefined) dataToUpdate.status = status;
+    if (financialStatus !== undefined) dataToUpdate.financialStatus = financialStatus;
     if (startDate !== undefined) dataToUpdate.startDate = startDate ? new Date(startDate) : null;
     if (notes !== undefined) dataToUpdate.notes = notes;
 
@@ -151,7 +153,7 @@ export async function DELETE(
 ) {
   try {
     const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
+    if (user && user.role !== 'ADMIN' && user.role !== 'BARBER') {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 

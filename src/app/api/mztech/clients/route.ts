@@ -55,14 +55,7 @@ export async function GET(req: NextRequest) {
         });
 
         if (dbClients && dbClients.length > 0) {
-          const existingIds = new Set(dbClients.map((c) => c.id));
-          const combined: any[] = [...dbClients];
-          for (const memC of clients) {
-            if (!existingIds.has(memC.id)) {
-              combined.push(memC);
-            }
-          }
-          return NextResponse.json({ clients: combined });
+          return NextResponse.json({ clients: dbClients });
         }
       } catch (err) {}
     }

@@ -166,7 +166,9 @@ export default function MzTechClientsPage() {
     setTerminatingClient(client);
     const today = new Date().toISOString().split('T')[0];
     setTerminationData({
-      status: client.status === 'CANCELAMENTO_SOLICITADO' ? 'ENCERRADO' : (client.status as ClientStatus),
+      status: (client.status === 'CANCELAMENTO_SOLICITADO' || client.status === 'SUSPENSO' || client.status === 'ENCERRADO')
+        ? client.status
+        : 'ENCERRADO',
       cancellationDate: client.cancellationDate
         ? new Date(client.cancellationDate).toISOString().split('T')[0]
         : today,
@@ -211,7 +213,7 @@ export default function MzTechClientsPage() {
       }
 
       setModalOpen(false);
-      loadClients();
+      await loadClients();
     } catch (err) {
       alert('Erro de conexão ao salvar cliente.');
     } finally {
@@ -225,10 +227,15 @@ export default function MzTechClientsPage() {
 
     setSubmitting(true);
     try {
+      const payload: any = {
+        ...terminationData,
+        financialStatus: terminationData.status === 'ENCERRADO' ? 'CANCELADO' : terminatingClient.financialStatus,
+      };
+
       const res = await fetch(`/api/mztech/clients/${terminatingClient.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(terminationData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -238,7 +245,7 @@ export default function MzTechClientsPage() {
       }
 
       setTerminationModalOpen(false);
-      loadClients();
+      await loadClients();
     } catch (err) {
       alert('Erro ao registrar encerramento do cliente.');
     } finally {
