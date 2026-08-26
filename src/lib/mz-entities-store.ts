@@ -699,12 +699,17 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     dueDay: quote.dueDay || 10,
     hasHosting: !isOnlyDev,
     hasMaintenance: !isOnlyDev,
+    hasDomain: quote.hasDomain || 'Não informado',
     backupRetentionDays: 30,
     codeOwnership: 'PROPRIEDADE_CLIENTE',
     termsVersion: 'v2.0-2026',
     assignedDev: chosenDev,
     generatedAt: nowStr,
   };
+
+  const clientAlreadyHasDomain = Boolean(
+    quote.hasDomain?.toLowerCase().includes('sim') || quote.hasDomain?.toLowerCase().includes('já possuo')
+  );
 
   const newContract: MzContractItem = {
     id: `contract-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -722,7 +727,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     project: {
       id: project.id,
       name: project.name,
-      domain: project.domain,
+      domain: project.domain || (clientAlreadyHasDomain ? 'Domínio Próprio do Cliente' : null),
     },
     quoteId: quote.id,
     assignedDev: chosenDev,
@@ -736,7 +741,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
     dueDay: snapshot.dueDay,
     termsVersion: 'v2.0-2026',
     codeOwnershipType: 'PROPRIEDADE_CLIENTE',
-    scopeDevelopment: `Desenvolvimento de ${quote.projectType} com alta performance e design responsivo.`,
+    scopeDevelopment: `Desenvolvimento de ${quote.projectType} com alta performance e design responsivo.${clientAlreadyHasDomain ? ' Inclui configuração técnica de DNS e apontamento do domínio próprio já existente.' : ''}`,
     scopeHosting: isOnlyDev ? 'Não contratada (Apenas Desenvolvimento)' : 'Hospedagem em nuvem Railway com certificado SSL incluso.',
     scopeMaintenance: isOnlyDev ? 'Garantia de 90 dias após entrega do código.' : 'Manutenção preventiva, correções e suporte prioritário via WhatsApp.',
     scopeSupport: isOnlyDev ? 'Suporte durante o período de desenvolvimento.' : `Atendimento direto com o sócio desenvolvedor ${chosenDev}.`,

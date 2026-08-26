@@ -315,6 +315,19 @@ export default function PublicContractSignPage({ params }: { params: { id: strin
                     {contract.monthlyPrice > 0 ? `${formatCurrency(contract.monthlyPrice)}/mês` : 'Não Contratada (Apenas Dev)'}
                   </td>
                 </tr>
+                {contract.snapshot?.hasDomain && (
+                  <tr>
+                    <td className="py-2.5 px-3 font-sans text-white">Domínio Próprio & Configuração DNS</td>
+                    <td className="py-2.5 px-3 text-slate-400">
+                      {contract.snapshot.hasDomain.toLowerCase().includes('sim') || contract.snapshot.hasDomain.toLowerCase().includes('já possuo')
+                        ? 'Cliente Já Possui Domínio (Apontamento Incluso)'
+                        : contract.snapshot.hasDomain}
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-emerald-400 font-bold">
+                      Incluso no Projeto
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

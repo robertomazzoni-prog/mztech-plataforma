@@ -317,6 +317,7 @@ export interface MzContractSnapshot {
   dueDay?: number;
   hasHosting: boolean;
   hasMaintenance: boolean;
+  hasDomain?: string | null;
   backupRetentionDays: number;
   codeOwnership: CodeOwnershipType;
   termsVersion: string;

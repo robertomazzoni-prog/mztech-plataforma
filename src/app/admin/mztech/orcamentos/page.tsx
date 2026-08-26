@@ -31,6 +31,7 @@ import {
   FileText,
   ShieldCheck,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import { MzQuoteItem, QuoteStatus, PaymentMethodChoice } from '@/types/mztech';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
@@ -622,7 +623,23 @@ export default function MzTechOrcamentosPage() {
                     <span className="text-slate-500">E-mail:</span> <span className="text-slate-300">{selectedQuote.email}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Domínio Próprio:</span> <span className="text-slate-300">{selectedQuote.hasDomain}</span>
+                    <span className="text-slate-500 block mb-1">Domínio Próprio:</span>
+                    {selectedQuote.hasDomain?.toLowerCase().includes('sim') || selectedQuote.hasDomain?.toLowerCase().includes('já possuo') ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Sim, já possui domínio registrado (Configuração DNS Inclusa)</span>
+                      </span>
+                    ) : selectedQuote.hasDomain?.toLowerCase().includes('não') ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Não possui (Registro de novo domínio com auxílio mzTech)</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>{selectedQuote.hasDomain || 'A definir na proposta'}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -639,6 +656,14 @@ export default function MzTechOrcamentosPage() {
                   </div>
                   <div>
                     <span className="text-slate-500">Hospedagem:</span> <span className="text-slate-300">{selectedQuote.needsHosting}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Situação de Domínio:</span>{' '}
+                    <strong className={selectedQuote.hasDomain?.toLowerCase().includes('sim') || selectedQuote.hasDomain?.toLowerCase().includes('já possuo') ? 'text-emerald-400' : 'text-cyan-400'}>
+                      {selectedQuote.hasDomain?.toLowerCase().includes('sim') || selectedQuote.hasDomain?.toLowerCase().includes('já possuo')
+                        ? 'Cliente com domínio próprio ativo'
+                        : selectedQuote.hasDomain || 'Novo registro necessário'}
+                    </strong>
                   </div>
                   <div>
                     <span className="text-slate-500">Prazo Desejado:</span> <span className="text-slate-300">{selectedQuote.desiredDeadline || '20 dias'}</span>
