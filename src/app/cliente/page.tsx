@@ -269,17 +269,22 @@ export default function ClientPortalPage() {
 
   const primaryProject = projects[0];
   const projectStatusInfo = getProjectStatusInfo(primaryProject?.status);
+  const hasQuotes = quotes.length > 0;
+  const hasContracts = contracts.length > 0;
+  const hasCommercialAnalysis = quotes.some((q) => q.status === 'EM_ANALISE' || q.status === 'APROVADO' || q.status === 'EM_CONTATO') || hasContracts;
   const hasAcceptedOrPaid = contracts.some((c) => c.acceptedOnline || c.status === 'ATIVO') || paidInvoices.length > 0;
 
   const currentStepperStatusText = primaryProject
     ? projectStatusInfo.stepText
     : hasAcceptedOrPaid
     ? '4. Aceite / Pagamento Confirmado'
-    : contracts.length > 0
+    : hasContracts
     ? '3. Contrato Gerado'
-    : quotes.length > 0
-    ? '2. Análise Comercial'
-    : '1. Orçamento Enviado';
+    : hasCommercialAnalysis
+    ? '2. Análise Comercial em Andamento'
+    : hasQuotes
+    ? '1. Orçamento Enviado'
+    : 'Aguardando Envio de Orçamento';
 
   // Desenvolvedor Responsável
   const devAssigned = quotes[0]?.selectedDev || 'Roberto';
@@ -379,7 +384,7 @@ export default function ClientPortalPage() {
         </div>
 
         {/* ============================================================ */}
-        {/* NOVO: STEPPER DE PROGRESSÃO DO SERVIÇO (6 ETAPAS) */}
+        {/* STEPPER DE PROGRESSÃO DO SERVIÇO (6 ETAPAS DINÂMICAS) */}
         {/* ============================================================ */}
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -387,17 +392,17 @@ export default function ClientPortalPage() {
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
               <span>Progresso do Fluxo Comercial & Entrega</span>
             </h3>
-            <span className="text-[11px] text-cyan-400 font-mono font-bold">
+            <span className={`text-[11px] font-mono font-bold ${hasQuotes || hasContracts || primaryProject ? 'text-cyan-400' : 'text-slate-500'}`}>
               Status Atual: {currentStepperStatusText}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {[
-              { step: '1', title: 'Orçamento Enviado', done: true },
-              { step: '2', title: 'Análise Comercial', done: quotes.length > 0 },
-              { step: '3', title: 'Contrato Gerado', done: contracts.length > 0 },
-              { step: '4', title: 'Aceite / Pagamento', done: hasAcceptedOrPaid },
+              { step: '1', title: 'Orçamento Enviado', done: hasQuotes || hasContracts || Boolean(primaryProject) },
+              { step: '2', title: 'Análise Comercial', done: hasCommercialAnalysis || hasAcceptedOrPaid || Boolean(primaryProject) },
+              { step: '3', title: 'Contrato Gerado', done: hasContracts || hasAcceptedOrPaid || Boolean(primaryProject) },
+              { step: '4', title: 'Aceite / Pagamento', done: hasAcceptedOrPaid || Boolean(primaryProject) },
               {
                 step: '5',
                 title: primaryProject?.status === 'TESTE' ? 'Fase de Testes' : 'Desenvolvimento',
@@ -427,6 +432,30 @@ export default function ClientPortalPage() {
             ))}
           </div>
         </section>
+
+        {/* Banner para cliente que ainda não tem orçamento */}
+        {!hasQuotes && !hasContracts && !primaryProject && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900 to-indigo-950/40 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs font-mono">
+                <Clock className="w-4 h-4 text-cyan-400" />
+                <span>Primeiro Passo: Solicitar Orçamento</span>
+              </div>
+              <h3 className="font-bold text-white text-base">
+                Você ainda não possui um orçamento registrado
+              </h3>
+              <p className="text-xs text-slate-300">
+                Preencha os detalhes do seu projeto no site para que nossa equipe técnica analise e elabore sua proposta personalizada.
+              </p>
+            </div>
+            <Link
+              href="/#orcamento"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 whitespace-nowrap self-start sm:self-auto transition-all"
+            >
+              Solicitar Orçamento Agora →
+            </Link>
+          </div>
+        )}
 
         {/* ============================================================ */}
         {/* ALERTA: CONTRATO AGUARDANDO ACEITE DIGITAL DO CLIENTE */}

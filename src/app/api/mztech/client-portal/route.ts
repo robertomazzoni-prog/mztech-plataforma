@@ -101,9 +101,10 @@ export async function GET(req: NextRequest) {
     // Buscar orçamentos do cliente
     const clientQuotes = quotes.filter(
       (q) =>
-        q.email?.toLowerCase() === client.email?.toLowerCase() ||
-        q.company?.toLowerCase() === client.companyName?.toLowerCase() ||
-        q.name?.toLowerCase() === client.contactName?.toLowerCase()
+        q.linkedClientId === client.id ||
+        (Boolean(q.email) && q.email?.toLowerCase() === client.email?.toLowerCase()) ||
+        (Boolean(q.company) && q.company?.toLowerCase() === client.companyName?.toLowerCase()) ||
+        (Boolean(q.name) && q.name?.toLowerCase() === client.contactName?.toLowerCase())
     );
 
     // Buscar contratos do cliente
