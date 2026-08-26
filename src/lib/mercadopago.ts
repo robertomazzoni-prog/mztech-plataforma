@@ -1,4 +1,4 @@
-﻿import { getStoredSettings } from './mz-settings-store';
+import { getStoredSettings } from './mz-settings-store';
 
 export interface MercadoPagoAccountInfo {
   id: number;
@@ -121,7 +121,7 @@ export async function createMercadoPagoPreference(params: {
       installments: params.installments || 12,
     },
     statement_descriptor: 'MZTECH SOLUCOES',
-    notification_url: `${params.baseUrl}/api/webhooks/mercadopago`,
+    ...(params.baseUrl.startsWith('https://') ? { notification_url: `${params.baseUrl}/api/webhooks/mercadopago` } : {}),
   };
 
   const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
