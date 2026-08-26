@@ -927,15 +927,15 @@ export default function ClientPortalPage() {
       )}
 
       {/* ============================================================ */}
-      {/* MODAL DE PAGAMENTO COM CARTÃO */}
+      {/* MODAL DE PAGAMENTO COM CARTÃO (MERCADO PAGO) */}
       {/* ============================================================ */}
       {cardModalOpen && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="bg-slate-900 border border-cyan-500/50 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="bg-slate-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <CreditCard className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-base text-white">Pagamento no Cartão de Crédito</h3>
+                <CreditCard className="w-5 h-5 text-blue-400" />
+                <h3 className="font-bold text-base text-white">Pagamento via Mercado Pago</h3>
               </div>
               <button
                 onClick={() => setCardModalOpen(false)}
@@ -947,44 +947,43 @@ export default function ClientPortalPage() {
 
             <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-1">
               <p className="text-xs text-slate-400">{selectedInvoice.title}</p>
-              <p className="text-3xl font-black text-cyan-400 font-mono">{formatCurrency(selectedInvoice.amount)}</p>
+              <p className="text-3xl font-black text-blue-400 font-mono">{formatCurrency(selectedInvoice.amount)}</p>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-400 font-semibold">Número do Cartão</label>
-                <input
-                  type="text"
-                  placeholder="4000 1234 5678 9010"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-semibold">Validade</label>
-                  <input
-                    type="text"
-                    placeholder="MM/AA"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
-                  />
+            <div className="space-y-4 text-xs">
+              <div className="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-2 text-slate-300">
+                <div className="flex items-center gap-2 font-semibold text-white">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Gateway Oficial Mercado Pago</span>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-semibold">CVV</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono"
-                  />
-                </div>
+                <p className="text-[11px] text-slate-400">
+                  Pague com total segurança em até 12x no cartão de crédito (Visa, Master, Elo, Hiper, Amex) ou utilize seu saldo do Mercado Livre / Mercado Pago.
+                </p>
               </div>
 
               <button
-                onClick={handleSimulatePayment}
-                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md mt-2 flex items-center justify-center gap-2"
+                onClick={async () => {
+                  try {
+                    const firstContract = contracts[0];
+                    const res = await fetch('/api/mztech/mercadopago/create-preference', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ contractId: firstContract?.id || selectedInvoice.id, installments: 1 }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.initPoint) {
+                      window.location.href = data.initPoint;
+                    } else {
+                      alert(data.error || 'Configure o Access Token do Mercado Pago no painel administrativo para ativar o link direto.');
+                    }
+                  } catch (err) {
+                    alert('Erro de conexão ao gerar checkout do Mercado Pago.');
+                  }
+                }}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-slate-950 font-black text-xs shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
               >
-                <Check className="w-4 h-4" />
-                <span>Pagar e Ativar Mensalidade Recorrente</span>
+                <span className="px-1.5 py-0.5 rounded bg-slate-950 text-white font-black text-[9px]">MP</span>
+                <span>Pagar com Mercado Pago Oficial →</span>
               </button>
             </div>
           </div>

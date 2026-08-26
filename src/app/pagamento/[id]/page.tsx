@@ -20,6 +20,8 @@ import {
   Sparkles,
   ChevronDown,
   Info,
+  ArrowRight,
+  Shield,
 } from 'lucide-react';
 import {
   formatCurrency,
@@ -536,37 +538,45 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
             </div>
 
             {/* ============================================================ */}
-            {/* ÁREA DE PAGAMENTO CARTÃO DE CRÉDITO & PARCELAMENTO */}
+            {/* ÁREA DE PAGAMENTO CARTÃO DE CRÉDITO VIA MERCADO PAGO / MERCADO LIVRE */}
             {/* ============================================================ */}
             {selectedMethod === 'CREDIT_CARD' && (
-              <form onSubmit={handlePayCreditCard} className="p-6 rounded-2xl bg-slate-950 border border-cyan-500/40 space-y-5 animate-in fade-in">
-                
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-cyan-400" />
-                    <span className="font-bold text-white text-xs uppercase tracking-wider font-mono">
-                      Dados do Cartão de Crédito
-                    </span>
+              <div className="p-6 sm:p-8 rounded-3xl bg-slate-950 border border-blue-500/40 space-y-6 animate-in fade-in shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-white text-sm block">
+                        Cartão de Crédito via Mercado Pago
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        Processamento oficial com proteção Mercado Livre
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20">
                     <Lock className="w-3 h-3" />
-                    <span>Gateway Criptografado</span>
+                    <span>Ambiente Seguro PCI-DSS</span>
                   </div>
                 </div>
 
-                <div className="space-y-4 max-w-lg mx-auto">
+                <div className="space-y-5 max-w-lg mx-auto relative z-10">
                   
                   {/* Seletor de Parcelamento */}
                   <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold flex items-center justify-between">
-                      <span>Quantidade de Parcelas:</span>
+                    <label className="text-slate-300 font-semibold text-xs flex items-center justify-between">
+                      <span>Quantidade de Parcelas no Cartão:</span>
                       <span className="text-emerald-400 text-[11px] font-mono">Sem Juros</span>
                     </label>
                     <div className="relative">
                       <select
                         value={installments}
                         onChange={(e) => setInstallments(Number(e.target.value))}
-                        className="w-full px-4 py-3 bg-slate-900 border border-cyan-500/40 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-400 appearance-none cursor-pointer"
+                        className="w-full px-4 py-3.5 bg-slate-900 border border-blue-500/40 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-blue-400 appearance-none cursor-pointer"
                       >
                         {installmentOptions.map((opt) => (
                           <option key={opt.num} value={opt.num}>
@@ -578,137 +588,38 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                     </div>
                   </div>
 
-                  {/* Número do Cartão com Badge da Bandeira */}
-                  <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold flex items-center justify-between">
-                      <span>Número do Cartão de Crédito *</span>
-                      {cardBrand !== 'Cartão' && (
-                        <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold font-mono text-[10px] border border-cyan-500/30">
-                          {cardBrand}
-                        </span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="0000 0000 0000 0000"
-                        value={cardNumber}
-                        onChange={handleCardNumberChange}
-                        maxLength={19}
-                        className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-cyan-400 pl-11"
-                      />
-                      <CreditCard className="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  {/* Informações das Bandeiras Aceitas */}
+                  <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-300">
+                      <span className="font-semibold">Bandeiras Aceitas:</span>
+                      <span className="text-[11px] text-slate-400">Visa, Mastercard, Elo, Hipercard, Amex</span>
                     </div>
-                  </div>
-
-                  {/* Nome do Titular */}
-                  <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold">Nome Impresso no Cartão *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="CARLOS SILVA"
-                      value={cardHolder}
-                      onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white uppercase text-xs focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  {/* CPF do Titular */}
-                  <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold">CPF do Titular do Cartão *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="000.000.000-00"
-                      value={cardCpf}
-                      onChange={handleCpfChange}
-                      maxLength={14}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  {/* Validade e CVV */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-slate-300 font-semibold">Validade *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="MM/AA"
-                        value={cardExpiry}
-                        onChange={handleExpiryChange}
-                        maxLength={5}
-                        className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-400 text-center"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-slate-300 font-semibold">CVV *</label>
-                      <input
-                        type="password"
-                        required
-                        placeholder="123"
-                        maxLength={4}
-                        value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').substring(0, 4))}
-                        className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-400 text-center"
-                      />
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80 text-[11px] text-slate-400">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      <span>
+                        Você será redirecionado para pagar com total segurança no Mercado Pago em até 12x no cartão de crédito ou usando sua conta Mercado Livre.
+                      </span>
                     </div>
                   </div>
 
                   {/* Recorrência Mensal Automática */}
                   {contract.monthlyPrice > 0 && (
                     <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-start gap-2.5">
-                      <input
-                        type="checkbox"
-                        id="saveRecurring"
-                        checked={saveRecurring}
-                        onChange={(e) => setSaveRecurring(e.target.checked)}
-                        className="w-4 h-4 mt-0.5 rounded text-cyan-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer"
-                      />
-                      <label htmlFor="saveRecurring" className="text-[11px] text-slate-300 leading-relaxed cursor-pointer">
-                        Salvar este cartão para cobrança automática da mensalidade de <strong className="text-cyan-400 font-mono">{formatCurrency(contract.monthlyPrice)}/mês</strong> (vencimento todo dia {contract.dueDay || 10}).
-                      </label>
+                      <Shield className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        Este contrato inclui plano mensal de <strong className="text-cyan-400 font-mono">{formatCurrency(contract.monthlyPrice)}/mês</strong> (vencimento todo dia {contract.dueDay || 10}).
+                      </p>
                     </div>
                   )}
 
-                  {/* Botão de Pagamento com Cartão */}
-                  <div className="pt-3 space-y-3">
-                    <button
-                      type="submit"
-                      disabled={processing}
-                      className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-bold text-sm shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                    >
-                      {processing ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                          <span>{processingStep || 'Processando autorização no cartão...'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard className="w-4 h-4" />
-                          <span>
-                            Pagar {installments > 1 ? `${installments}x de ${formatCurrency(amountToPay / installments)}` : formatCurrency(amountToPay)} no Cartão
-                          </span>
-                        </>
-                      )}
-                    </button>
-
-                    <div className="relative flex py-1 items-center">
-                      <div className="flex-grow border-t border-slate-800"></div>
-                      <span className="flex-shrink mx-3 text-slate-500 text-[10px] uppercase font-mono">ou pague com</span>
-                      <div className="flex-grow border-t border-slate-800"></div>
-                    </div>
-
-                    {/* Botão Oficial Mercado Pago */}
+                  {/* Botão Oficial Mercado Pago */}
+                  <div className="pt-2 space-y-3">
                     <button
                       type="button"
                       onClick={async () => {
                         if (!contract) return;
                         setProcessing(true);
-                        setProcessingStep('Gerando link seguro do Mercado Pago...');
+                        setProcessingStep('Conectando ao gateway seguro do Mercado Pago...');
                         try {
                           const res = await fetch('/api/mztech/mercadopago/create-preference', {
                             method: 'POST',
@@ -729,20 +640,34 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                         }
                       }}
                       disabled={processing}
-                      className="w-full py-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                      className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-blue-500/25 flex items-center justify-center gap-3 transition-all hover:scale-[1.01]"
                     >
-                      <span className="px-1.5 py-0.5 rounded bg-blue-500 text-slate-950 font-black text-[9px]">MP</span>
-                      <span>Pagar via Checkout Oficial Mercado Pago (Cartão / Pix / Saldo)</span>
+                      {processing ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
+                          <span>{processingStep || 'Conectando ao Mercado Pago...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="px-2 py-0.5 rounded bg-slate-950 text-white font-black text-xs">
+                            Mercado Pago
+                          </span>
+                          <span>
+                            Pagar {installments > 1 ? `${installments}x de ${formatCurrency(amountToPay / installments)}` : formatCurrency(amountToPay)}
+                          </span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
 
-                    <p className="text-[10px] text-slate-500 text-center pt-1 flex items-center justify-center gap-1.5">
+                    <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Transação 100% segura • Emissão imediata do comprovante</span>
+                      <span>Transação oficial 100% segura • Retorno e confirmação automáticos</span>
                     </p>
                   </div>
 
                 </div>
-              </form>
+              </div>
             )}
 
             {/* ============================================================ */}
