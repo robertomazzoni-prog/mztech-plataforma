@@ -27,6 +27,8 @@ import {
 } from '@/lib/utils';
 import { MzContractItem } from '@/types/mztech';
 
+export const dynamic = 'force-dynamic';
+
 export default function PublicPaymentPage({ params }: { params: { id: string } }) {
   const [contract, setContract] = useState<MzContractItem | null>(null);
   const [settings, setSettings] = useState<any>(null);
@@ -48,8 +50,8 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
     try {
       setLoading(true);
       const [contRes, settRes] = await Promise.all([
-        fetch(`/api/mztech/contracts/${params.id}`),
-        fetch(`/api/mztech/settings`),
+        fetch(`/api/mztech/contracts/${params.id}?t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/mztech/settings?t=${Date.now()}`, { cache: 'no-store' }),
       ]);
 
       if (contRes.ok) {
