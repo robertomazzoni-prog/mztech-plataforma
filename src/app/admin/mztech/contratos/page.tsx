@@ -737,12 +737,16 @@ export default function MzTechContractsPage() {
 
                 <div className="space-y-1">
                   <label className="text-slate-400 font-semibold">Forma de Pagamento Contratada</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.paymentMethod}
                     onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
-                  />
+                  >
+                    <option value="Cartão de Crédito (Parcelado em até 12x)">Cartão de Crédito (Parcelado em até 12x)</option>
+                    <option value="Cartão de Crédito (Recorrência Mensal Automática)">Cartão de Crédito (Recorrência Mensal Automática)</option>
+                    <option value="PIX (À Vista / Chave Oficial)">PIX (À Vista / Chave Oficial)</option>
+                    <option value="Entrada PIX + Mensalidade no Cartão">Entrada PIX + Mensalidade no Cartão</option>
+                  </select>
                 </div>
               </div>
 

@@ -471,11 +471,27 @@ export default function MzTechOrcamentosPage() {
                       <td className="py-3 px-4 font-mono text-slate-300">
                         {q.monthlyPrice ? `${formatCurrency(q.monthlyPrice)}/mês` : '—'}
                       </td>
-                      <td className="py-3 px-4 text-slate-400 text-[11px]">
-                        {q.paymentMethodChoice === 'CREDIT_CARD_RECURRING' && 'Cartão Recorrente'}
-                        {q.paymentMethodChoice === 'PIX' && 'PIX'}
-                        {q.paymentMethodChoice === 'CREDIT_CARD' && 'Cartão'}
-                        {q.paymentMethodChoice === 'CARD_PLUS_PIX' && 'Cartão + PIX'}
+                      <td className="py-3 px-4 text-slate-300 text-[11px] font-medium">
+                        {q.paymentMethodChoice === 'CREDIT_CARD_RECURRING' && (
+                          <span className="inline-flex items-center gap-1 text-cyan-300">
+                            <CreditCard className="w-3 h-3 text-cyan-400" /> Cartão Recorrente
+                          </span>
+                        )}
+                        {q.paymentMethodChoice === 'CREDIT_CARD' && (
+                          <span className="inline-flex items-center gap-1 text-cyan-300">
+                            <CreditCard className="w-3 h-3 text-cyan-400" /> Cartão Parcelado
+                          </span>
+                        )}
+                        {q.paymentMethodChoice === 'PIX' && (
+                          <span className="inline-flex items-center gap-1 text-emerald-300">
+                            <QrCode className="w-3 h-3 text-emerald-400" /> PIX
+                          </span>
+                        )}
+                        {q.paymentMethodChoice === 'CARD_PLUS_PIX' && (
+                          <span className="inline-flex items-center gap-1 text-purple-300">
+                            <CreditCard className="w-3 h-3 text-purple-400" /> Cartão + PIX
+                          </span>
+                        )}
                         {!q.paymentMethodChoice && 'A Combinar'}
                       </td>
                       <td className="py-3 px-4">
@@ -924,10 +940,10 @@ export default function MzTechOrcamentosPage() {
                     onChange={(e: any) => setFormData({ ...formData, paymentMethodChoice: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
                   >
-                    <option value="CREDIT_CARD_RECURRING">Cartão Recorrente (Mensal)</option>
-                    <option value="PIX">PIX (À Vista / Recorrente)</option>
-                    <option value="CREDIT_CARD">Cartão de Crédito</option>
-                    <option value="CARD_PLUS_PIX">Cartão + PIX</option>
+                    <option value="CREDIT_CARD">Cartão de Crédito (Parcelado em até 12x)</option>
+                    <option value="CREDIT_CARD_RECURRING">Cartão de Crédito Recorrente (Mensal)</option>
+                    <option value="PIX">PIX (À Vista / Chave Oficial)</option>
+                    <option value="CARD_PLUS_PIX">Entrada PIX + Mensalidade no Cartão</option>
                   </select>
                 </div>
               </div>

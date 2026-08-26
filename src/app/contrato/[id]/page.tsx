@@ -328,6 +328,15 @@ export default function PublicContractSignPage({ params }: { params: { id: strin
                     </td>
                   </tr>
                 )}
+                <tr>
+                  <td className="py-2.5 px-3 font-sans text-white">Forma de Pagamento Acordada</td>
+                  <td className="py-2.5 px-3 text-cyan-300 font-sans font-semibold">
+                    {contract.paymentMethod || contract.snapshot?.paymentMethod || 'Cartão de Crédito / PIX'}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-300 font-sans">
+                    Condição Formal
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

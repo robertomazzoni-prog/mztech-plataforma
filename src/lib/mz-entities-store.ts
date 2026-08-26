@@ -1187,7 +1187,7 @@ export async function approveQuoteAndGenerateContract(quoteId: string, adminName
       ? 'PIX (À Vista / Chave Oficial)'
       : paymentMethodChoice === 'CARD_PLUS_PIX'
       ? 'Entrada PIX + Mensalidade no Cartão'
-      : 'Cartão de Crédito',
+      : 'Cartão de Crédito (Parcelado em até 12x)',
     periodicity: quote.billingPeriodicity || 'MENSAL',
     dueDay: quote.dueDay || 10,
     hasHosting: !isOnlyDev,
@@ -1320,6 +1320,12 @@ export function generateBillingForSignedContract(contractId: string): { payment?
     const clients = getStoredClients();
     const client = clients.find((c) => c.id === contract.clientId) || contract.client;
 
+    const isPixOnly = Boolean(
+      contract.paymentMethod?.toLowerCase().includes('pix') &&
+      !contract.paymentMethod?.toLowerCase().includes('cartão') &&
+      !contract.paymentMethod?.toLowerCase().includes('cartao')
+    );
+
     initialCharge = createStoredPayment({
       clientId: contract.clientId,
       client: {
@@ -1330,7 +1336,7 @@ export function generateBillingForSignedContract(contractId: string): { payment?
       contractId: contract.id,
       title: `Taxa de Desenvolvimento Inicial — ${contract.project?.name || contract.title}`,
       amount: contract.totalDevPrice,
-      paymentMethod: contract.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+      paymentMethod: isPixOnly ? 'PIX' : 'CREDIT_CARD',
       paymentType: 'TAXA_INICIAL',
       status: 'PENDING',
       dueDate: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 dias para pagamento
@@ -1357,6 +1363,12 @@ export function generateBillingForSignedContract(contractId: string): { payment?
       const clients = getStoredClients();
       const client = clients.find((c) => c.id === contract.clientId) || contract.client;
 
+      const isSubPixOnly = Boolean(
+        contract.paymentMethod?.toLowerCase().includes('pix') &&
+        !contract.paymentMethod?.toLowerCase().includes('cartão') &&
+        !contract.paymentMethod?.toLowerCase().includes('cartao')
+      );
+
       newSubscription = createStoredSubscription({
         clientId: contract.clientId,
         client: {
@@ -1370,7 +1382,7 @@ export function generateBillingForSignedContract(contractId: string): { payment?
         planName: contract.title || 'Plano Hospedagem + Manutenção mzTech',
         amount: contract.monthlyPrice,
         periodicity: 'MENSAL',
-        paymentMethod: contract.paymentMethod?.includes('PIX') ? 'PIX' : 'CREDIT_CARD',
+        paymentMethod: isSubPixOnly ? 'PIX' : 'CREDIT_CARD',
         status: 'ACTIVE',
         notes: `Recorrência ativada após assinatura digital do contrato ${contract.contractNumber}`,
       });
