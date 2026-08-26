@@ -52,6 +52,10 @@ export async function PATCH(req: NextRequest) {
       pixKey,
       pixKeys,
       workingHours,
+      mercadoPagoEnabled,
+      mercadoPagoAccessToken,
+      mercadoPagoPublicKey,
+      mercadoPagoEnvironment,
     } = body;
 
     const updated = updateSettings({
@@ -72,6 +76,10 @@ export async function PATCH(req: NextRequest) {
       ...(pixKey !== undefined && { pixKey: pixKey.trim() }),
       ...(Array.isArray(pixKeys) && { pixKeys }),
       ...(workingHours !== undefined && { workingHours: workingHours.trim() }),
+      ...(mercadoPagoEnabled !== undefined && { mercadoPagoEnabled: Boolean(mercadoPagoEnabled) }),
+      ...(mercadoPagoAccessToken !== undefined && { mercadoPagoAccessToken: mercadoPagoAccessToken.trim() }),
+      ...(mercadoPagoPublicKey !== undefined && { mercadoPagoPublicKey: mercadoPagoPublicKey.trim() }),
+      ...(mercadoPagoEnvironment !== undefined && { mercadoPagoEnvironment }),
     });
 
     return NextResponse.json({

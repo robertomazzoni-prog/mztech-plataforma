@@ -74,6 +74,14 @@ export default function AdminSettingsPage() {
   // Horário
   const [workingHours, setWorkingHours] = useState('Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h');
 
+  // Integração Mercado Pago
+  const [mercadoPagoEnabled, setMercadoPagoEnabled] = useState(true);
+  const [mercadoPagoAccessToken, setMercadoPagoAccessToken] = useState('');
+  const [mercadoPagoPublicKey, setMercadoPagoPublicKey] = useState('');
+  const [mercadoPagoEnvironment, setMercadoPagoEnvironment] = useState<'SANDBOX' | 'PRODUCTION'>('PRODUCTION');
+  const [testingMp, setTestingMp] = useState(false);
+  const [mpTestResult, setMpTestResult] = useState<{ success: boolean; account?: any; error?: string } | null>(null);
+
   const loadSettings = async () => {
     try {
       setLoading(true);
@@ -93,6 +101,11 @@ export default function AdminSettingsPage() {
         setMorvanPhone(s.morvanPhone || '(31) 99359-7136');
         setMorvanPixKey(s.morvanPixKey || 'morvan@mztech.com.br');
         setWorkingHours(s.workingHours || 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h');
+
+        setMercadoPagoEnabled(s.mercadoPagoEnabled !== false);
+        setMercadoPagoAccessToken(s.mercadoPagoAccessToken || '');
+        setMercadoPagoPublicKey(s.mercadoPagoPublicKey || '');
+        setMercadoPagoEnvironment(s.mercadoPagoEnvironment || 'PRODUCTION');
 
         if (Array.isArray(s.emails) && s.emails.length > 0) {
           setEmails(s.emails);
@@ -295,6 +308,10 @@ export default function AdminSettingsPage() {
           pixKey: primaryPix.trim(),
           pixKeys: validPixKeys,
           workingHours,
+          mercadoPagoEnabled,
+          mercadoPagoAccessToken: mercadoPagoAccessToken.trim(),
+          mercadoPagoPublicKey: mercadoPagoPublicKey.trim(),
+          mercadoPagoEnvironment,
         }),
       });
 
@@ -304,7 +321,7 @@ export default function AdminSettingsPage() {
         return;
       }
 
-      setSuccessMsg('Configurações e tema da landing page salvos com sucesso!');
+      setSuccessMsg('Configurações, tema e integração do Mercado Pago salvos com sucesso!');
       setTimeout(() => {
         setSuccessMsg(null);
       }, 5000);
@@ -312,6 +329,24 @@ export default function AdminSettingsPage() {
       setErrorMsg('Erro de conexão ao salvar configurações.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestMercadoPago = async () => {
+    setTestingMp(true);
+    setMpTestResult(null);
+    try {
+      const res = await fetch('/api/mztech/mercadopago/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: mercadoPagoAccessToken }),
+      });
+      const data = await res.json();
+      setMpTestResult(data);
+    } catch (err) {
+      setMpTestResult({ success: false, error: 'Erro de comunicação ao testar credencial do Mercado Pago.' });
+    } finally {
+      setTestingMp(false);
     }
   };
 
@@ -873,6 +908,166 @@ export default function AdminSettingsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* BLOCO 2.5: INTEGRAÇÃO MERCADO PAGO (CARTÃO & RECORRÊNCIA) */}
+          {/* ============================================================ */}
+          <div className="bg-slate-900/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 shadow-xl backdrop-blur-xl space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white">Integração Mercado Pago</h3>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      GATEWAY OFICIAL
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Configure seu Access Token para que todos os pagamentos em cartão de crédito e recorrência caiam direto na sua conta bancária do Mercado Pago.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleTestMercadoPago}
+                  disabled={testingMp || !mercadoPagoAccessToken.trim()}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                >
+                  {testingMp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  <span>Testar Conexão</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Resultado do Teste de Conexão */}
+            {mpTestResult && (
+              <div
+                className={`p-4 rounded-2xl border text-xs animate-in fade-in flex items-start gap-3 ${
+                  mpTestResult.success
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    : 'bg-red-500/10 border-red-500/30 text-red-300'
+                }`}
+              >
+                {mpTestResult.success ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                )}
+                <div className="space-y-1">
+                  <strong className="block text-white font-bold">
+                    {mpTestResult.success ? 'Conexão com Mercado Pago Aprovada!' : 'Falha na Validação do Mercado Pago'}
+                  </strong>
+                  {mpTestResult.success && mpTestResult.account ? (
+                    <p className="text-[11px] leading-relaxed">
+                      Conta vinculada: <strong className="text-white">{mpTestResult.account.first_name} {mpTestResult.account.last_name} ({mpTestResult.account.nickname})</strong> • E-mail: <strong className="text-white">{mpTestResult.account.email}</strong> • País: <strong className="text-white">{mpTestResult.account.site_id}</strong>.
+                    </p>
+                  ) : (
+                    <p className="text-[11px] leading-relaxed">{mpTestResult.error}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Status do Gateway */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Status do Mercado Pago
+                </label>
+                <select
+                  value={mercadoPagoEnabled ? 'ACTIVE' : 'INACTIVE'}
+                  onChange={(e) => setMercadoPagoEnabled(e.target.value === 'ACTIVE')}
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-400"
+                >
+                  <option value="ACTIVE">🟢 Ativo (Processar no Checkout Público)</option>
+                  <option value="INACTIVE">🔴 Desativado (Apenas PIX Interno)</option>
+                </select>
+              </div>
+
+              {/* Ambiente */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Ambiente de Operação
+                </label>
+                <select
+                  value={mercadoPagoEnvironment}
+                  onChange={(e: any) => setMercadoPagoEnvironment(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-400"
+                >
+                  <option value="PRODUCTION">⚡ Produção (Vendas e Cobranças Reais)</option>
+                  <option value="SANDBOX">🧪 Sandbox (Modo de Testes com Cartão Simulado)</option>
+                </select>
+              </div>
+
+              {/* Access Token */}
+              <div className="space-y-1.5 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-cyan-300">
+                    Access Token do Mercado Pago (Credencial Secreta de Produção) *
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">Começa com APP_USR-...</span>
+                </div>
+                <input
+                  type="password"
+                  value={mercadoPagoAccessToken}
+                  onChange={(e) => setMercadoPagoAccessToken(e.target.value)}
+                  placeholder="APP_USR-0000000000000000-000000-00000000000000000000000000000000-000000000"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-cyan-500/30 rounded-xl text-cyan-200 text-xs font-mono focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              {/* Public Key */}
+              <div className="space-y-1.5 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Public Key do Mercado Pago (Chave Pública)
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">Começa com APP_USR-...</span>
+                </div>
+                <input
+                  type="text"
+                  value={mercadoPagoPublicKey}
+                  onChange={(e) => setMercadoPagoPublicKey(e.target.value)}
+                  placeholder="APP_USR-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+            </div>
+
+            {/* Tutorial Passo a Passo */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Como Obter Suas Credenciais no Mercado Pago:</span>
+                </span>
+                <a
+                  href="https://www.mercadopago.com.br/developers/panel/app"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-cyan-400 hover:underline font-bold text-[11px] flex items-center gap-1"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Abrir Painel Mercado Pago Developers
+                </a>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-300">
+                <li>Acesse o <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" rel="noreferrer" className="text-cyan-400 underline font-semibold">Mercado Pago Developers</a> e faça login com a conta da sua empresa.</li>
+                <li>Clique em <strong>Criar Aplicação</strong> (ou selecione uma existente) e escolha a opção <strong>Pagamentos no Checkout</strong>.</li>
+                <li>Vá em <strong>Credenciais de Produção</strong>, copie o <strong>Access Token</strong> e cole no campo acima.</li>
+                <li>Clique em <strong>Testar Conexão</strong> e depois em <strong>Salvar Todas as Configurações</strong>.</li>
+              </ol>
             </div>
           </div>
 

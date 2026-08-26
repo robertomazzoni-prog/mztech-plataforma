@@ -144,6 +144,26 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     loadContractAndSettings();
+
+    // Verificação de retorno do Mercado Pago
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const mpStatus = urlParams.get('mp_status') || urlParams.get('collection_status') || urlParams.get('status');
+      const paymentId = urlParams.get('payment_id') || urlParams.get('collection_id');
+      
+      if (mpStatus === 'approved') {
+        setAuthReceipt({
+          authCode: paymentId ? `MP-${paymentId}` : `MP-MZ-${Math.floor(100000 + Math.random() * 900000)}`,
+          installments: 1,
+          installmentValue: 0,
+          totalAmount: 0,
+          cardLast4: 'MP',
+          brand: 'Mercado Pago Oficial',
+          date: new Date().toISOString(),
+        });
+        setPaidSuccess(true);
+      }
+    }
   }, [params.id]);
 
   const handleCopyPix = () => {
@@ -655,7 +675,7 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                   )}
 
                   {/* Botão de Pagamento com Cartão */}
-                  <div className="pt-3">
+                  <div className="pt-3 space-y-3">
                     <button
                       type="submit"
                       disabled={processing}
@@ -675,7 +695,47 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                         </>
                       )}
                     </button>
-                    <p className="text-[10px] text-slate-500 text-center mt-2.5 flex items-center justify-center gap-1.5">
+
+                    <div className="relative flex py-1 items-center">
+                      <div className="flex-grow border-t border-slate-800"></div>
+                      <span className="flex-shrink mx-3 text-slate-500 text-[10px] uppercase font-mono">ou pague com</span>
+                      <div className="flex-grow border-t border-slate-800"></div>
+                    </div>
+
+                    {/* Botão Oficial Mercado Pago */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!contract) return;
+                        setProcessing(true);
+                        setProcessingStep('Gerando link seguro do Mercado Pago...');
+                        try {
+                          const res = await fetch('/api/mztech/mercadopago/create-preference', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contractId: contract.id, installments }),
+                          });
+                          const data = await res.json();
+                          if (res.ok && data.initPoint) {
+                            window.location.href = data.initPoint;
+                          } else {
+                            alert(data.error || 'Configure o Access Token do Mercado Pago no painel administrativo para ativar o link direto.');
+                          }
+                        } catch (err) {
+                          alert('Erro de conexão ao gerar checkout do Mercado Pago.');
+                        } finally {
+                          setProcessing(false);
+                          setProcessingStep(null);
+                        }
+                      }}
+                      disabled={processing}
+                      className="w-full py-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                    >
+                      <span className="px-1.5 py-0.5 rounded bg-blue-500 text-slate-950 font-black text-[9px]">MP</span>
+                      <span>Pagar via Checkout Oficial Mercado Pago (Cartão / Pix / Saldo)</span>
+                    </button>
+
+                    <p className="text-[10px] text-slate-500 text-center pt-1 flex items-center justify-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Transação 100% segura • Emissão imediata do comprovante</span>
                     </p>

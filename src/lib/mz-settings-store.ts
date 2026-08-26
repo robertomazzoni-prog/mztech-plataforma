@@ -38,6 +38,11 @@ export interface CompanySettings {
   pixKeys: CompanyPixItem[];
   workingHours: string;
   year: number;
+  // Integração Mercado Pago
+  mercadoPagoEnabled?: boolean;
+  mercadoPagoAccessToken?: string;
+  mercadoPagoPublicKey?: string;
+  mercadoPagoEnvironment?: 'SANDBOX' | 'PRODUCTION';
 }
 
 const DATA_DIR = path.join(process.cwd(), 'src', 'data');
@@ -86,6 +91,10 @@ export const defaultCompanySettings: CompanySettings = {
   ],
   workingHours: 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h',
   year: 2026,
+  mercadoPagoEnabled: true,
+  mercadoPagoAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
+  mercadoPagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY || '',
+  mercadoPagoEnvironment: 'PRODUCTION',
 };
 
 const globalSettingsKey = Symbol.for('mztech.settings');
