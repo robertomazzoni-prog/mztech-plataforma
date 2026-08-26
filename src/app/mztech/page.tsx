@@ -334,47 +334,126 @@ export default function MzTechPublicPage() {
       </header>
 
       {/* ============================================================ */}
-      {/* 2. HERO SECTION */}
+      {/* 2. HERO SECTION - ENGENHARIA DE SOFTWARE & DESENVOLVIMENTO REAL */}
       {/* ============================================================ */}
-      <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
-        {/* Glowing Background Orbs */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-cyan-500/20 via-blue-500/10 to-indigo-500/0 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
+        {/* Background Grid Sutil e Foco de Luz Tecnológico */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-cyan-950/25 via-slate-950 to-slate-950 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           
-          {/* Badge Posicionamento */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-8 shadow-md shadow-cyan-500/5 animate-in fade-in slide-in-from-bottom-2">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span>{MZTECH_INFO.tagline}</span>
+          {/* Badge Oficial */}
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold shadow-sm backdrop-blur-md">
+            <Terminal className="w-4 h-4 text-cyan-400" />
+            <span>mzTech • Estúdio de Software & Desenvolvimento Web</span>
           </div>
 
-          {/* Título Principal Oficial */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
-            Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">presença digital profissional.</span>
+          {/* Título Principal */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] max-w-4xl mx-auto">
+            Engenharia de software de alta performance, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">sistemas sob medida</span> e presença digital sólida.
           </h1>
 
-          {/* Subtítulo Oficial */}
-          <p className="text-slate-300 text-base sm:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
-            {MZTECH_INFO.description}
+          {/* Subtítulo Realista & Humanizado */}
+          <p className="text-slate-300 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed font-normal">
+            Sem templates prontos ou intermediários. Projetos construídos com código limpo em <strong>Next.js</strong> e <strong>PostgreSQL</strong> pelos desenvolvedores fundadores <strong>Roberto Mazzoni</strong> e <strong>Morvan</strong>, com hospedagem em nuvem gerenciada, alta velocidade e suporte direto.
           </p>
 
+          {/* 4 Pilares Técnicos */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-2">
+            {[
+              { icon: Code2, label: 'Código Nativo & Escalável', desc: 'Next.js 14 & React' },
+              { icon: Server, label: 'Infraestrutura Cloud', desc: 'Railway, SSL & DNS' },
+              { icon: ShieldCheck, label: 'Banco Dedicado & Backups', desc: 'PostgreSQL Relacional' },
+              { icon: MessageSquare, label: 'Atendimento Direto', desc: 'Roberto & Morvan' },
+            ].map((p, idx) => {
+              const Icon = p.icon;
+              return (
+                <div key={idx} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 text-left space-y-1">
+                  <Icon className="w-4 h-4 text-cyan-400" />
+                  <p className="text-xs font-bold text-white leading-tight">{p.label}</p>
+                  <p className="text-[11px] text-slate-400">{p.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Botões CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
               href="#orcamento"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
-              <span>Solicitar orçamento</span>
+              <span>Solicitar Orçamento do Projeto</span>
             </Link>
 
             <Link
-              href="#servicos"
+              href="#portfolio"
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-cyan-500/40 font-semibold text-base flex items-center justify-center gap-2 transition-all"
             >
-              <span>Conhecer nossos serviços</span>
+              <span>Ver Projetos em Produção</span>
               <ArrowRight className="w-4 h-4 text-cyan-400" />
             </Link>
+          </div>
+        </div>
+
+        {/* Apresentação dos Desenvolvedores Fundadores */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Card Roberto */}
+            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/30 flex items-center gap-4 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-lg flex-shrink-0">
+                R
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base">Roberto Mazzoni</h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">
+                    Sócio Fundador
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-snug">
+                  Desenvolvedor Full Stack • Especialista em Frontend, Next.js, React e Interfaces de Alta Conversão
+                </p>
+                <a
+                  href={`https://wa.me/${(settingsData?.robertoWhatsapp || MZTECH_INFO.robertoWhatsapp || '5531986847049').replace(/\D/g, '')}?text=Ol%C3%A1%20Roberto%2C%20gostaria%20de%20conversar%20sobre%20um%20projeto%20com%20a%20mzTech.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline pt-1"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>WhatsApp: {MZTECH_INFO.robertoPhone}</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Card Morvan */}
+            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/30 flex items-center gap-4 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-lg flex-shrink-0">
+                M
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base">Morvan</h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">
+                    Sócio Fundador
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-snug">
+                  Desenvolvedor Full Stack • Especialista em Sistemas Web, APIs, Bancos Relacionais e Infraestrutura Cloud
+                </p>
+                <a
+                  href={`https://wa.me/${(settingsData?.morvanWhatsapp || MZTECH_INFO.morvanWhatsapp || '5531993597136').replace(/\D/g, '')}?text=Ol%C3%A1%20Morvan%2C%20gostaria%20de%20conversar%20sobre%20um%20projeto%20com%20a%20mzTech.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline pt-1"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>WhatsApp: {MZTECH_INFO.morvanPhone}</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -385,14 +464,14 @@ export default function MzTechPublicPage() {
       <section id="servicos" className="py-24 bg-slate-900/50 border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-              Soluções Completas
+            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
+              Soluções Completas de Software
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              O Que a mzTech Faz
+              O Que a mzTech Constrói
             </h2>
             <p className="text-slate-400 text-base sm:text-lg mt-3">
-              Da criação visual e desenvolvimento de código até a hospedagem contínua e manutenção técnica.
+              Do código-fonte à infraestrutura em produção: engenharia moderna com estabilidade e segurança.
             </p>
           </div>
 
@@ -402,64 +481,64 @@ export default function MzTechPublicPage() {
               <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-5 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors">
                 <Globe className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Desenvolvimento de Sites</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Sites Institucionais</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Sites profissionais, rápidos, responsivos e adaptados à identidade da sua empresa. Estruturados para passar autoridade e converter visitantes em clientes.
+                Sites corporativos rápidos, responsivos e otimizados para mecanismos de busca (SEO). Criados para transmitir autoridade máxima e converter visitantes em clientes.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
+            <div className="bg-slate-900 border border-slate-800 hover:border-blue-500/40 rounded-3xl p-7 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-5 group-hover:bg-blue-500 group-hover:text-slate-950 transition-colors">
                 <Code2 className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Sistemas Web</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Sistemas Web & Dashboards</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Sistemas personalizados para automatizar processos, agendamentos, painéis administrativos e facilitar a gestão do seu negócio.
+                Plataformas administrativas sob medida, agendamentos automáticos, fluxos operacionais e controle de dados para automatizar processos na sua empresa.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
+            <div className="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-7 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
                 <Server className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Hospedagem</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Hospedagem Cloud Gerenciada</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Hospedagem gerenciada pela mzTech com infraestrutura moderna adequada ao projeto. Sem dores de cabeça com servidores ou configurações complexas.
+                Infraestrutura em nuvem moderna (Railway Cloud, AWS) dimensionada para seu projeto. Cuidamos de DNS, SSL, escalabilidade e deploys contínuos.
               </p>
             </div>
 
             {/* Card 4 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
+            <div className="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-3xl p-7 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-5 group-hover:bg-indigo-500 group-hover:text-slate-950 transition-colors">
                 <Wrench className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Manutenção</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Manutenção Preventiva</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Atualizações, correções e manutenção técnica constante para garantir que seu site ou sistema permaneça seguro e sempre no ar.
+                Patches de segurança, atualizações de dependências e pequenas melhorias de textos e componentes para manter sua aplicação estável 24/7.
               </p>
             </div>
 
             {/* Card 5 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
+            <div className="bg-slate-900 border border-slate-800 hover:border-purple-500/40 rounded-3xl p-7 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5 group-hover:bg-purple-500 group-hover:text-slate-950 transition-colors">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Segurança</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Segurança & Backups</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Certificados SSL, proteção de dados, configurações de segurança de banco e monitoramento contra quedas e acessos indevidos.
+                Certificados SSL automatizados, sanitização contra ataques, banco de dados isolado e rotinas de backup com retenção de dados.
               </p>
             </div>
 
             {/* Card 6 */}
-            <div className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-7 transition-all group">
+            <div className="bg-slate-900 border border-slate-800 hover:border-amber-500/40 rounded-3xl p-7 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-5 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
                 <Headphones className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Suporte</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Suporte com Desenvolvedores</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Atendimento próximo para dúvidas, problemas e necessidades técnicas relacionadas ao serviço contratado via WhatsApp e e-mail.
+                Atendimento humanizado e direto com quem programa o seu sistema, sem atendentes robóticos ou filas de espera desnecessárias.
               </p>
             </div>
           </div>
@@ -541,7 +620,7 @@ export default function MzTechPublicPage() {
               </h3>
 
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                "Projeto desenvolvido pela mzTech para gerenciamento da presença digital e atendimento de uma barbearia, incluindo funcionalidades voltadas para agendamento e administração."
+                Plataforma web completa desenvolvida sob medida pela mzTech em Next.js e PostgreSQL para gerenciamento e atendimento de barbearia. Inclui fluxo de agendamentos 24h integrado ao WhatsApp, painel financeiro e controle operacional de equipe.
               </p>
 
               <div className="space-y-2 pt-2">
@@ -605,14 +684,14 @@ export default function MzTechPublicPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
               Transparência Comercial
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
               Planos mzTech
             </h2>
             <p className="text-slate-300 text-base sm:text-lg mt-3">
-              O desenvolvimento do projeto é contratado separadamente e a mensalidade é referente à infraestrutura e aos serviços contínuos de hospedagem e manutenção.
+              O desenvolvimento do projeto é contratado sob medida e a mensalidade refere-se à infraestrutura em nuvem e aos serviços contínuos de hospedagem e manutenção técnica.
             </p>
           </div>
 
@@ -653,7 +732,7 @@ export default function MzTechPublicPage() {
                     </div>
 
                     <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-                      "{plan.description}"
+                      {plan.description}
                     </p>
 
                     <div className="space-y-3 pt-4 border-t border-slate-800">
@@ -691,10 +770,10 @@ export default function MzTechPublicPage() {
               <span>Por que existe uma mensalidade?</span>
             </h3>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              "A criação do site é um projeto inicial. Depois que o site entra no ar, existem custos e atividades contínuas para mantê-lo funcionando, seguro e atualizado."
+              A criação do site é a etapa de engenharia e desenvolvimento inicial. Após o lançamento em produção, existem atividades e custos contínuos para manter a aplicação veloz, segura e 100% online.
             </p>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              A mensalidade cobre infraestrutura em nuvem, certificado SSL, backups periódicos, monitoramento de disponibilidade, manutenção técnica do código e suporte direto. A mzTech vende o serviço final gerenciado e cuida de todas as alterações internas de servidores para que sua empresa nunca precise se preocupar com aspectos técnicos.
+              A mensalidade cobre a infraestrutura em nuvem, certificados de segurança SSL, rotinas de backup, monitoramento de disponibilidade e suporte técnico direto. A mzTech entrega uma solução gerenciada completa para que sua empresa foque no negócio enquanto cuidamos de toda a operação técnica.
             </p>
           </div>
         </div>
@@ -705,25 +784,25 @@ export default function MzTechPublicPage() {
       {/* ============================================================ */}
       <section className="py-20 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-y border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+          <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
             Escopo Sob Medida
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-            Seu projeto é personalizado
+            Seu Projeto Desenvolvido Sob Medida
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            "O valor de desenvolvimento é calculado de acordo com a complexidade, quantidade de páginas, funcionalidades e integrações necessárias."
+            O valor de desenvolvimento é calculado com precisão de acordo com o escopo técnico, quantidade de telas, complexidade das regras de negócio e integrações necessárias.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             {[
-              'Site institucional',
+              'Site institucional corporativo',
               'Landing page de alta conversão',
-              'Site profissional',
-              'Sistema de agendamento online',
-              'Painel administrativo e métricas',
-              'Integrações via WhatsApp e APIs',
               'Sistemas web sob medida',
+              'Sistema de agendamento online 24h',
+              'Painel administrativo e dashboards',
+              'Integrações com WhatsApp e APIs REST',
+              'Banco de dados PostgreSQL dedicado',
             ].map((item) => (
               <span
                 key={item}
@@ -739,7 +818,7 @@ export default function MzTechPublicPage() {
               href="#orcamento"
               className="px-8 py-3.5 rounded-xl font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm inline-flex items-center gap-2 shadow-lg shadow-cyan-500/10 transition-all"
             >
-              <span>Solicitar orçamento personalizado</span>
+              <span>Solicitar Orçamento Personalizado</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -752,11 +831,11 @@ export default function MzTechPublicPage() {
       <section className="py-24 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 font-mono">
               Clareza de Escopo
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              O que a manutenção mzTech inclui?
+              O Que a Manutenção mzTech Inclui
             </h2>
             <p className="text-slate-400 text-base sm:text-lg mt-3">
               Saiba exatamente o que está coberto no seu plano recorrente de manutenção e estabilidade.
@@ -805,12 +884,12 @@ export default function MzTechPublicPage() {
               <h3 className="text-xl font-bold text-white">Domínio Próprio</h3>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              "O domínio é o endereço utilizado para acessar o site, como <code className="text-cyan-400 font-mono">empresa.com.br</code>."
+              O domínio é o endereço exclusivo utilizado para acessar o seu site na web, como <code className="text-cyan-400 font-mono">suaempresa.com.br</code>.
             </p>
             <ul className="space-y-2 text-xs text-slate-400">
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
-                <span>O domínio poderá ser registrado diretamente pelo cliente ou com nosso auxílio.</span>
+                <span>O domínio pode ser registrado diretamente por você ou com o auxílio técnico da nossa equipe.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
@@ -818,7 +897,7 @@ export default function MzTechPublicPage() {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
-                <span>A mzTech cuida de toda a configuração técnica de DNS e apontamento.</span>
+                <span>A mzTech cuida de toda a configuração técnica de DNS, apontamento de servidores e certificados.</span>
               </li>
             </ul>
           </div>
@@ -827,23 +906,23 @@ export default function MzTechPublicPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-4">
             <div className="flex items-center gap-2.5">
               <Server className="w-6 h-6 text-emerald-400" />
-              <h3 className="text-xl font-bold text-white">Hospedagem mzTech</h3>
+              <h3 className="text-xl font-bold text-white">Hospedagem Cloud mzTech</h3>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              "A mzTech poderá utilizar diferentes provedores e tecnologias de infraestrutura para disponibilizar os serviços contratados."
+              A mzTech gerencia infraestrutura em nuvem de alta disponibilidade para manter seus serviços operando com estabilidade ininterrupta.
             </p>
             <ul className="space-y-2 text-xs text-slate-400">
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Infraestrutura em nuvem dimensionada para o desempenho e estabilidade do seu projeto.</span>
+                <span>Servidores em nuvem de alta velocidade dimensionados para o desempenho do seu projeto.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Ajustes internos de fornecedores para garantir escalabilidade sem alterar seu contrato.</span>
+                <span>Certificado SSL com criptografia de ponta a ponta renovado automaticamente.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Total responsabilidade técnica assumida pela mzTech.</span>
+                <span>Total responsabilidade técnica assumida diretamente pela mzTech.</span>
               </li>
             </ul>
           </div>

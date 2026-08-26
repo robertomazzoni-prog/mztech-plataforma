@@ -70,27 +70,25 @@ export async function GET(req: NextRequest) {
       client = clients.find(
         (c) =>
           c.email?.toLowerCase() === targetEmail ||
-          c.contactName?.toLowerCase().includes(targetEmail) ||
-          c.companyName?.toLowerCase().includes(targetEmail)
+          c.contactName?.toLowerCase() === targetEmail ||
+          c.companyName?.toLowerCase() === targetEmail ||
+          c.id === targetEmail
       );
     }
 
-    if (!client && clients.length > 0) {
-      // Se não especificou email, pega o primeiro cliente
-      client = clients[0];
+    if (!client) {
+      return NextResponse.json(
+        {
+          authenticated: false,
+          client: null,
+          error: 'UNAUTHORIZED',
+          message: 'Sessão não autenticada. Por favor, faça login para acessar seu painel.',
+        },
+        { status: 401 }
+      );
     }
 
-    if (!client) {
-      return NextResponse.json({
-        client: null,
-        projects: [],
-        quotes: [],
-        contracts: [],
-        invoices: [],
-        availableClients: [],
-        settings,
-      });
-    }
+    const isUserAdmin = session?.role === 'ADMIN' || session?.role === 'BARBER';
 
     // Buscar projetos do cliente
     const clientProjects = projects.filter(
@@ -185,12 +183,14 @@ export async function GET(req: NextRequest) {
       contracts: clientContracts,
       invoices,
       settings,
-      availableClients: clients.map((c) => ({
-        id: c.id,
-        companyName: c.companyName,
-        contactName: c.contactName,
-        email: c.email,
-      })),
+      availableClients: isUserAdmin
+        ? clients.map((c) => ({
+            id: c.id,
+            companyName: c.companyName,
+            contactName: c.contactName,
+            email: c.email,
+          }))
+        : [],
     });
   } catch (error: any) {
     console.error('Erro ao carregar dados do portal do cliente:', error);

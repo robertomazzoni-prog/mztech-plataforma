@@ -62,13 +62,26 @@ export default function ClientPortalPage() {
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
+        if (!data.client) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('mztech_client_session');
+          }
+          router.push('/cliente/login');
+          return;
+        }
         setClientData(data);
         if (data.client?.email) {
           setSelectedClientEmail(data.client.email);
         }
+      } else {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('mztech_client_session');
+        }
+        router.push('/cliente/login');
       }
     } catch (err) {
       console.error('Erro ao carregar dados da conta do cliente:', err);
+      router.push('/cliente/login');
     } finally {
       setLoading(false);
     }
@@ -81,12 +94,18 @@ export default function ClientPortalPage() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          savedEmail = parsed.email;
+          savedEmail = parsed.email || parsed.contactName || parsed.companyName;
         } catch (e) {}
       }
     }
+
+    if (!savedEmail) {
+      router.push('/cliente/login');
+      return;
+    }
+
     loadClientData(savedEmail);
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     if (!confirm('Deseja realmente encerrar a sessão da sua Área do Cliente?')) return;
