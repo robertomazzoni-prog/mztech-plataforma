@@ -164,6 +164,27 @@ export default function MzTechProjectsPage() {
     }
   };
 
+  const handleQuickStatusChange = async (id: string, newStatus: ProjectStatus) => {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+    );
+
+    try {
+      const res = await fetch(`/api/mztech/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        alert('Erro ao salvar alteração de status.');
+        loadData();
+      }
+    } catch (e) {
+      alert('Erro de conexão ao alterar status.');
+      loadData();
+    }
+  };
+
   const handleDeleteProject = async (id: string, name: string) => {
     if (!confirm(`Deseja realmente excluir o projeto "${name}"?`)) return;
 
@@ -185,7 +206,7 @@ export default function MzTechProjectsPage() {
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Produção
+            Produção / Entregue
           </span>
         );
       case 'DESENVOLVIMENTO':
@@ -197,8 +218,8 @@ export default function MzTechProjectsPage() {
         );
       case 'TESTE':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-            Testes
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+            Testes / Homologação
           </span>
         );
       case 'MANUTENCAO':
@@ -215,8 +236,8 @@ export default function MzTechProjectsPage() {
         );
       case 'ENCERRADO':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-            Encerrado
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
+            Encerrado / Entregue
           </span>
         );
       default:
@@ -323,8 +344,36 @@ export default function MzTechProjectsPage() {
                       </p>
                     </td>
 
-                    {/* Status */}
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(p.status)}</td>
+                    {/* Status de Entrega com Seletor Rápido */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <select
+                          value={p.status}
+                          onChange={(e) => handleQuickStatusChange(p.id, e.target.value as ProjectStatus)}
+                          className={`text-xs font-bold rounded-lg px-2.5 py-1.5 border focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer transition-colors ${
+                            p.status === 'PRODUCAO'
+                              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50'
+                              : p.status === 'DESENVOLVIMENTO'
+                              ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/50'
+                              : p.status === 'TESTE'
+                              ? 'bg-purple-950/80 text-purple-300 border-purple-500/50'
+                              : p.status === 'MANUTENCAO'
+                              ? 'bg-blue-950/80 text-blue-300 border-blue-500/50'
+                              : p.status === 'ENCERRADO'
+                              ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40'
+                              : 'bg-amber-950/80 text-amber-300 border-amber-500/50'
+                          }`}
+                        >
+                          <option value="PLANEJAMENTO">📋 1. Planejamento</option>
+                          <option value="DESENVOLVIMENTO">▶ 2. Em Desenvolvimento</option>
+                          <option value="TESTE">🧪 3. Em Testes / Homologação</option>
+                          <option value="PRODUCAO">🚀 4. Entregue / Em Produção</option>
+                          <option value="MANUTENCAO">🛡️ 5. Em Manutenção Contínua</option>
+                          <option value="ENCERRADO">✅ 6. Encerrado / Concluído</option>
+                        </select>
+                        <p className="text-[10px] text-slate-500 font-mono">Status no Portal do Cliente</p>
+                      </div>
+                    </td>
 
                     {/* Links */}
                     <td className="px-6 py-4 whitespace-nowrap text-xs space-y-1">
@@ -527,12 +576,12 @@ export default function MzTechProjectsPage() {
                     }
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400"
                   >
-                    <option value="PLANEJAMENTO">Planejamento</option>
-                    <option value="DESENVOLVIMENTO">Desenvolvimento</option>
-                    <option value="TESTE">Testes</option>
-                    <option value="PRODUCAO">Em Produção</option>
-                    <option value="MANUTENCAO">Manutenção</option>
-                    <option value="ENCERRADO">Encerrado</option>
+                    <option value="PLANEJAMENTO">📋 1. Planejamento & Setup</option>
+                    <option value="DESENVOLVIMENTO">▶ 2. Em Desenvolvimento</option>
+                    <option value="TESTE">🧪 3. Em Testes / Homologação</option>
+                    <option value="PRODUCAO">🚀 4. Entregue / Em Produção</option>
+                    <option value="MANUTENCAO">🛡️ 5. Em Manutenção Contínua</option>
+                    <option value="ENCERRADO">✅ 6. Encerrado / Concluído</option>
                   </select>
                 </div>
               </div>

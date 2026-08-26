@@ -8,6 +8,8 @@ import {
 import { getStoredQuotes } from '@/lib/quotes-store';
 import { getStoredSettings } from '@/lib/mz-settings-store';
 import { getUserFromRequest } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { isDatabaseOnline } from '@/lib/init-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +21,49 @@ export async function GET(req: NextRequest) {
 
     const targetEmail = emailParam || session?.email?.toLowerCase();
 
-    const clients = getStoredClients();
-    const projects = getStoredProjects();
+    let clients = getStoredClients();
+    let projects = getStoredProjects();
     const quotes = getStoredQuotes();
     const contracts = getStoredContracts();
     const payments = getStoredPayments();
     const settings = getStoredSettings();
+
+    const dbOnline = await isDatabaseOnline();
+    if (dbOnline) {
+      try {
+        const dbProjects = await prisma.mzProject.findMany({
+          orderBy: { createdAt: 'desc' },
+          include: { client: true },
+        });
+        if (dbProjects && dbProjects.length > 0) {
+          const mappedDbProjects: any[] = dbProjects.map((p) => ({
+            id: p.id,
+            clientId: p.clientId,
+            client: p.client ? { id: p.client.id, companyName: p.client.companyName, contactName: p.client.contactName, email: p.client.email } : undefined,
+            name: p.name,
+            type: p.type,
+            status: p.status,
+            startDate: p.startDate ? p.startDate.toISOString() : null,
+            deliveryDate: p.deliveryDate ? p.deliveryDate.toISOString() : null,
+            domain: p.domain,
+            hostingUrl: p.hostingUrl,
+            githubRepo: p.githubRepo,
+            hostingPlatform: p.hostingPlatform,
+            notes: p.notes,
+            createdAt: p.createdAt.toISOString(),
+            updatedAt: p.updatedAt.toISOString(),
+          }));
+
+          const dbMap = new Map(mappedDbProjects.map((p) => [p.id, p]));
+          projects = projects.map((p) => dbMap.get(p.id) || p);
+          for (const dbP of mappedDbProjects) {
+            if (!projects.some((p) => p.id === dbP.id)) {
+              projects.push(dbP);
+            }
+          }
+        }
+      } catch (e) {}
+    }
 
     let client = null;
     if (targetEmail) {

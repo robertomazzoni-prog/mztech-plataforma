@@ -193,6 +193,75 @@ export default function ClientPortalPage() {
   const paidInvoices = invoices.filter((i: any) => i.status === 'PAID');
   const unacceptedContract = contracts.find((c) => !c.acceptedOnline && c.status !== 'CANCELADO');
 
+  // Helper dinâmico para mapear o status de entrega definido no Controle de Projetos
+  const getProjectStatusInfo = (status?: string) => {
+    switch (status) {
+      case 'PRODUCAO':
+        return {
+          label: '🚀 Entregue / Em Produção',
+          badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          stepText: '6. Entregue e Ativo em Produção 🚀',
+          step5Done: true,
+          step6Done: true,
+        };
+      case 'TESTE':
+        return {
+          label: '🧪 Em Fase de Testes & Homologação',
+          badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+          stepText: '5. Em Fase de Testes & Homologação',
+          step5Done: true,
+          step6Done: false,
+        };
+      case 'DESENVOLVIMENTO':
+        return {
+          label: '▶ Em Desenvolvimento Técnico',
+          badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+          stepText: '5. Em Desenvolvimento Técnico',
+          step5Done: true,
+          step6Done: false,
+        };
+      case 'MANUTENCAO':
+        return {
+          label: '🛡️ Em Manutenção & Suporte Ativo',
+          badgeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+          stepText: '6. Ativo sob Manutenção Contínua',
+          step5Done: true,
+          step6Done: true,
+        };
+      case 'ENCERRADO':
+        return {
+          label: '✅ Projeto Concluído & Entregue',
+          badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          stepText: '6. Projeto Concluído & Entregue com Sucesso',
+          step5Done: true,
+          step6Done: true,
+        };
+      case 'PLANEJAMENTO':
+      default:
+        return {
+          label: '📋 Planejamento & Setup Inicial',
+          badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          stepText: '4. Setup & Planejamento Inicial',
+          step5Done: false,
+          step6Done: false,
+        };
+    }
+  };
+
+  const primaryProject = projects[0];
+  const projectStatusInfo = getProjectStatusInfo(primaryProject?.status);
+  const hasAcceptedOrPaid = contracts.some((c) => c.acceptedOnline || c.status === 'ATIVO') || paidInvoices.length > 0;
+
+  const currentStepperStatusText = primaryProject
+    ? projectStatusInfo.stepText
+    : hasAcceptedOrPaid
+    ? '4. Aceite / Pagamento Confirmado'
+    : contracts.length > 0
+    ? '3. Contrato Gerado'
+    : quotes.length > 0
+    ? '2. Análise Comercial'
+    : '1. Orçamento Enviado';
+
   // Desenvolvedor Responsável
   const devAssigned = quotes[0]?.selectedDev || 'Roberto';
 
@@ -248,33 +317,36 @@ export default function ClientPortalPage() {
         
         {/* Banner de Boas-Vindas & Ficha do Cliente */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Painel do Cliente mzTech • Conta Ativa
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Ambiente Seguro mzTech • Painel do Cliente</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Olá, {client?.contactName || 'Cliente'}!
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+                Olá, <span className="text-cyan-400">{client?.contactName || 'Cliente'}</span>!
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Empresa: <strong className="text-white">{client?.companyName}</strong> • Acompanhe propostas, contratos, faturas e projetos em tempo real.
+              <p className="text-sm text-slate-400 max-w-2xl">
+                Empresa: <strong className="text-slate-200">{client?.companyName || 'Sua Empresa'}</strong> • Acompanhe propostas, contratos, faturas e o status em tempo real do seu projeto.
               </p>
             </div>
 
-            {/* Sócio Responsável */}
-            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-4 min-w-[280px]">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-bold text-lg">
-                {devAssigned.charAt(0)}
+            {/* Card do Sócio Responsável */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-3 self-start md:self-auto min-w-[240px]">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+                {devAssigned[0]}
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Sócio Especialista Responsável:</p>
-                <p className="text-sm font-bold text-white flex items-center gap-1.5">
-                  <span>{devAssigned}</span>
-                  <span className="text-[10px] font-mono font-normal text-cyan-400">(Sócio mzTech)</span>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold font-mono">
+                  Sócio Especialista Responsável:
+                </p>
+                <p className="text-sm font-bold text-white">
+                  {devAssigned} <span className="text-xs text-cyan-400 font-normal">(Sócio mzTech)</span>
                 </p>
                 <a
-                  href={`https://wa.me/5531986847049?text=${encodeURIComponent(`Olá! Estou no Portal do Cliente da mzTech e gostaria de falar sobre meus projetos.`)}`}
+                  href={`https://wa.me/${devAssigned.includes('Morvan') ? '5531993597136' : '5531986847049'}?text=Ol%C3%A1%20${devAssigned}%2C%20sou%20cliente%20da%20mzTech%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida.`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline mt-0.5"
@@ -296,8 +368,8 @@ export default function ClientPortalPage() {
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
               <span>Progresso do Fluxo Comercial & Entrega</span>
             </h3>
-            <span className="text-[11px] text-cyan-400 font-mono">
-              Status Atual: {projects.length > 0 && projects[0].status === 'PRODUCAO' ? '6. Ativo em Produção' : contracts.length > 0 ? '3. Contrato Gerado' : '1. Proposta Recebida'}
+            <span className="text-[11px] text-cyan-400 font-mono font-bold">
+              Status Atual: {currentStepperStatusText}
             </span>
           </div>
 
@@ -306,20 +378,28 @@ export default function ClientPortalPage() {
               { step: '1', title: 'Orçamento Enviado', done: true },
               { step: '2', title: 'Análise Comercial', done: quotes.length > 0 },
               { step: '3', title: 'Contrato Gerado', done: contracts.length > 0 },
-              { step: '4', title: 'Aceite / Pagamento', done: contracts.some((c) => c.acceptedOnline) || paidInvoices.length > 0 },
-              { step: '5', title: 'Desenvolvimento', done: projects.length > 0 },
-              { step: '6', title: 'Produção Ativa', done: projects.some((p) => p.status === 'PRODUCAO') },
+              { step: '4', title: 'Aceite / Pagamento', done: hasAcceptedOrPaid },
+              {
+                step: '5',
+                title: primaryProject?.status === 'TESTE' ? 'Fase de Testes' : 'Desenvolvimento',
+                done: Boolean(primaryProject && (primaryProject.status === 'DESENVOLVIMENTO' || primaryProject.status === 'TESTE' || primaryProject.status === 'PRODUCAO' || primaryProject.status === 'MANUTENCAO' || primaryProject.status === 'ENCERRADO')),
+              },
+              {
+                step: '6',
+                title: 'Produção / Entregue',
+                done: Boolean(primaryProject && (primaryProject.status === 'PRODUCAO' || primaryProject.status === 'MANUTENCAO' || primaryProject.status === 'ENCERRADO')),
+              },
             ].map((st) => (
               <div
                 key={st.step}
-                className={`p-3 rounded-xl border text-center space-y-1 ${
+                className={`p-3 rounded-xl border text-center space-y-1 transition-all ${
                   st.done
                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                     : 'bg-slate-950/60 border-slate-800 text-slate-500'
                 }`}
               >
                 <span className={`w-5 h-5 rounded-full inline-flex items-center justify-center font-bold text-[10px] mx-auto ${
-                  st.done ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  st.done ? 'bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/40' : 'bg-slate-800 text-slate-400'
                 }`}>
                   {st.done ? '✓' : st.step}
                 </span>
@@ -466,7 +546,7 @@ export default function ClientPortalPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {projects.map((proj) => {
-                const isProduction = proj.status === 'PRODUCAO';
+                const statusInfo = getProjectStatusInfo(proj.status);
                 return (
                   <div
                     key={proj.id}
@@ -481,13 +561,9 @@ export default function ClientPortalPage() {
                       </div>
 
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
-                          isProduction
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border ${statusInfo.badgeClass}`}
                       >
-                        {isProduction ? '● Em Produção' : '▶ Em Desenvolvimento'}
+                        {statusInfo.label}
                       </span>
                     </div>
 
