@@ -334,50 +334,174 @@ export default function MzTechPublicPage() {
       </header>
 
       {/* ============================================================ */}
-      {/* 2. HERO SECTION */}
+      {/* 2. HERO SECTION (DINÂMICO: ESTILO 1 CYBER DARK OU ESTILO 2 STUDIO PRO) */}
       {/* ============================================================ */}
-      <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
-        {/* Glowing Background Orbs */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-cyan-500/20 via-blue-500/10 to-indigo-500/0 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {settingsData?.siteTheme === 'STUDIO_PREMIUM' ? (
+        /* ESTILO 2: STUDIO DE ENGENHARIA & MINIMALIST PRO */
+        <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
+          {/* Background Grid Sutil e Foco de Luz Tecnológico */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-cyan-950/25 via-slate-950 to-slate-950 pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+            {/* Badge Oficial Studio */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold shadow-sm backdrop-blur-md">
+              <Terminal className="w-4 h-4 text-cyan-400" />
+              <span>mzTech • Estúdio de Software & Desenvolvimento Web</span>
+            </div>
+
+            {/* Título Principal */}
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] max-w-4xl mx-auto">
+              Engenharia de software de alta performance, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">sistemas sob medida</span> e presença digital sólida.
+            </h1>
+
+            {/* Subtítulo Realista & Humanizado */}
+            <p className="text-slate-300 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed font-normal">
+              Sem templates prontos ou intermediários. Projetos construídos com código limpo em <strong>Next.js</strong> e <strong>PostgreSQL</strong> pelos desenvolvedores fundadores <strong>{settingsData?.robertoName || 'Roberto Mazzoni'}</strong> e <strong>{settingsData?.morvanName || 'Morvan'}</strong>, com hospedagem em nuvem gerenciada, alta velocidade e suporte direto.
+            </p>
+
+            {/* 4 Pilares Técnicos */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-2">
+              {[
+                { icon: Code2, label: 'Código Nativo & Escalável', desc: 'Next.js 14 & React' },
+                { icon: Server, label: 'Infraestrutura Cloud', desc: 'Railway, SSL & DNS' },
+                { icon: ShieldCheck, label: 'Banco Dedicado & Backups', desc: 'PostgreSQL Relacional' },
+                { icon: MessageSquare, label: 'Atendimento Direto', desc: `${settingsData?.robertoName || 'Roberto'} & ${settingsData?.morvanName || 'Morvan'}` },
+              ].map((p, idx) => {
+                const Icon = p.icon;
+                return (
+                  <div key={idx} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 text-left space-y-1">
+                    <Icon className="w-4 h-4 text-cyan-400" />
+                    <p className="text-xs font-bold text-white leading-tight">{p.label}</p>
+                    <p className="text-[11px] text-slate-400">{p.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Botões CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+              <Link
+                href="#orcamento"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Solicitar Orçamento do Projeto</span>
+              </Link>
+
+              <Link
+                href="#portfolio"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-cyan-500/40 font-semibold text-base flex items-center justify-center gap-2 transition-all"
+              >
+                <span>Ver Projetos em Produção</span>
+                <ArrowRight className="w-4 h-4 text-cyan-400" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Apresentação dos Desenvolvedores Fundadores */}
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Card Roberto */}
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/30 flex items-center gap-4 transition-colors">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-lg flex-shrink-0">
+                  R
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-white text-base">{settingsData?.robertoName || 'Roberto Mazzoni'}</h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">
+                      Sócio Fundador
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-snug">
+                    Desenvolvedor Full Stack • Especialista em Frontend, Next.js, React e Interfaces de Alta Conversão
+                  </p>
+                  <a
+                    href={`https://wa.me/${(settingsData?.robertoWhatsapp || MZTECH_INFO.robertoWhatsapp || '5531986847049').replace(/\D/g, '')}?text=Ol%C3%A1%20Roberto%2C%20gostaria%20de%20conversar%20sobre%20um%20projeto%20com%20a%20mzTech.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline pt-1"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp: {settingsData?.robertoPhone || MZTECH_INFO.robertoPhone}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Card Morvan */}
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/30 flex items-center gap-4 transition-colors">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-lg flex-shrink-0">
+                  M
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-white text-base">{settingsData?.morvanName || 'Morvan'}</h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">
+                      Sócio Fundador
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-snug">
+                    Desenvolvedor Full Stack • Especialista em Sistemas Web, APIs, Bancos Relacionais e Infraestrutura Cloud
+                  </p>
+                  <a
+                    href={`https://wa.me/${(settingsData?.morvanWhatsapp || MZTECH_INFO.morvanWhatsapp || '5531993597136').replace(/\D/g, '')}?text=Ol%C3%A1%20Morvan%2C%20gostaria%20de%20conversar%20sobre%20um%20projeto%20com%20a%20mzTech.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline pt-1"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp: {settingsData?.morvanPhone || MZTECH_INFO.morvanPhone}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        /* ESTILO 1: DARK CYBER & GLOW (PADRÃO) */
+        <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
+          {/* Glowing Background Orbs */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-cyan-500/20 via-blue-500/10 to-indigo-500/0 rounded-full blur-3xl pointer-events-none" />
           
-          {/* Badge Posicionamento */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-8 shadow-md shadow-cyan-500/5 animate-in fade-in slide-in-from-bottom-2">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span>{MZTECH_INFO.tagline}</span>
+          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            {/* Badge Posicionamento */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-8 shadow-md shadow-cyan-500/5 animate-in fade-in slide-in-from-bottom-2">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>{settingsData?.tagline || MZTECH_INFO.tagline}</span>
+            </div>
+
+            {/* Título Principal Oficial */}
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
+              Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">presença digital profissional.</span>
+            </h1>
+
+            {/* Subtítulo Oficial */}
+            <p className="text-slate-300 text-base sm:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+              {MZTECH_INFO.description}
+            </p>
+
+            {/* Botões CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="#orcamento"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Solicitar orçamento</span>
+              </Link>
+
+              <Link
+                href="#servicos"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-cyan-500/40 font-semibold text-base flex items-center justify-center gap-2 transition-all"
+              >
+                <span>Conhecer nossos serviços</span>
+                <ArrowRight className="w-4 h-4 text-cyan-400" />
+              </Link>
+            </div>
           </div>
-
-          {/* Título Principal Oficial */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
-            Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">presença digital profissional.</span>
-          </h1>
-
-          {/* Subtítulo Oficial */}
-          <p className="text-slate-300 text-base sm:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
-            {MZTECH_INFO.description}
-          </p>
-
-          {/* Botões CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="#orcamento"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              <span>Solicitar orçamento</span>
-            </Link>
-
-            <Link
-              href="#servicos"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-cyan-500/40 font-semibold text-base flex items-center justify-center gap-2 transition-all"
-            >
-              <span>Conhecer nossos serviços</span>
-              <ArrowRight className="w-4 h-4 text-cyan-400" />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ============================================================ */}
       {/* 3. SEÇÃO "O QUE FAZEMOS" */}

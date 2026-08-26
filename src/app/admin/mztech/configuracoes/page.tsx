@@ -38,6 +38,7 @@ export default function AdminSettingsPage() {
   const [name, setName] = useState('mzTech');
   const [legalName, setLegalName] = useState('mzTech Soluções Digitais & Desenvolvimento');
   const [tagline, setTagline] = useState('Tecnologia que coloca sua empresa no digital.');
+  const [siteTheme, setSiteTheme] = useState<'CYBER_DARK' | 'STUDIO_PREMIUM'>('CYBER_DARK');
   
   // E-mails dinâmicos
   const [emails, setEmails] = useState<CompanyEmailItem[]>([
@@ -84,6 +85,7 @@ export default function AdminSettingsPage() {
         setName(s.name || 'mzTech');
         setLegalName(s.legalName || 'mzTech Soluções Digitais & Desenvolvimento');
         setTagline(s.tagline || 'Tecnologia que coloca sua empresa no digital.');
+        setSiteTheme(s.siteTheme || 'CYBER_DARK');
         setRobertoName(s.robertoName || 'Roberto');
         setRobertoPhone(s.robertoPhone || '(31) 98684-7049');
         setRobertoPixKey(s.robertoPixKey || 'robertomazzoni956@gmail.com');
@@ -279,6 +281,7 @@ export default function AdminSettingsPage() {
           name,
           legalName,
           tagline,
+          siteTheme,
           email: primaryEmail,
           emails: validEmails,
           robertoName,
@@ -301,7 +304,7 @@ export default function AdminSettingsPage() {
         return;
       }
 
-      setSuccessMsg('Configurações salvas com sucesso! As novas chaves Pix e e-mails já estão ativos no sistema.');
+      setSuccessMsg('Configurações e tema da landing page salvos com sucesso!');
       setTimeout(() => {
         setSuccessMsg(null);
       }, 5000);
@@ -325,10 +328,10 @@ export default function AdminSettingsPage() {
             <span>mzTech Enterprise Configs</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <span>Configurações & Canais de Pagamento</span>
+            <span>Configurações & Estilo Visual da Plataforma</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-            Gerencie múltiplos <strong>e-mails</strong> de atendimento, <strong>chaves Pix</strong> de recebimento, telefones dos sócios e dados da empresa.
+            Alterne o <strong>estilo visual do site institucional</strong> em tempo real, gerencie <strong>e-mails</strong> de atendimento, <strong>chaves Pix</strong> de recebimento e telefones dos sócios.
           </p>
         </div>
 
@@ -378,6 +381,153 @@ export default function AdminSettingsPage() {
       ) : (
         <form id="settings-form" onSubmit={handleSave} className="space-y-8">
           
+          {/* ============================================================ */}
+          {/* BLOCO 0: SELETOR DINÂMICO DE ESTILO & TEMA DA LANDING PAGE */}
+          {/* ============================================================ */}
+          <div className="bg-slate-900/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>Identidade Visual & Tema do Site Oficial</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-bold">
+                      {siteTheme === 'STUDIO_PREMIUM' ? 'Estilo 2: Studio Pro' : 'Estilo 1: Dark Cyber'}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Escolha qual estilo visual fica no ar para os visitantes. Você pode alternar quando quiser.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href="/mztech"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Ver Site no Ar</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Grid de Seleção dos 2 Estilos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Estilo 1: Dark Cyber & Terminal */}
+              <div
+                onClick={() => setSiteTheme('CYBER_DARK')}
+                className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative flex flex-col justify-between ${
+                  siteTheme === 'CYBER_DARK'
+                    ? 'bg-cyan-500/10 border-cyan-400 shadow-xl shadow-cyan-500/10 scale-[1.01]'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40'
+                }`}
+              >
+                {siteTheme === 'CYBER_DARK' && (
+                  <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                    <span>Tema Ativo</span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">Estilo 1: Dark Cyber & Glow</h4>
+                      <p className="text-[11px] text-cyan-400 font-mono">Moderno • Glows Neon • Terminal</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                    Visual clássico escuro com badges brilhantes, headline com gradiente azul/ciano e layout dinâmico focado em tecnologia e presença digital.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1 mt-2">
+                    <span className="text-[10px] text-cyan-400 font-mono block">✨ Tecnologia que coloca sua empresa no digital.</span>
+                    <strong className="text-white text-xs block">Seu negócio merece uma presença digital profissional.</strong>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800/80 mt-4 flex items-center justify-between">
+                  <span className="text-xs text-slate-400 font-medium">Layout Dinâmico</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSiteTheme('CYBER_DARK');
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      siteTheme === 'CYBER_DARK'
+                        ? 'bg-cyan-500 text-slate-950 shadow-md'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {siteTheme === 'CYBER_DARK' ? 'Selecionado' : 'Ativar Este Estilo'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Estilo 2: Studio de Engenharia & Minimalist Pro */}
+              <div
+                onClick={() => setSiteTheme('STUDIO_PREMIUM')}
+                className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative flex flex-col justify-between ${
+                  siteTheme === 'STUDIO_PREMIUM'
+                    ? 'bg-blue-500/10 border-blue-400 shadow-xl shadow-blue-500/10 scale-[1.01]'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40'
+                }`}
+              >
+                {siteTheme === 'STUDIO_PREMIUM' && (
+                  <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-blue-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                    <span>Tema Ativo</span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-base">Estilo 2: Studio de Software Pro</h4>
+                      <p className="text-[11px] text-blue-400 font-mono">Alta Autoridade • Fundadores • Vercel/Linear Style</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                    Visual sofisticado de estúdio de engenharia de software internacional, com malha geométrica técnica, apresentação dos fundadores Roberto e Morvan e métricas de infraestrutura.
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1 mt-2">
+                    <span className="text-[10px] text-blue-400 font-mono block">mzTech • Estúdio de Software & Desenvolvimento</span>
+                    <strong className="text-white text-xs block">Engenharia de software de alta performance e sistemas sob medida.</strong>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800/80 mt-4 flex items-center justify-between">
+                  <span className="text-xs text-slate-400 font-medium">Layout Studio Elite</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSiteTheme('STUDIO_PREMIUM');
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      siteTheme === 'STUDIO_PREMIUM'
+                        ? 'bg-blue-500 text-slate-950 shadow-md'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {siteTheme === 'STUDIO_PREMIUM' ? 'Selecionado' : 'Ativar Este Estilo'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* ============================================================ */}
           {/* BLOCO 1: E-MAILS DE CONTATO & NOTIFICAÇÕES (MÚLTIPLOS) */}
           {/* ============================================================ */}

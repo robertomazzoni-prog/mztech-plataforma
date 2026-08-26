@@ -17,10 +17,13 @@ export interface CompanyPixItem {
   isPrimary?: boolean;
 }
 
+export type SiteThemeStyle = 'CYBER_DARK' | 'STUDIO_PREMIUM';
+
 export interface CompanySettings {
   name: string;
   legalName: string;
   tagline: string;
+  siteTheme?: SiteThemeStyle;
   email: string;
   emails: CompanyEmailItem[];
   robertoName: string;
@@ -44,6 +47,7 @@ export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
   tagline: 'Tecnologia que coloca sua empresa no digital.',
+  siteTheme: 'CYBER_DARK',
   email: 'robertomazzoni956@gmail.com',
   emails: [
     {

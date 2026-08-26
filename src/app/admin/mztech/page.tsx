@@ -24,6 +24,7 @@ import {
   Phone,
   Mail,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import { formatCurrency, formatDatePtBR } from '@/lib/utils';
 import { MzDashboardMetrics, MzQuoteItem } from '@/types/mztech';
@@ -99,6 +100,14 @@ export default function MzTechDashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/mztech/configuracoes"
+            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500/40 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+            title="Alterar Estilo Visual da Landing Page"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Estilo do Site</span>
+          </Link>
           <button
             onClick={loadDashboard}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors"
