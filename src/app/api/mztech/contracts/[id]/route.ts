@@ -125,7 +125,7 @@ export async function PATCH(
         acceptedUserAgent: userAgent,
         signedAt: nowStr,
         signatureCertificateHash: certHash,
-        status: current?.providerSigned ? 'ATIVO' : (current?.status || 'AGUARDANDO_PAGAMENTO'),
+        status: current?.status === 'ATIVO' ? 'ATIVO' : 'ASSINADO',
       });
 
       if (updated) {

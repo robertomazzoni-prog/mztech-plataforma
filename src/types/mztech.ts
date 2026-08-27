@@ -90,9 +90,11 @@ export type CodeOwnershipType =
 
 export type ContractStatus =
   | 'RASCUNHO'
+  | 'EMITIDO'
   | 'AGUARDANDO_ENVIO'
-  | 'AGUARDANDO_PAGAMENTO'
   | 'AGUARDANDO_ACEITE'
+  | 'AGUARDANDO_PAGAMENTO'
+  | 'ASSINADO'
   | 'ATIVO'
   | 'SUSPENSO'
   | 'CANCELADO'

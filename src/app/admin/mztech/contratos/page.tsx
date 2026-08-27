@@ -303,6 +303,42 @@ export default function MzTechContractsPage() {
     }, 4000);
   };
 
+  // AÇÃO 5: CONFIRMAR PAGAMENTO MANUALMENTE (SE IDENTIFICADO DIRETO)
+  const handleConfirmPaymentManual = async (contract: MzContractItem) => {
+    if (!confirm(`Deseja confirmar o recebimento do pagamento do contrato ${contract.contractNumber || contract.title}? O status mudará para PAGO & ATIVO.`)) {
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/mztech/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: contract.clientId,
+          contractId: contract.id,
+          title: `Taxa Inicial — ${contract.project?.name || contract.title}`,
+          amount: contract.totalDevPrice > 0 ? contract.totalDevPrice : contract.monthlyPrice,
+          paymentMethod: 'PIX',
+          paymentType: 'TAXA_INICIAL',
+          status: 'PAID',
+          notes: 'Pagamento confirmado e identificado pela administração mzTech.',
+        }),
+      });
+
+      if (res.ok) {
+        setFeedbackToast('Pagamento confirmado e contrato ativado com sucesso!');
+        loadData();
+        setTimeout(() => setFeedbackToast(null), 5000);
+      } else {
+        alert('Erro ao registrar confirmação de pagamento.');
+      }
+    } catch (e) {
+      alert('Erro de conexão ao confirmar pagamento.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // AÇÃO 4: COPIAR LINK DE PAGAMENTO / CHECKOUT
   const handleCopyPaymentLink = (contractId: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://mztech.app';
@@ -506,7 +542,9 @@ export default function MzTechContractsPage() {
                 {filteredContracts.map((c) => {
                   const isProviderSigned = Boolean(c.providerSigned);
                   const isClientSigned = Boolean(c.clientSigned || c.acceptedOnline);
-                  const isPaid = (c.status === 'ATIVO' && (c.clientSigned || c.acceptedOnline)) || payments.some((p) => (p.contractId === c.id || p.clientId === c.clientId) && p.status === 'PAID');
+                  const isPaid = payments.some(
+                    (p) => (p.contractId === c.id || p.clientId === c.clientId) && p.status === 'PAID'
+                  );
                   const devName = c.assignedDev || (c as any).snapshot?.assignedDev || (c.providerSignedBy ? c.providerSignedBy.split(' ')[0] : 'Roberto');
                   const isMorvan = devName.toLowerCase().includes('morvan');
 
@@ -564,7 +602,7 @@ export default function MzTechContractsPage() {
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        {isPaid || c.status === 'ATIVO' ? (
+                        {isPaid ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20">
                             <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
                             <span>PAGO & ATIVO</span>
@@ -578,6 +616,10 @@ export default function MzTechContractsPage() {
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
                             Falta Prestador
                           </span>
+                        ) : isProviderSigned ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            Aguardando Cliente
+                          </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
                             {c.status || 'RASCUNHO'}
@@ -587,20 +629,30 @@ export default function MzTechContractsPage() {
                       <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
                         
                         {/* Se o pagamento já foi identificado */}
-                        {isPaid || c.status === 'ATIVO' ? (
+                        {isPaid ? (
                           <span className="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 font-bold text-[11px] border border-emerald-500/30 inline-flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                             <span>Pago</span>
                           </span>
                         ) : isProviderSigned && isClientSigned ? (
-                          <button
-                            onClick={() => handleCopyPaymentLink(c.id)}
-                            className="px-2.5 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-semibold text-[11px] border border-amber-500/30 inline-flex items-center gap-1 transition-colors"
-                            title="Copiar Link de Pagamento Gerado"
-                          >
-                            <DollarSign className="w-3 h-3" />
-                            <span>Link Pagto</span>
-                          </button>
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleCopyPaymentLink(c.id)}
+                              className="px-2.5 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-semibold text-[11px] border border-amber-500/30 inline-flex items-center gap-1 transition-colors"
+                              title="Copiar Link de Pagamento Gerado"
+                            >
+                              <DollarSign className="w-3 h-3" />
+                              <span>Link Pagto</span>
+                            </button>
+                            <button
+                              onClick={() => handleConfirmPaymentManual(c)}
+                              className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-[10px] border border-emerald-500/40 inline-flex items-center gap-1 transition-colors"
+                              title="Confirmar Pagamento Manualmente"
+                            >
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span>Confirmar</span>
+                            </button>
+                          </div>
                         ) : null}
 
                         {/* Visualizar e Assinar */}

@@ -327,8 +327,8 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
       num,
       val,
       label: num === 1
-        ? `1x de ${formatCurrency(val)} à vista (sem juros)`
-        : `${num}x de ${formatCurrency(val)} / mês (sem juros)`,
+        ? `1x de ${formatCurrency(val)} à vista`
+        : `${num}x de ${formatCurrency(val)} / mês (juros calculados no Mercado Pago)`,
     };
   });
 
@@ -417,7 +417,7 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                 <span className="text-slate-500 font-sans">Condição Escolhida:</span>
                 <span className="text-cyan-300">
                   {authReceipt?.installments && authReceipt.installments > 1
-                    ? `${authReceipt.installments}x de ${formatCurrency(authReceipt.installmentValue)} (sem juros)`
+                    ? `${authReceipt.installments}x de ${formatCurrency(authReceipt.installmentValue)}`
                     : authReceipt?.brand === 'PIX Instantâneo'
                     ? 'PIX À Vista'
                     : '1x à vista no Cartão'}
@@ -504,7 +504,7 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                     <div className="flex items-center gap-2">
                       <span className="text-xs block">Cartão de Crédito</span>
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                        Até 12x Sem Juros
+                        Até 12x no Mercado Pago
                       </span>
                     </div>
                     <span className="text-[11px] text-slate-400 font-normal">À vista, Parcelado ou Recorrente</span>
@@ -570,7 +570,7 @@ export default function PublicPaymentPage({ params }: { params: { id: string } }
                   <div className="space-y-1.5">
                     <label className="text-slate-300 font-semibold text-xs flex items-center justify-between">
                       <span>Quantidade de Parcelas no Cartão:</span>
-                      <span className="text-emerald-400 text-[11px] font-mono">Sem Juros</span>
+                      <span className="text-blue-400 text-[11px] font-mono">Juros calculados no Mercado Pago</span>
                     </label>
                     <div className="relative">
                       <select
