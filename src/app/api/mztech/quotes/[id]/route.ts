@@ -118,21 +118,48 @@ export async function PATCH(
 
     // Atualizações de campos comerciais normais
     const updatesToApply: any = {};
-    if (status !== undefined) updatesToApply.status = status;
-    if (notes !== undefined) updatesToApply.notes = notes;
-    if (selectedDev !== undefined) updatesToApply.selectedDev = selectedDev;
-    if (initialDevPrice !== undefined) updatesToApply.initialDevPrice = Number(initialDevPrice);
-    if (monthlyPrice !== undefined) updatesToApply.monthlyPrice = Number(monthlyPrice);
-    if (discount !== undefined) updatesToApply.discount = Number(discount);
-    if (finalPrice !== undefined) updatesToApply.finalPrice = Number(finalPrice);
-    if (paymentMethodChoice !== undefined) updatesToApply.paymentMethodChoice = paymentMethodChoice;
-    if (billingPeriodicity !== undefined) updatesToApply.billingPeriodicity = billingPeriodicity;
-    if (dueDay !== undefined) updatesToApply.dueDay = Number(dueDay);
-    if (estimatedBudget !== undefined) updatesToApply.estimatedBudget = estimatedBudget;
-    if (desiredDeadline !== undefined) updatesToApply.desiredDeadline = desiredDeadline;
-    if (projectType !== undefined) updatesToApply.projectType = projectType;
-    if (company !== undefined) updatesToApply.company = company;
-    if (cnpjCpf !== undefined) updatesToApply.cnpjCpf = cnpjCpf;
+    if (body.name !== undefined) updatesToApply.name = body.name.trim();
+    if (body.company !== undefined) updatesToApply.company = body.company?.trim() || null;
+    if (body.cnpjCpf !== undefined) updatesToApply.cnpjCpf = body.cnpjCpf?.trim() || null;
+    if (body.whatsapp !== undefined) updatesToApply.whatsapp = body.whatsapp.trim();
+    if (body.email !== undefined) updatesToApply.email = body.email.trim();
+    if (body.selectedDev !== undefined) updatesToApply.selectedDev = body.selectedDev;
+    if (body.projectType !== undefined) updatesToApply.projectType = body.projectType;
+    if (body.serviceId !== undefined) updatesToApply.serviceId = body.serviceId;
+    if (body.hasDomain !== undefined) updatesToApply.hasDomain = body.hasDomain;
+    if (body.needsHosting !== undefined) updatesToApply.needsHosting = body.needsHosting;
+    if (body.needsMaintenance !== undefined) updatesToApply.needsMaintenance = body.needsMaintenance;
+    if (body.projectDescription !== undefined) updatesToApply.projectDescription = body.projectDescription;
+    
+    if (body.initialDevPrice !== undefined) {
+      const parsedInit = Number(body.initialDevPrice);
+      updatesToApply.initialDevPrice = isNaN(parsedInit) ? 0 : parsedInit;
+      
+      const disc = body.discount !== undefined ? Number(body.discount) : 0;
+      updatesToApply.discount = isNaN(disc) ? 0 : disc;
+      
+      if (body.finalPrice !== undefined && body.finalPrice !== null && !isNaN(Number(body.finalPrice))) {
+        updatesToApply.finalPrice = Number(body.finalPrice);
+      } else {
+        updatesToApply.finalPrice = updatesToApply.initialDevPrice - updatesToApply.discount;
+      }
+    } else if (body.discount !== undefined) {
+      const disc = Number(body.discount);
+      updatesToApply.discount = isNaN(disc) ? 0 : disc;
+    }
+
+    if (body.monthlyPrice !== undefined) {
+      const parsedMonth = Number(body.monthlyPrice);
+      updatesToApply.monthlyPrice = isNaN(parsedMonth) ? 0 : parsedMonth;
+    }
+
+    if (body.paymentMethodChoice !== undefined) updatesToApply.paymentMethodChoice = body.paymentMethodChoice;
+    if (body.billingPeriodicity !== undefined) updatesToApply.billingPeriodicity = body.billingPeriodicity;
+    if (body.dueDay !== undefined) updatesToApply.dueDay = Number(body.dueDay);
+    if (body.estimatedBudget !== undefined) updatesToApply.estimatedBudget = body.estimatedBudget;
+    if (body.desiredDeadline !== undefined) updatesToApply.desiredDeadline = body.desiredDeadline;
+    if (body.status !== undefined) updatesToApply.status = body.status;
+    if (body.notes !== undefined) updatesToApply.notes = body.notes;
 
     const updated = updateQuote(params.id, updatesToApply);
 

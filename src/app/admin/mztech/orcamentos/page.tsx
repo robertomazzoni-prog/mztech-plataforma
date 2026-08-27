@@ -244,10 +244,22 @@ export default function MzTechOrcamentosPage() {
       const url = formData.id ? `/api/mztech/quotes/${formData.id}` : '/api/mztech/quotes';
       const method = formData.id ? 'PATCH' : 'POST';
 
+      const initPrice = parseFloat(formData.initialDevPrice || '0');
+      const disc = parseFloat(formData.discount || '0');
+      const calcFinal = (isNaN(initPrice) ? 0 : initPrice) - (isNaN(disc) ? 0 : disc);
+
+      const payload = {
+        ...formData,
+        initialDevPrice: isNaN(initPrice) ? 0 : initPrice,
+        discount: isNaN(disc) ? 0 : disc,
+        finalPrice: calcFinal,
+        monthlyPrice: parseFloat(formData.monthlyPrice || '0') || 0,
+      };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -928,7 +940,16 @@ export default function MzTechOrcamentosPage() {
                       type="number"
                       step="0.01"
                       value={formData.initialDevPrice}
-                      onChange={(e) => setFormData({ ...formData, initialDevPrice: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const disc = parseFloat(formData.discount || '0');
+                        const fin = (parseFloat(val || '0') - (isNaN(disc) ? 0 : disc)).toString();
+                        setFormData({
+                          ...formData,
+                          initialDevPrice: val,
+                          finalPrice: fin,
+                        });
+                      }}
                       className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
                     />
                   </div>
@@ -1125,11 +1146,17 @@ export default function MzTechOrcamentosPage() {
                       else if (val === 'Site Institucional Profissional') initialPrice = '1500.00';
                       else if (val === 'Sistema Web & Painel Administrativo') initialPrice = '2900.00';
                       else if (val === 'Site + Sistema de Agendamento') initialPrice = '1800.00';
+                      else if (val === 'E-commerce / Loja Online') initialPrice = '2500.00';
+                      else if (val === 'Cardápio Digital & Delivery') initialPrice = '1200.00';
+
+                      const disc = parseFloat(formData.discount || '0');
+                      const fin = (parseFloat(initialPrice || '0') - (isNaN(disc) ? 0 : disc)).toString();
 
                       setFormData({
                         ...formData,
                         projectType: val,
                         initialDevPrice: initialPrice,
+                        finalPrice: fin,
                       });
                     }}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-cyan-400"
