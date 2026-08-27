@@ -45,7 +45,7 @@ import {
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
-import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 import CleanCorporateTheme from '@/components/themes/CleanCorporateTheme';
 
 const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
@@ -203,6 +203,13 @@ export default function MzTechPublicPage() {
 
     if (!formData.name || !formData.whatsapp || !formData.email) {
       alert('Por favor, preencha os campos obrigatórios (Nome, WhatsApp e E-mail).');
+      return;
+    }
+
+    // Validação de Nome Real
+    const nameValidation = validateRealName(formData.name, 'Seu Nome');
+    if (!nameValidation.isValid) {
+      alert(nameValidation.error);
       return;
     }
 

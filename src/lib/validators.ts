@@ -31,7 +31,6 @@ export const VALID_BRAZILIAN_DDDS = new Set([
 
 // Domínios fictícios, de teste, temporários ou de exemplos de placeholders proibidos
 export const BLOCKED_DOMAINS = new Set([
-  // Exemplos e placeholders
   'example.com',
   'example.org',
   'example.net',
@@ -72,7 +71,6 @@ export const BLOCKED_DOMAINS = new Set([
   'domain.com',
   'site.com',
   'email.com',
-  // E-mails temporários e descartáveis conhecidos
   'mailinator.com',
   'tempmail.com',
   'temp-mail.org',
@@ -119,29 +117,59 @@ export const BLOCKED_DOMAINS = new Set([
   'rhinomore.com',
 ]);
 
-// Usuários de e-mail falsos óbvios
-export const BLOCKED_USERNAMES = new Set([
-  'teste',
-  'test',
-  'asdf',
-  'asdfgh',
-  'qwerty',
-  '123456',
-  '123456789',
-  'fake',
-  'admin123',
-  'usuario',
-  'cliente',
-  'fulano',
-  'ciclano',
-  'aaaaaa',
-  'bbbbbb',
-  'cccccc',
-  'abcdef',
-  'qualquercoisa',
-  'naoexiste',
-  'sememail',
-]);
+// Padrões de nomes de usuário de teste/falsos bloqueados
+const DUMMY_USER_PATTERNS = [
+  /test(e)?/i,
+  /^asdf/i,
+  /^qwerty/i,
+  /^fake/i,
+  /^admin\d*$/i,
+  /^usuario\d*$/i,
+  /^cliente\d*$/i,
+  /^fulano/i,
+  /^ciclano/i,
+  /^demo\d*$/i,
+  /^qualquer/i,
+  /^sememail/i,
+  /^naoexiste/i,
+  /^temp/i,
+  /^exemplo/i,
+  /^sample/i,
+  /^dummy/i,
+  /^anonimo/i,
+  /^\d+$/,
+  /^([a-z0-9])\1{2,}$/i,
+];
+
+/**
+ * Valida se um nome ou nome de empresa é real (não é 'teste', 'asdf', etc.)
+ */
+export function validateRealName(name: string, fieldName = 'Nome'): {
+  isValid: boolean;
+  error?: string;
+  cleanName: string;
+} {
+  if (!name || typeof name !== 'string') {
+    return { isValid: false, error: `${fieldName} não informado.`, cleanName: '' };
+  }
+
+  const clean = name.trim();
+  if (clean.length < 3) {
+    return { isValid: false, error: `${fieldName} deve ter no mínimo 3 caracteres.`, cleanName: clean };
+  }
+
+  const lower = clean.toLowerCase();
+  const dummyNames = ['teste', 'test', 'asdf', 'qwerty', 'fake', 'admin', 'xxx', 'abc', '123', 'usuario', 'fulano'];
+  if (dummyNames.includes(lower) || lower.startsWith('teste') || lower.startsWith('test ')) {
+    return {
+      isValid: false,
+      error: `Por favor, informe um ${fieldName.toLowerCase()} real (evite nomes fictícios como "teste").`,
+      cleanName: clean,
+    };
+  }
+
+  return { isValid: true, cleanName: clean };
+}
 
 /**
  * Formata um número de telefone dinamicamente enquanto o usuário digita
@@ -150,12 +178,10 @@ export function formatPhoneInput(value: string): string {
   if (!value) return '';
   let digits = value.replace(/\D/g, '');
 
-  // Se tiver DDI 55 na frente e mais de 11 dígitos, remove o 55
   if (digits.startsWith('55') && digits.length > 11) {
     digits = digits.slice(2);
   }
 
-  // Limitar a no máximo 11 dígitos
   if (digits.length > 11) {
     digits = digits.slice(0, 11);
   }
@@ -164,10 +190,8 @@ export function formatPhoneInput(value: string): string {
   if (digits.length <= 2) return `(${digits}`;
   if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   if (digits.length <= 10) {
-    // Fixo ou celular curto: (XX) XXXX-XXXX
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
-  // Celular 11 dígitos: (XX) 9XXXX-XXXX
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
@@ -191,44 +215,20 @@ export function validateBrazilianPhone(phone: string): {
 
   let digits = phone.replace(/\D/g, '');
 
-  // Tratar DDI 55
   if (digits.startsWith('55') && digits.length > 11) {
     digits = digits.slice(2);
   }
 
-  // Verificar tamanho (10 dígitos para fixo ou 11 para celular)
   if (digits.length !== 10 && digits.length !== 11) {
     return {
       isValid: false,
-      error: 'O telefone deve conter DDD + número (10 ou 11 dígitos). Ex: (31) 99999-9999',
+      error: 'O telefone deve conter DDD + número (10 ou 11 dígitos). Ex: (31) 99123-4567',
       cleanDigits: digits,
       formatted: formatPhoneInput(digits),
     };
   }
 
-  // Verificar todos os dígitos repetidos (ex: 11111111111, 00000000000)
-  const firstChar = digits[0];
-  if (digits.split('').every((c) => c === firstChar)) {
-    return {
-      isValid: false,
-      error: 'Número de telefone inválido (todos os dígitos são repetidos).',
-      cleanDigits: digits,
-      formatted: formatPhoneInput(digits),
-    };
-  }
-
-  // Verificar sequências óbvias falsas
-  const dummySequences = ['1234567890', '0123456789', '12345678901', '98765432100', '9876543210'];
-  if (dummySequences.includes(digits)) {
-    return {
-      isValid: false,
-      error: 'Número de telefone inválido (sequência numérica falsa).',
-      cleanDigits: digits,
-      formatted: formatPhoneInput(digits),
-    };
-  }
-
-  // Validar DDD
+  // Validar DDD oficial da Anatel
   const ddd = parseInt(digits.slice(0, 2), 10);
   if (!VALID_BRAZILIAN_DDDS.has(ddd)) {
     return {
@@ -241,7 +241,17 @@ export function validateBrazilianPhone(phone: string): {
 
   const numberPart = digits.slice(2);
 
-  // Celular (11 dígitos): o primeiro dígito após o DDD OBRIGATORIAMENTE deve ser 9
+  // 1. Rejeita se todos os dígitos do número forem iguais (ex: 999999999, 888888888, 000000000)
+  if (numberPart.split('').every((c) => c === numberPart[0])) {
+    return {
+      isValid: false,
+      error: 'Número de telefone inválido (dígitos todos repetidos). Informe seu número real.',
+      cleanDigits: digits,
+      formatted: formatPhoneInput(digits),
+    };
+  }
+
+  // 2. Celular (11 dígitos): deve começar com 9 após o DDD e os 8 dígitos seguintes NÃO podem ser todos iguais
   if (digits.length === 11) {
     if (numberPart[0] !== '9') {
       return {
@@ -251,19 +261,18 @@ export function validateBrazilianPhone(phone: string): {
         formatted: formatPhoneInput(digits),
       };
     }
-    // O segundo dígito do celular não deve ser repetição total do restante
-    const rest = numberPart.slice(1);
-    if (rest.split('').every((c) => c === rest[0])) {
+    const afterNine = numberPart.slice(1);
+    if (afterNine.split('').every((c) => c === afterNine[0])) {
       return {
         isValid: false,
-        error: 'Número de celular inválido (dígitos repetidos).',
+        error: 'Número de celular inválido (dígitos repetidos como 99999-9999). Informe seu número real.',
         cleanDigits: digits,
         formatted: formatPhoneInput(digits),
       };
     }
   }
 
-  // Telefone Fixo (10 dígitos): o primeiro dígito após o DDD deve ser de 2 a 5
+  // 3. Telefone Fixo (10 dígitos): deve começar com 2 a 5
   if (digits.length === 10) {
     const firstDigit = parseInt(numberPart[0], 10);
     if (firstDigit < 2 || firstDigit > 5) {
@@ -274,6 +283,17 @@ export function validateBrazilianPhone(phone: string): {
         formatted: formatPhoneInput(digits),
       };
     }
+  }
+
+  // 4. Rejeita sequências numéricas óbvias falsas
+  const dummySequences = ['12345678', '87654321', '123456789', '987654321', '01234567', '76543210'];
+  if (dummySequences.some((seq) => numberPart.includes(seq))) {
+    return {
+      isValid: false,
+      error: 'Número de telefone inválido (sequência numérica falsa). Informe seu número real.',
+      cleanDigits: digits,
+      formatted: formatPhoneInput(digits),
+    };
   }
 
   return {
@@ -323,20 +343,28 @@ export function validateEmailFormat(email: string): {
 
   const [username, domain] = parts;
 
-  // Validações de usuário
-  if (username.length < 2 || username.length > 64) {
+  if (username.length < 3 || username.length > 64) {
     return {
       isValid: false,
-      error: 'O nome de usuário do e-mail deve ter no mínimo 2 caracteres.',
+      error: 'O nome de usuário do e-mail deve ter no mínimo 3 caracteres.',
       cleanEmail: clean,
     };
   }
 
-  // Verifica repetições de um único caractere no usuário (ex: aaaaa@...)
-  if (username.length > 2 && username.split('').every((c) => c === username[0])) {
+  // Verifica repetições de um único caractere (ex: aaaaa@...)
+  if (username.split('').every((c) => c === username[0])) {
     return {
       isValid: false,
-      error: 'Informe um e-mail real e válido (caracteres repetidos).',
+      error: 'Informe um e-mail real e existente (caracteres repetidos).',
+      cleanEmail: clean,
+    };
+  }
+
+  // Bloqueio de padrões falsos/testes no usuário (ex: teste123, fake, asdf, etc.)
+  if (DUMMY_USER_PATTERNS.some((p) => p.test(username))) {
+    return {
+      isValid: false,
+      error: `O e-mail "${clean}" parece ser um e-mail de teste fictício. Por favor, informe seu e-mail pessoal ou corporativo real e ativo.`,
       cleanEmail: clean,
     };
   }
@@ -364,16 +392,7 @@ export function validateEmailFormat(email: string): {
   if (BLOCKED_DOMAINS.has(domain)) {
     return {
       isValid: false,
-      error: `O domínio "@${domain}" não é aceito. Informe seu e-mail corporativo ou pessoal real.`,
-      cleanEmail: clean,
-    };
-  }
-
-  // Combinações falsas de usuário
-  if (BLOCKED_USERNAMES.has(username)) {
-    return {
-      isValid: false,
-      error: `O e-mail "${clean}" parece ser um e-mail de teste fictício. Informe seu e-mail real.`,
+      error: `O domínio "@${domain}" não é aceito. Informe seu e-mail corporativo ou pessoal real e ativo.`,
       cleanEmail: clean,
     };
   }

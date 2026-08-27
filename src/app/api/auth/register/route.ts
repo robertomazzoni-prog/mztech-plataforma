@@ -4,7 +4,7 @@ import { hashPassword, signToken } from '@/lib/auth';
 import { cleanPhoneDigits, formatPhoneNumber } from '@/lib/utils';
 import { isDatabaseOnline } from '@/lib/init-db';
 import { getStoredClients, saveStoredClients } from '@/lib/mz-entities-store';
-import { validateBrazilianPhone } from '@/lib/validators';
+import { validateBrazilianPhone, validateRealName } from '@/lib/validators';
 import { validateEmailDomainExists } from '@/lib/server-validators';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +33,12 @@ export async function POST(req: NextRequest) {
         { error: 'Por favor, preencha seu nome, empresa, e-mail, WhatsApp e senha.' },
         { status: 400 }
       );
+    }
+
+    // Validação de Nome Real
+    const nameCheck = validateRealName(finalContact, 'Nome');
+    if (!nameCheck.isValid) {
+      return NextResponse.json({ error: nameCheck.error }, { status: 400 });
     }
 
     // Validação de Telefone / WhatsApp Brasileiro

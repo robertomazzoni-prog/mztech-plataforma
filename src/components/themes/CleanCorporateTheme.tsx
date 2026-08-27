@@ -50,7 +50,7 @@ import {
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
-import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 
 interface CleanCorporateThemeProps {
   settingsData: any;

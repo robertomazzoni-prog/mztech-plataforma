@@ -18,7 +18,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { formatPhoneNumber, cleanPhoneDigits } from '@/lib/utils';
-import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 
 export default function ClientRegisterPage() {
   const router = useRouter();
@@ -42,6 +42,12 @@ export default function ClientRegisterPage() {
     e.preventDefault();
     if (!contactName || !whatsapp || !email || !password) {
       setError('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    const nameCheck = validateRealName(contactName, 'Nome Completo');
+    if (!nameCheck.isValid) {
+      setError(nameCheck.error || 'Informe seu nome real.');
       return;
     }
 
