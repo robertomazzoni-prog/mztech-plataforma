@@ -214,7 +214,7 @@ export default function ClientRegisterPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contato@empresa.com"
+                    placeholder="seu.email@dominio.com.br"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-sm transition-colors"
                   />
                 </div>

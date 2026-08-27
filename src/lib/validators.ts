@@ -29,47 +29,118 @@ export const VALID_BRAZILIAN_DDDS = new Set([
   98, 99,                             // MA
 ]);
 
-// Domínios fictícios, de teste ou temporários proibidos
+// Domínios fictícios, de teste, temporários ou de exemplos de placeholders proibidos
 export const BLOCKED_DOMAINS = new Set([
+  // Exemplos e placeholders
   'example.com',
   'example.org',
   'example.net',
+  'exemplo.com',
+  'exemplo.com.br',
   'test.com',
   'teste.com',
   'teste.com.br',
+  'test.org',
+  'test.net',
   'asdf.com',
+  'asdf.com.br',
   'foo.com',
   'bar.com',
   'fake.com',
   'invalid.com',
-  'mailinator.com',
-  'tempmail.com',
-  '123.com',
-  'aaa.com',
-  'abc.com',
-  'xyz.com',
+  'empresa.com',
+  'empresa.com.br',
+  'suaempresa.com',
+  'suaempresa.com.br',
+  'minhaempresa.com',
+  'minhaempresa.com.br',
+  'seuemail.com',
+  'seuemail.com.br',
+  'meuemail.com',
+  'meuemail.com.br',
+  'qualquercoisa.com',
+  'qualquercoisa.com.br',
   'naoexiste.com',
   'naoexiste.com.br',
+  '123.com',
+  '123.com.br',
+  'aaa.com',
+  'abc.com',
+  'abc.com.br',
+  'xyz.com',
+  'xyz.com.br',
   'domain.com',
   'site.com',
   'email.com',
+  // E-mails temporários e descartáveis conhecidos
+  'mailinator.com',
+  'tempmail.com',
+  'temp-mail.org',
+  'guerrillamail.com',
+  'guerrillamail.net',
+  'guerrillamail.org',
+  'guerrillamailblock.com',
+  'grr.la',
+  'pokemail.net',
+  'spam4.me',
+  '10minutemail.com',
+  '10mail.org',
+  'yopmail.com',
+  'yopmail.fr',
+  'yopmail.net',
+  'sharklasers.com',
+  'throwawaymail.com',
+  'trashmail.com',
+  'dispostable.com',
+  'maildrop.cc',
+  'burnermail.io',
+  'mohmal.com',
+  'inboxkitten.com',
+  'getairmail.com',
+  'fakeinbox.com',
+  'fakemailgenerator.com',
+  'mytemp.email',
+  'tempr.email',
+  'discard.email',
+  'generator.email',
+  'emailondeck.com',
+  'nada.ltd',
+  'crazymailing.com',
+  'armyspy.com',
+  'cuvox.de',
+  'dayrep.com',
+  'fleckens.hu',
+  'gustr.com',
+  'jourrapide.com',
+  'rhyta.com',
+  'superrito.com',
+  'teleworm.us',
+  'einrot.com',
+  'rhinomore.com',
 ]);
 
-// Usuários de e-mail falsos óbvios em provedores genéricos
+// Usuários de e-mail falsos óbvios
 export const BLOCKED_USERNAMES = new Set([
   'teste',
   'test',
   'asdf',
   'asdfgh',
+  'qwerty',
   '123456',
   '123456789',
   'fake',
   'admin123',
   'usuario',
+  'cliente',
   'fulano',
   'ciclano',
   'aaaaaa',
   'bbbbbb',
+  'cccccc',
+  'abcdef',
+  'qualquercoisa',
+  'naoexiste',
+  'sememail',
 ]);
 
 /**
@@ -256,7 +327,16 @@ export function validateEmailFormat(email: string): {
   if (username.length < 2 || username.length > 64) {
     return {
       isValid: false,
-      error: 'O nome de usuário do e-mail deve ter entre 2 e 64 caracteres.',
+      error: 'O nome de usuário do e-mail deve ter no mínimo 2 caracteres.',
+      cleanEmail: clean,
+    };
+  }
+
+  // Verifica repetições de um único caractere no usuário (ex: aaaaa@...)
+  if (username.length > 2 && username.split('').every((c) => c === username[0])) {
+    return {
+      isValid: false,
+      error: 'Informe um e-mail real e válido (caracteres repetidos).',
       cleanEmail: clean,
     };
   }
@@ -280,17 +360,17 @@ export function validateEmailFormat(email: string): {
     };
   }
 
-  // Domínios bloqueados / falsos
+  // Domínios bloqueados / falsos / descartáveis
   if (BLOCKED_DOMAINS.has(domain)) {
     return {
       isValid: false,
-      error: `O domínio "${domain}" é um domínio de testes e não é aceito. Informe um e-mail corporativo ou pessoal válido.`,
+      error: `O domínio "@${domain}" não é aceito. Informe seu e-mail corporativo ou pessoal real.`,
       cleanEmail: clean,
     };
   }
 
   // Combinações falsas de usuário
-  if (BLOCKED_USERNAMES.has(username) && (domain.includes('gmail') || domain.includes('hotmail') || domain.includes('outlook') || domain.includes('yahoo'))) {
+  if (BLOCKED_USERNAMES.has(username)) {
     return {
       isValid: false,
       error: `O e-mail "${clean}" parece ser um e-mail de teste fictício. Informe seu e-mail real.`,
