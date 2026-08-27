@@ -127,6 +127,19 @@ export default function CleanCorporateTheme({
   const legalName = settingsData?.legalName || MZTECH_INFO.legalName;
   const workingHours = settingsData?.workingHours || 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h';
 
+  const handleSelectPlan = (plan: any) => {
+    const planString = `${plan.name} (${formatCurrency(plan.price)}/mês)`;
+    setFormData((prev: any) => ({
+      ...prev,
+      needsHosting: planString,
+      monthlyPrice: plan.price || getMonthlyPriceFromPlan(planString, recurringServices),
+    }));
+    const formElement = document.getElementById('orcamento');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Classes de Estilo Condicionais para Modo Claro e Modo Escuro (Preto/Zinc puro no escuro)
   const theme = {
     bg: isDarkMode ? 'bg-[#09090b]' : 'bg-slate-50',
@@ -526,57 +539,63 @@ export default function CleanCorporateTheme({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {MZTECH_PLANS.map((plan, idx) => (
-              <div
-                key={idx}
-                className={`p-6 sm:p-8 rounded-2xl border-2 transition-all flex flex-col justify-between shadow-sm relative ${
-                  plan.recommended
-                    ? isDarkMode
-                      ? 'border-blue-500 bg-[#18181c] shadow-blue-500/10'
-                      : 'border-blue-600 bg-white shadow-md'
-                    : `${theme.border} ${theme.surface}`
-                }`}
-              >
-                {plan.recommended && (
-                  <div className="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider">
-                    {plan.badge}
-                  </div>
-                )}
+            {(recurringServices && recurringServices.length > 0 ? recurringServices : MZTECH_PLANS).map((plan: any, idx: number) => {
+              const isRec = plan.recommended || (typeof plan.name === 'string' && plan.name.toLowerCase().includes('manutenção')) || plan.type === 'MANUTENCAO';
+              const badgeText = plan.badge || (isRec ? 'Mais Recomendado' : 'Hospedagem Gerenciada');
 
-                <div className="space-y-4">
-                  <div>
-                    <h3 className={`text-xl font-bold ${theme.textPrimary}`}>{plan.name}</h3>
-                    <p className={`text-xs ${theme.textSecondary} mt-1`}>{plan.description}</p>
+              return (
+                <div
+                  key={plan.id || plan.name || idx}
+                  className={`p-6 sm:p-8 rounded-2xl border-2 transition-all flex flex-col justify-between shadow-sm relative ${
+                    isRec
+                      ? isDarkMode
+                        ? 'border-blue-500 bg-[#18181c] shadow-blue-500/10'
+                        : 'border-blue-600 bg-white shadow-md'
+                      : `${theme.border} ${theme.surface}`
+                  }`}
+                >
+                  {isRec && (
+                    <div className="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                      {badgeText}
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className={`text-xl font-bold ${theme.textPrimary}`}>{plan.name}</h3>
+                      <p className={`text-xs ${theme.textSecondary} mt-1`}>{plan.description}</p>
+                    </div>
+
+                    <div className="flex items-baseline gap-1 pt-2">
+                      <span className="text-3xl sm:text-4xl font-extrabold text-blue-600">
+                        {formatCurrency(plan.price)}
+                      </span>
+                      <span className={`text-xs ${theme.textMuted}`}>{plan.period || '/mês'}</span>
+                    </div>
+
+                    <ul className="space-y-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                      {Array.isArray(plan.features) && plan.features.map((feat: string, fIdx: number) => (
+                        <li key={fIdx} className="flex items-start gap-2.5 text-xs">
+                          <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span className={theme.textSecondary}>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  <div className="flex items-baseline gap-1 pt-2">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-blue-600">
-                      {formatCurrency(plan.price)}
-                    </span>
-                    <span className={`text-xs ${theme.textMuted}`}>{plan.period}</span>
+                  <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPlan(plan)}
+                      className={`w-full py-3 rounded-lg ${isRec ? theme.btnPrimary : theme.btnSecondary} text-center text-xs font-semibold flex items-center justify-center gap-2`}
+                    >
+                      <span>{plan.cta || `Escolher ${plan.name?.replace('Plano ', '')}`}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-
-                  <ul className="space-y-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    {plan.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2.5 text-xs">
-                        <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <span className={theme.textSecondary}>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
-
-                <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
-                  <a
-                    href="#orcamento"
-                    className={`w-full py-3 rounded-lg ${plan.recommended ? theme.btnPrimary : theme.btnSecondary} text-center text-xs font-semibold flex items-center justify-center gap-2`}
-                  >
-                    <span>{plan.cta}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
         </div>
@@ -593,10 +612,10 @@ export default function CleanCorporateTheme({
               Processo de Trabalho
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Como Funciona do Início à Entrega
+              Metodologia de Engenharia Web
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Metodologia transparente e ágil para transformar a ideia do seu negócio em realidade digital.
+              Fluxo ágil e transparente para entrega do seu projeto no prazo e com máxima qualidade.
             </p>
           </div>
 
@@ -623,143 +642,601 @@ export default function CleanCorporateTheme({
           
           <div className="text-center space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Proposta Comercial
+              Dê o Próximo Passo
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Solicite seu Orçamento Personalizado
+              Solicite seu Orçamento
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Preencha os dados abaixo para receber uma estimativa instantânea e atendimento direto.
+              Preencha os dados abaixo para receber uma análise técnica e proposta comercial personalizada.
             </p>
           </div>
 
-          <form onSubmit={handleFormSubmit} className={`p-6 sm:p-10 rounded-2xl border ${theme.border} ${theme.surface} shadow-lg space-y-6`}>
-            
-            {/* Honeypot anti-spam invisível */}
-            <input
-              type="text"
-              name="website_url_hp"
-              value={formData.website_url_hp}
-              onChange={(e) => setFormData({ ...formData, website_url_hp: e.target.value })}
-              style={{ display: 'none', position: 'absolute', left: '-9999px' }}
-              tabIndex={-1}
-              autoComplete="off"
-            />
+          <div className={`p-6 sm:p-10 rounded-2xl border ${theme.border} ${theme.surface} shadow-xl`}>
+            {formSubmitted ? (
+              <div className="text-center py-12 space-y-6 animate-in fade-in">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme.textPrimary}`}>
+                    Solicitação & Conta Criadas com Sucesso!
+                  </h3>
+                  <p className={`text-sm ${theme.textSecondary} max-w-md mx-auto leading-relaxed`}>
+                    Sua conta no <strong className={theme.textPrimary}>Portal do Cliente</strong> foi gerada e sua proposta já está disponível no painel administrativo e no seu portal para acompanhamento em tempo real.
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>Nome Completo *</label>
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+                  <Link
+                    href="/cliente"
+                    className={`w-full sm:w-auto px-6 py-3.5 rounded-xl ${theme.btnPrimary} font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all`}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Acessar Meu Portal do Cliente</span>
+                  </Link>
+
+                  <a
+                    href={`https://wa.me/${MZTECH_INFO.whatsapp}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm inline-flex items-center justify-center gap-2 transition-all shadow-lg"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Falar no WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} className="space-y-6">
+                
+                {/* Honeypot anti-spam invisível */}
                 <input
                   type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ex: João da Silva"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                  name="website_url_hp"
+                  value={formData.website_url_hp}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, website_url_hp: e.target.value }))}
+                  className="hidden"
+                  tabIndex={-1}
+                  autoComplete="off"
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>Empresa / Negócio *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  placeholder="Ex: Minha Empresa Ltda"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>WhatsApp / Telefone *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.whatsapp}
-                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                  placeholder="Ex: (31) 98765-4321"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>E-mail Corporativo *</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Ex: contato@minhaempresa.com.br"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>Tipo de Projeto</label>
-                <select
-                  value={formData.projectType}
-                  onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                >
-                  <option value="Site Institucional Profissional">Site Institucional Profissional</option>
-                  <option value="Landing Page de Alta Conversão">Landing Page de Alta Conversão</option>
-                  <option value="Sistema Web / Painel Sob Medida">Sistema Web / Painel Sob Medida</option>
-                  <option value="Loja Virtual / E-commerce">Loja Virtual / E-commerce</option>
-                  <option value="Apenas Hospedagem & Manutenção">Apenas Hospedagem & Manutenção</option>
-                  <option value="Outro Projeto Digital">Outro Projeto Digital</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className={`text-xs font-semibold ${theme.textSecondary}`}>Especialista Responsável</label>
-                <select
-                  value={formData.selectedDev}
-                  onChange={(e) => setFormData({ ...formData, selectedDev: e.target.value as any })}
-                  className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                >
-                  <option value="Roberto">Roberto ({robertoPhone})</option>
-                  <option value="Morvan">Morvan ({morvanPhone})</option>
-                  <option value="Sem Preferência (Roberto ou Morvan)">Sem Preferência (Qualquer Fundador)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5 pt-2">
-              <label className={`text-xs font-semibold ${theme.textSecondary}`}>Detalhes e Objetivos do Projeto</label>
-              <textarea
-                rows={3}
-                value={formData.projectDescription}
-                onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
-                placeholder="Conte brevemente o que sua empresa precisa (páginas, funcionalidades, etc.)..."
-                className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-              />
-            </div>
-
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs text-slate-500">
-                <span>Atendimento confidencial e direto com os fundadores.</span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={formLoading}
-                className={`w-full sm:w-auto px-8 py-3.5 rounded-lg ${theme.btnPrimary} text-sm flex items-center justify-center gap-2`}
-              >
-                {formLoading ? (
-                  <span>Enviando proposta...</span>
+                {/* Banner de Usuário Logado ou Criação de Conta */}
+                {currentUser ? (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className={`font-bold ${theme.textPrimary} block`}>Conectado como {currentUser.name}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">
+                          {currentUser.email} • Sua proposta será vinculada à sua conta
+                        </span>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] uppercase tracking-wider">
+                      Conta Ativa
+                    </span>
+                  </div>
                 ) : (
-                  <>
-                    <span>Enviar Orçamento no WhatsApp</span>
-                    <Send className="w-4 h-4" />
-                  </>
+                  <div className={`p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border} flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs`}>
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className={`font-bold ${theme.textPrimary} block`}>Criação Obrigatória de Conta no Portal do Cliente</span>
+                        <span className={`text-[11px] ${theme.textMuted}`}>
+                          Para solicitar o orçamento, preencha os dados e defina sua senha para acompanhar o projeto e contratos no portal.
+                        </span>
+                      </div>
+                    </div>
+                    <Link
+                      href="/cliente/login"
+                      className="text-blue-600 dark:text-blue-400 hover:underline font-bold text-[11px] whitespace-nowrap self-start sm:self-auto"
+                    >
+                      Já tem uma conta? Entrar
+                    </Link>
+                  </div>
                 )}
-              </button>
-            </div>
 
-          </form>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>Seu Nome *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Carlos Silva"
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, name: e.target.value }))}
+                      className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>Nome da Empresa</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Silva & Associados"
+                      value={formData.company}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, company: e.target.value }))}
+                      className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>WhatsApp / Celular *</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="(31) 99999-9999"
+                      value={formData.whatsapp}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, whatsapp: e.target.value }))}
+                      className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>E-mail Comercial (Login do Portal) *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="contato@suaempresa.com.br"
+                      value={formData.email}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, email: e.target.value }))}
+                      className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    />
+                  </div>
+                </div>
+
+                {/* Campos de Senha Obrigatórios (se não estiver autenticado) */}
+                {!currentUser && (
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border}`}>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
+                          <Lock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          <span>Definir Senha de Acesso *</span>
+                        </label>
+                        <span className={`text-[10px] ${theme.textMuted} font-mono`}>Mínimo 6 dígitos</span>
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        placeholder="••••••••"
+                        value={formData.password || ''}
+                        onChange={(e) => setFormData((prev: any) => ({ ...prev, password: e.target.value }))}
+                        className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
+                        <Lock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        <span>Confirmar Senha *</span>
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        placeholder="••••••••"
+                        value={formData.confirmPassword || ''}
+                        onChange={(e) => setFormData((prev: any) => ({ ...prev, confirmPassword: e.target.value }))}
+                        className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Seleção do Desenvolvedor / Sócio Responsável */}
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
+                      <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Escolha o Desenvolvedor / Especialista *</span>
+                    </label>
+                    <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">Atendimento direto com o sócio</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Roberto */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, selectedDev: 'Roberto' }))}
+                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                        formData.selectedDev === 'Roberto'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+                              R
+                            </div>
+                            <span className={`font-bold ${theme.textPrimary} text-sm`}>{robertoName}</span>
+                          </div>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              formData.selectedDev === 'Roberto'
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-slate-400 dark:border-slate-600'
+                            }`}
+                          >
+                            {formData.selectedDev === 'Roberto' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </span>
+                        </div>
+                        <p className="text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400">Sócio & Dev Full Stack</p>
+                        <p className={`text-[11px] ${theme.textMuted} leading-tight mt-1`}>
+                          Especialista em Interfaces Web, Next.js, React e Soluções Digitais
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Morvan */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, selectedDev: 'Morvan' }))}
+                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                        formData.selectedDev === 'Morvan'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                              M
+                            </div>
+                            <span className={`font-bold ${theme.textPrimary} text-sm`}>{morvanName}</span>
+                          </div>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              formData.selectedDev === 'Morvan'
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-slate-400 dark:border-slate-600'
+                            }`}
+                          >
+                            {formData.selectedDev === 'Morvan' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </span>
+                        </div>
+                        <p className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">Sócio & Dev Full Stack</p>
+                        <p className={`text-[11px] ${theme.textMuted} leading-tight mt-1`}>
+                          Especialista em Sistemas Web, Banco de Dados e Arquitetura Cloud
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Sem preferência */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev: any) => ({ ...prev, selectedDev: 'Sem Preferência (Roberto ou Morvan)' }))
+                      }
+                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                        formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-600 text-white font-bold text-xs flex items-center justify-center">
+                              mz
+                            </div>
+                            <span className={`font-bold ${theme.textPrimary} text-sm`}>Indiferente</span>
+                          </div>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-slate-400 dark:border-slate-600'
+                            }`}
+                          >
+                            {formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)' && (
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
+                            )}
+                          </span>
+                        </div>
+                        <p className={`text-[10px] font-mono font-bold ${theme.textMuted}`}>Equipe mzTech</p>
+                        <p className={`text-[11px] ${theme.textMuted} leading-tight mt-1`}>
+                          Qualquer um dos dois desenvolvedores sócios disponível
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5 sm:col-span-1">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>Tipo de Projeto</label>
+                    <select
+                      value={formData.projectType}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, projectType: e.target.value }))}
+                      className={`w-full px-3 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    >
+                      {devServices && devServices.length > 0 ? (
+                        devServices.map((s: any) => (
+                          <option key={s.id || s.name} value={s.name}>
+                            {s.name}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="Site Institucional Profissional">Site Institucional Profissional</option>
+                          <option value="Landing Page de Alta Conversão">Landing Page de Alta Conversão</option>
+                          <option value="Sistema Web / Painel Sob Medida">Sistema Web / Painel Sob Medida</option>
+                          <option value="Loja Virtual / E-commerce">Loja Virtual / E-commerce</option>
+                        </>
+                      )}
+                      <option value="Outro Projeto Personalizado">Outro Projeto Personalizado</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-1">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>Possui Domínio?</label>
+                    <select
+                      value={formData.hasDomain}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, hasDomain: e.target.value }))}
+                      className={`w-full px-3 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    >
+                      <option value="Sim, já possuo domínio registrado">Sim, já possuo</option>
+                      <option value="Não, preciso registrar">Não, preciso registrar</option>
+                      <option value="Preciso de orientação">Preciso de orientação</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-1">
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>Plano Desejado</label>
+                    <select
+                      value={formData.needsHosting}
+                      onChange={(e) => {
+                        const newPlan = e.target.value;
+                        if (newPlan.toLowerCase().includes('definir')) {
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            needsHosting: 'A Definir na Proposta Comercial',
+                            monthlyPrice: 0,
+                          }));
+                        } else if (newPlan === 'Apenas Desenvolvimento') {
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            needsHosting: 'Apenas Desenvolvimento',
+                            monthlyPrice: 0,
+                          }));
+                        } else {
+                          const plans = recurringServices && recurringServices.length > 0 ? recurringServices : MZTECH_PLANS;
+                          const matchingPlan = plans.find((p: any) => newPlan.includes(p.name));
+                          const newMonthly = matchingPlan ? matchingPlan.price : getMonthlyPriceFromPlan(newPlan, plans);
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            needsHosting: newPlan,
+                            monthlyPrice: newMonthly,
+                          }));
+                        }
+                      }}
+                      className={`w-full px-3 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                    >
+                      <option value="A Definir na Proposta Comercial">A Definir na Proposta Comercial</option>
+                      {(recurringServices && recurringServices.length > 0 ? recurringServices : MZTECH_PLANS).map((p: any) => (
+                        <option key={p.id || p.name} value={`${p.name} (${formatCurrency(p.price)}/mês)`}>
+                          {p.name} ({formatCurrency(p.price)}/mês)
+                        </option>
+                      ))}
+                      <option value="Apenas Desenvolvimento">Apenas Desenvolvimento (Sem Recorrência)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Campo condicional para inserir o Domínio Próprio */}
+                {(formData.hasDomain?.toLowerCase().includes('sim') || formData.hasDomain?.toLowerCase().includes('já possuo')) && (
+                  <div className={`p-4 rounded-xl ${theme.surfaceMuted} border border-emerald-500/40 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Qual é o seu Domínio Próprio? *</span>
+                      </label>
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        Configuração DNS Inclusa
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ex: suaempresa.com.br, seunegocio.com ou minhaclinica.com.br"
+                      value={formData.customDomain || ''}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, customDomain: e.target.value }))}
+                      className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm font-mono ${theme.input}`}
+                    />
+                    <p className={`text-[11px] ${theme.textMuted} leading-relaxed`}>
+                      💡 A equipe técnica da mzTech cuidará de todos os apontamentos de DNS, vinculação dos servidores e instalação do Certificado de Segurança SSL no seu domínio registrado.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className={`text-xs font-semibold ${theme.textSecondary}`}>
+                    Descrição do Projeto & Necessidades
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Conte sobre o seu negócio, o que o site/sistema precisa ter, referências ou funcionalidades específicas..."
+                    value={formData.projectDescription}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, projectDescription: e.target.value }))}
+                    className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
+                  />
+                </div>
+
+                {/* SELEÇÃO DA FORMA DE PAGAMENTO */}
+                <div className="space-y-2.5 pt-2">
+                  <div className="flex items-center justify-between">
+                    <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
+                      <CreditCard className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Como Você Deseja Pagar? *</span>
+                    </label>
+                    <span className={`text-[11px] ${theme.textMuted}`}>Escolha sua preferência</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Cartão de Crédito Recorrente */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, paymentMethodChoice: 'CREDIT_CARD_RECURRING' }))}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className={`text-xs font-bold ${theme.textPrimary}`}>Cartão de Crédito Recorrente</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' ? 'border-blue-600 bg-blue-600' : 'border-slate-400 dark:border-slate-600'}`} />
+                      </div>
+                      <p className={`text-[11px] ${theme.textMuted} mt-1`}>
+                        Pagamento automático da mensalidade todo mês direto no cartão.
+                      </p>
+                    </button>
+
+                    {/* PIX */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, paymentMethodChoice: 'PIX' }))}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'PIX'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className={`text-xs font-bold ${theme.textPrimary}`}>PIX (À Vista / Recorrente)</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'PIX' ? 'border-blue-600 bg-blue-600' : 'border-slate-400 dark:border-slate-600'}`} />
+                      </div>
+                      <p className={`text-[11px] ${theme.textMuted} mt-1`}>
+                        Pagamento instantâneo via QR Code e chave Pix oficial da mzTech.
+                      </p>
+                    </button>
+
+                    {/* Cartão de Crédito Parcelado */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, paymentMethodChoice: 'CREDIT_CARD' }))}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CREDIT_CARD'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className={`text-xs font-bold ${theme.textPrimary}`}>Cartão de Crédito (Parcelado)</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CREDIT_CARD' ? 'border-blue-600 bg-blue-600' : 'border-slate-400 dark:border-slate-600'}`} />
+                      </div>
+                      <p className={`text-[11px] ${theme.textMuted} mt-1`}>
+                        Pagamento do valor inicial de desenvolvimento parcelado no cartão.
+                      </p>
+                    </button>
+
+                    {/* Cartão + PIX */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, paymentMethodChoice: 'CARD_PLUS_PIX' }))}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        formData.paymentMethodChoice === 'CARD_PLUS_PIX'
+                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
+                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className={`text-xs font-bold ${theme.textPrimary}`}>Cartão + PIX</strong>
+                        <span className={`w-3.5 h-3.5 rounded-full border ${formData.paymentMethodChoice === 'CARD_PLUS_PIX' ? 'border-blue-600 bg-blue-600' : 'border-slate-400 dark:border-slate-600'}`} />
+                      </div>
+                      <p className={`text-[11px] ${theme.textMuted} mt-1`}>
+                        Entrada no Pix e mensalidades no cartão de crédito recorrente.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* RESUMO DA PROPOSTA */}
+                <div className={`p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase font-bold text-blue-600 dark:text-blue-400 font-mono flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Resumo da Solicitação</span>
+                    </span>
+                    <span className={`text-[11px] ${theme.textMuted}`}>Sem cobrança imediata</span>
+                  </div>
+
+                  <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t ${theme.border} text-xs`}>
+                    <div>
+                      <span className={`text-[10px] ${theme.textMuted} block`}>Tipo de Projeto:</span>
+                      <strong className={`truncate block ${theme.textPrimary}`}>{formData.projectType}</strong>
+                    </div>
+                    <div>
+                      <span className={`text-[10px] ${theme.textMuted} block`}>Modalidade:</span>
+                      <span className="text-blue-600 dark:text-blue-400 truncate block font-medium">
+                        {formData.needsHosting?.includes('79,90') || formData.needsHosting?.includes('Hospedagem + Manutenção')
+                          ? 'Hospedagem + Manutenção'
+                          : formData.needsHosting?.includes('39,90') || formData.needsHosting?.includes('Hospedagem Gerenciada')
+                          ? 'Hospedagem Gerenciada'
+                          : formData.needsHosting === 'Apenas Desenvolvimento'
+                          ? 'Apenas Desenvolvimento'
+                          : 'A Definir'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className={`text-[10px] ${theme.textMuted} block`}>Mensalidade:</span>
+                      <span className={`${formData.monthlyPrice > 0 ? 'text-emerald-500 font-bold' : theme.textSecondary} font-mono block`}>
+                        {formData.monthlyPrice > 0
+                          ? `R$ ${formData.monthlyPrice.toFixed(2).replace('.', ',')}/mês`
+                          : formData.needsHosting === 'Apenas Desenvolvimento'
+                          ? 'Sem Mensalidade (R$ 0,00)'
+                          : 'A Definir na Proposta'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className={`text-[10px] ${theme.textMuted} block`}>Forma Escolhida:</span>
+                      <span className={`truncate block ${theme.textSecondary}`}>
+                        {formData.paymentMethodChoice === 'CREDIT_CARD_RECURRING' && 'Cartão Recorrente'}
+                        {formData.paymentMethodChoice === 'PIX' && 'PIX'}
+                        {formData.paymentMethodChoice === 'CREDIT_CARD' && 'Cartão'}
+                        {formData.paymentMethodChoice === 'CARD_PLUS_PIX' && 'Cartão + PIX'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={`pt-2 border-t ${theme.border} text-[11px] ${theme.textMuted} flex items-center gap-1.5`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    <span>Valor de desenvolvimento: <strong className={theme.textPrimary}>Definido sob medida na proposta comercial após análise</strong></span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={formLoading}
+                    className={`w-full py-4 rounded-xl ${theme.btnPrimary} font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
+                  >
+                    {formLoading ? (
+                      <Activity className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                    <span>Enviar Solicitação de Orçamento</span>
+                  </button>
+                  <p className={`text-[11px] ${theme.textMuted} text-center mt-3`}>
+                    Ao enviar, seu orçamento e conta de cliente serão salvos no painel da mzTech e nossa equipe entrará em contato.
+                  </p>
+                </div>
+
+              </form>
+            )}
+          </div>
 
         </div>
       </section>
