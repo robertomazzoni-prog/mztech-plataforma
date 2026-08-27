@@ -164,11 +164,17 @@ export async function DELETE(
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
+        await prisma.mzPayment.deleteMany({ where: { clientId: params.id } }).catch(() => {});
+        await prisma.mzSubscription.deleteMany({ where: { clientId: params.id } }).catch(() => {});
         await prisma.mzHosting.deleteMany({ where: { clientId: params.id } }).catch(() => {});
         await prisma.mzProject.deleteMany({ where: { clientId: params.id } }).catch(() => {});
         await prisma.mzBackup.deleteMany({ where: { clientId: params.id } }).catch(() => {});
         await prisma.mzMaintenance.deleteMany({ where: { clientId: params.id } }).catch(() => {});
         await prisma.mzContract.deleteMany({ where: { clientId: params.id } }).catch(() => {});
+        await prisma.mzQuote.updateMany({
+          where: { linkedClientId: params.id },
+          data: { linkedClientId: null, linkedProjectId: null, linkedContractId: null },
+        }).catch(() => {});
         await prisma.mzClient.delete({ where: { id: params.id } }).catch(() => {});
       } catch (err) {
         console.warn('Erro ao deletar no Prisma (ignorado se deletado em memória):', err);

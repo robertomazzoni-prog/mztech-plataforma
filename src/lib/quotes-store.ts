@@ -94,23 +94,9 @@ export async function syncQuotesFromDb(): Promise<MzQuoteItem[]> {
           updatedAt: q.updatedAt.toISOString(),
         }));
 
-        const current = getStoredQuotes();
-        const dbIds = new Set(mapped.map((m) => m.id));
-        for (const localQ of current) {
-          if (!dbIds.has(localQ.id)) {
-            mapped.push(localQ);
-            syncQuoteToPrisma(localQ).catch(() => {});
-          }
-        }
         globalObject[globalQuotesKey] = mapped;
         writeQuotesToFile(mapped);
         return mapped;
-      } else {
-        const current = getStoredQuotes();
-        for (const localQ of current) {
-          syncQuoteToPrisma(localQ).catch(() => {});
-        }
-        return current;
       }
     } catch (e) {
       console.warn('Aviso ao sincronizar orçamentos do banco:', e);
