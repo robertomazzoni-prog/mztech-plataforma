@@ -38,6 +38,7 @@ import { formatCurrency, formatDatePtBR } from '@/lib/utils';
 
 export default function MzTechOrcamentosPage() {
   const [quotes, setQuotes] = useState<MzQuoteItem[]>([]);
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -82,13 +83,21 @@ export default function MzTechOrcamentosPage() {
   const loadQuotes = async () => {
     try {
       setRefreshing(true);
-      const res = await fetch('/api/mztech/quotes');
-      if (res.ok) {
-        const data = await res.json();
+      const [quotesRes, servRes] = await Promise.all([
+        fetch('/api/mztech/quotes'),
+        fetch('/api/mztech/services?all=true').catch(() => null),
+      ]);
+
+      if (quotesRes.ok) {
+        const data = await quotesRes.json();
         setQuotes(data.quotes || []);
       }
+      if (servRes && servRes.ok) {
+        const sData = await servRes.json();
+        setAvailableServices(sData.services || []);
+      }
     } catch (err) {
-      console.error('Erro ao buscar orçamentos:', err);
+      console.error('Erro ao buscar orçamentos e serviços:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -910,52 +919,238 @@ export default function MzTechOrcamentosPage() {
               </div>
 
               {/* Valores Comerciais */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800">
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-semibold">Valor Inicial (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.initialDevPrice}
-                    onChange={(e) => setFormData({ ...formData, initialDevPrice: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
-                  />
+              <div className="space-y-3 pt-2 border-t border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Valor Inicial */}
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Valor Inicial (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.initialDevPrice}
+                      onChange={(e) => setFormData({ ...formData, initialDevPrice: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  {/* Mensalidade (R$/mês) com Seletor de Planos */}
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold flex items-center justify-between">
+                      <span>Mensalidade (R$/mês)</span>
+                    </label>
+
+                    <div className="space-y-1.5">
+                      <select
+                        value={
+                          Number(formData.monthlyPrice) === 79.9
+                            ? '79.90|||Plano Hospedagem + Manutenção (R$ 79,90/mês)'
+                            : Number(formData.monthlyPrice) === 39.9
+                            ? '39.90|||Plano Hospedagem Gerenciada (R$ 39,90/mês)'
+                            : Number(formData.monthlyPrice) === 149.9
+                            ? '149.90|||Plano Manutenção & Suporte Dedicado (R$ 149,90/mês)'
+                            : Number(formData.monthlyPrice) === 0
+                            ? '0.00|||Isento / Sem Mensalidade'
+                            : 'CUSTOM'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val !== 'CUSTOM') {
+                            const [price, name] = val.split('|||');
+                            setFormData((prev) => ({
+                              ...prev,
+                              monthlyPrice: price,
+                              needsHosting: name,
+                            }));
+                          }
+                        }}
+                        className="w-full px-2 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-[11px] focus:outline-none focus:border-cyan-400 font-medium"
+                      >
+                        <option value="79.90|||Plano Hospedagem + Manutenção (R$ 79,90/mês)">
+                          ⭐ Hospedagem + Manutenção (R$ 79,90/mês)
+                        </option>
+                        <option value="39.90|||Plano Hospedagem Gerenciada (R$ 39,90/mês)">
+                          🌐 Hospedagem Gerenciada (R$ 39,90/mês)
+                        </option>
+                        <option value="149.90|||Plano Manutenção & Suporte Dedicado (R$ 149,90/mês)">
+                          🛡️ Suporte & Manutenção Dedicada (R$ 149,90/mês)
+                        </option>
+                        <option value="0.00|||Isento / Sem Mensalidade">
+                          ⚪ Isento / Sem Mensalidade (R$ 0,00)
+                        </option>
+                        {availableServices
+                          .filter(
+                            (s) =>
+                              (s.recurrence === 'MENSAL' ||
+                                s.type === 'HOSPEDAGEM' ||
+                                s.type === 'MANUTENCAO' ||
+                                s.type === 'SUPORTE') &&
+                              s.price !== 79.9 &&
+                              s.price !== 39.9 &&
+                              s.price !== 149.9
+                          )
+                          .map((s) => (
+                            <option key={s.id} value={`${s.price}|||${s.name} (R$ ${s.price}/mês)`}>
+                              📦 {s.name} (R$ {s.price}/mês)
+                            </option>
+                          ))}
+                        <option value="CUSTOM">✍️ Digitar Outro Valor Personalizado...</option>
+                      </select>
+
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-[11px]">
+                          R$
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={formData.monthlyPrice}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              monthlyPrice: e.target.value,
+                              needsHosting:
+                                Number(e.target.value) === 0
+                                  ? 'Isento / Sem Mensalidade'
+                                  : prev.needsHosting,
+                            }))
+                          }
+                          className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Forma de Pagamento */}
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-semibold">Forma de Pagamento</label>
+                    <select
+                      value={formData.paymentMethodChoice}
+                      onChange={(e: any) =>
+                        setFormData({ ...formData, paymentMethodChoice: e.target.value })
+                      }
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="CREDIT_CARD_RECURRING">Cartão de Crédito Recorrente (Mensal)</option>
+                      <option value="CREDIT_CARD">Cartão de Crédito (Parcelado em até 12x)</option>
+                      <option value="PIX">PIX (À Vista / Chave Oficial)</option>
+                      <option value="CARD_PLUS_PIX">Entrada PIX + Mensalidade no Cartão</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-semibold">Mensalidade (R$/mês)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.monthlyPrice}
-                    onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-semibold">Forma de Pagamento</label>
-                  <select
-                    value={formData.paymentMethodChoice}
-                    onChange={(e: any) => setFormData({ ...formData, paymentMethodChoice: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
+                {/* Atalhos Rápidos de 1 Clique */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 mr-1">Planos Rápidos:</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        monthlyPrice: '79.90',
+                        needsHosting: 'Plano Hospedagem + Manutenção (R$ 79,90/mês)',
+                      }))
+                    }
+                    className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                      Number(formData.monthlyPrice) === 79.9
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
                   >
-                    <option value="CREDIT_CARD">Cartão de Crédito (Parcelado em até 12x)</option>
-                    <option value="CREDIT_CARD_RECURRING">Cartão de Crédito Recorrente (Mensal)</option>
-                    <option value="PIX">PIX (À Vista / Chave Oficial)</option>
-                    <option value="CARD_PLUS_PIX">Entrada PIX + Mensalidade no Cartão</option>
-                  </select>
+                    ⭐ Completo (R$ 79,90)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        monthlyPrice: '39.90',
+                        needsHosting: 'Plano Hospedagem Gerenciada (R$ 39,90/mês)',
+                      }))
+                    }
+                    className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                      Number(formData.monthlyPrice) === 39.9
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    🌐 Hospedagem (R$ 39,90)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        monthlyPrice: '149.90',
+                        needsHosting: 'Plano Manutenção & Suporte Dedicado (R$ 149,90/mês)',
+                      }))
+                    }
+                    className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                      Number(formData.monthlyPrice) === 149.9
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    🛡️ Dedicado (R$ 149,90)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        monthlyPrice: '0.00',
+                        needsHosting: 'Isento / Sem Mensalidade',
+                      }))
+                    }
+                    className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                      Number(formData.monthlyPrice) === 0
+                        ? 'bg-slate-800 text-white border-slate-600'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    ⚪ Isento (R$ 0)
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-slate-400 font-semibold">Serviço / Tipo de Projeto</label>
-                <input
-                  type="text"
-                  value={formData.projectType}
-                  onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-400"
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <select
+                    value={formData.projectType}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      let initialPrice = formData.initialDevPrice;
+                      if (val === 'Landing Page de Alta Conversão') initialPrice = '890.00';
+                      else if (val === 'Site Institucional Profissional') initialPrice = '1500.00';
+                      else if (val === 'Sistema Web & Painel Administrativo') initialPrice = '2900.00';
+                      else if (val === 'Site + Sistema de Agendamento') initialPrice = '1800.00';
+
+                      setFormData({
+                        ...formData,
+                        projectType: val,
+                        initialDevPrice: initialPrice,
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="Site Institucional Profissional">Site Institucional Profissional (R$ 1.500)</option>
+                    <option value="Landing Page de Alta Conversão">Landing Page de Alta Conversão (R$ 890)</option>
+                    <option value="Site + Sistema de Agendamento">Site + Sistema de Agendamento (R$ 1.800)</option>
+                    <option value="Sistema Web & Painel Administrativo">Sistema Web & Painel Administrativo (R$ 2.900)</option>
+                    <option value="E-commerce / Loja Online">E-commerce / Loja Online (R$ 2.500)</option>
+                    <option value="Cardápio Digital & Delivery">Cardápio Digital & Delivery (R$ 1.200)</option>
+                    <option value="Outro">Outro (Digitar Nome Abaixo)</option>
+                  </select>
+
+                  <input
+                    type="text"
+                    value={formData.projectType}
+                    onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
+                    placeholder="Nome customizado do serviço..."
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">
