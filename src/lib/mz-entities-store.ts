@@ -583,6 +583,12 @@ export async function syncClientsFromDb(): Promise<MzClientItem[]> {
         globalObj[globalClientsKey] = mapped;
         saveStoredClients(mapped);
         return mapped;
+      } else {
+        const current = getStoredClients();
+        for (const localC of current) {
+          syncClientToPrisma(localC).catch(() => {});
+        }
+        return current;
       }
     } catch (e) {
       console.warn('Aviso ao sincronizar clientes do banco:', e);
@@ -743,6 +749,12 @@ export async function syncProjectsFromDb(): Promise<MzProjectItem[]> {
         globalObj[globalProjectsKey] = mapped;
         saveStoredProjects(mapped);
         return mapped;
+      } else {
+        const current = getStoredProjects();
+        for (const localP of current) {
+          syncProjectToPrisma(localP).catch(() => {});
+        }
+        return current;
       }
     } catch (e) {
       console.warn('Aviso ao sincronizar projetos do banco:', e);
@@ -902,6 +914,12 @@ export async function syncContractsFromDb(): Promise<MzContractItem[]> {
         globalObj[globalContractsKey] = mapped;
         saveStoredContracts(mapped);
         return mapped;
+      } else {
+        const current = getStoredContracts();
+        for (const localC of current) {
+          syncContractToPrisma(localC).catch(() => {});
+        }
+        return current;
       }
     } catch (e) {
       console.warn('Aviso ao sincronizar contratos do banco:', e);

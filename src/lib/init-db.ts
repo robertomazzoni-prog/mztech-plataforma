@@ -314,6 +314,203 @@ export async function ensureDatabaseReady() {
       );
     `).catch(() => {});
 
+    // 3. AUTO-SEEDING / PROTEÇÃO DE DADOS INICIAIS SE BANCO ESTIVER VAZIO
+    const userCount = await prisma.user.count().catch(() => 0);
+    if (userCount === 0) {
+      const adminPass = await bcrypt.hash('admin123', 10);
+      const robertPass = await bcrypt.hash('roberto123', 10);
+      const morvanPass = await bcrypt.hash('morvan123', 10);
+
+      await prisma.user.createMany({
+        data: [
+          {
+            name: 'Lucas Mazzoni (Admin)',
+            email: 'admin@mazzoni.com',
+            password: adminPass,
+            phone: '(11) 99999-8888',
+            role: 'ADMIN',
+          },
+          {
+            name: 'Roberto Mazzoni (mzTech Sócio)',
+            email: 'robertomazzoni123@gmail.com',
+            password: robertPass,
+            phone: '5531986847049',
+            role: 'ADMIN',
+          },
+          {
+            name: 'Morvan (mzTech Sócio)',
+            email: 'morvan@mztech.com.br',
+            password: morvanPass,
+            phone: '5531993597136',
+            role: 'ADMIN',
+          },
+        ],
+        skipDuplicates: true,
+      }).catch(() => {});
+    }
+
+    // Clientes iniciais
+    const clientCount = await prisma.mzClient.count().catch(() => 0);
+    if (clientCount === 0) {
+      await prisma.mzClient.createMany({
+        data: [
+          {
+            id: 'client-robertotech',
+            companyName: 'RobertoTECH',
+            contactName: 'Roberto',
+            whatsapp: '5531986847049',
+            email: 'robertomazzoni123@gmail.com',
+            domain: 'robertotech.com.br',
+            status: 'ATIVO',
+            financialStatus: 'EM_DIA',
+            notes: 'Cliente oficial mzTech • RobertoTECH',
+            codeDelivered: true,
+            backupDelivered: true,
+          },
+          {
+            id: 'client-tete',
+            companyName: 'tete',
+            contactName: 'tete',
+            whatsapp: '5531986847049',
+            email: 'tete@mazzoni.com.br',
+            domain: 'tete.com.br',
+            status: 'ATIVO',
+            financialStatus: 'EM_DIA',
+            notes: 'Cliente originado do orçamento MZ-2026-0003 • Roberto',
+            codeDelivered: true,
+            backupDelivered: true,
+          },
+        ],
+        skipDuplicates: true,
+      }).catch(() => {});
+    }
+
+    // Orçamentos iniciais
+    const quoteCount = await prisma.mzQuote.count().catch(() => 0);
+    if (quoteCount === 0) {
+      await prisma.mzQuote.createMany({
+        data: [
+          {
+            id: 'quote-veronica',
+            quoteNumber: 'MZ-2026-0001',
+            name: 'Veronica',
+            company: 'deliciasdaVE',
+            whatsapp: '31994119143',
+            email: 'veronica@gmail.com',
+            selectedDev: 'Roberto',
+            projectType: 'Outro',
+            hasDomain: 'Não, preciso registrar',
+            needsHosting: 'Plano Hospedagem Gerenciada (R$ 39,90/mês)',
+            needsMaintenance: 'Sim',
+            projectDescription: 'Site de vendas de doces',
+            initialDevPrice: 250.0,
+            monthlyPrice: 39.9,
+            discount: 0.0,
+            finalPrice: 250.0,
+            paymentMethodChoice: 'CREDIT_CARD_RECURRING',
+            billingPeriodicity: 'MENSAL',
+            dueDay: 10,
+            status: 'AGUARDANDO_ANALISE',
+            notes: 'Site de vendas de doces',
+          },
+          {
+            id: 'quote-tete',
+            quoteNumber: 'MZ-2026-0003',
+            name: 'tete',
+            company: 'tete',
+            whatsapp: '5531986847049',
+            email: 'tete@mazzoni.com.br',
+            selectedDev: 'Roberto',
+            projectType: 'Site Institucional Profissional',
+            hasDomain: 'Sim, já possuo (tete.com.br)',
+            needsHosting: 'Plano Hospedagem Gerenciada (R$ 39,90/mês)',
+            needsMaintenance: 'Sim',
+            initialDevPrice: 0.0,
+            monthlyPrice: 39.9,
+            discount: 0.0,
+            finalPrice: 0.0,
+            paymentMethodChoice: 'PIX',
+            billingPeriodicity: 'MENSAL',
+            dueDay: 10,
+            status: 'CONCLUIDO',
+          },
+        ],
+        skipDuplicates: true,
+      }).catch(() => {});
+    }
+
+    // Serviços iniciais
+    const serviceCount = await prisma.mzService.count().catch(() => 0);
+    if (serviceCount === 0) {
+      await prisma.mzService.createMany({
+        data: [
+          {
+            id: 'serv-landing-page',
+            name: 'Landing Page de Alta Conversão',
+            description: 'Página única responsiva e moderna focada em vendas e captura de leads.',
+            type: 'DESENVOLVIMENTO',
+            price: 890.00,
+            recurrence: 'UNICA',
+            status: 'ATIVO',
+            active: true,
+          },
+          {
+            id: 'serv-site-institucional',
+            name: 'Site Institucional Profissional',
+            description: 'Site corporativo multi-páginas de alta autoridade.',
+            type: 'DESENVOLVIMENTO',
+            price: 1500.00,
+            recurrence: 'UNICA',
+            status: 'ATIVO',
+            active: true,
+          },
+          {
+            id: 'serv-plano-hospedagem',
+            name: 'Plano Hospedagem Gerenciada',
+            description: 'Hospedagem em nuvem com SSL e suporte.',
+            type: 'HOSPEDAGEM',
+            price: 39.90,
+            recurrence: 'MENSAL',
+            status: 'ATIVO',
+            active: true,
+          },
+          {
+            id: 'serv-plano-completo',
+            name: 'Plano Hospedagem + Manutenção Técnica',
+            description: 'Hospedagem, segurança, alterações e suporte prioritário via WhatsApp.',
+            type: 'MANUTENCAO',
+            price: 79.90,
+            recurrence: 'MENSAL',
+            status: 'ATIVO',
+            active: true,
+          },
+        ],
+        skipDuplicates: true,
+      }).catch(() => {});
+    }
+
+    // Portfólio inicial
+    const portCount = await prisma.mzPortfolio.count().catch(() => 0);
+    if (portCount === 0) {
+      await prisma.mzPortfolio.create({
+        data: {
+          id: 'port-mazzoni-barbershop',
+          title: 'Mazzoni Barbershop',
+          category: 'Site + Sistema de Agendamento',
+          description: 'Plataforma web completa desenvolvida sob medida pela mzTech em Next.js e PostgreSQL.',
+          url: 'https://mazzoni-barbershop-production.up.railway.app',
+          displayUrl: 'mazzoni-barbershop-production.up.railway.app',
+          tagline: 'ELEVE SEU ESTILO AO NÍVEL MÁXIMO',
+          subheadline: 'Agendamento de Horários & Presença Digital',
+          featuresJson: JSON.stringify(['Agendamento online 24h', 'Confirmação via WhatsApp', 'Painel administrativo']),
+          badge: 'Em Produção',
+          infrastructure: 'Infraestrutura Railway',
+          featured: true,
+          active: true,
+        },
+      }).catch(() => {});
+    }
+
     isInitialized = true;
   } catch (error) {
     console.error('Aviso na inicialização do banco:', error);

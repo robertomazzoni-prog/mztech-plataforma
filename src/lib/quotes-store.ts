@@ -105,6 +105,12 @@ export async function syncQuotesFromDb(): Promise<MzQuoteItem[]> {
         globalObject[globalQuotesKey] = mapped;
         writeQuotesToFile(mapped);
         return mapped;
+      } else {
+        const current = getStoredQuotes();
+        for (const localQ of current) {
+          syncQuoteToPrisma(localQ).catch(() => {});
+        }
+        return current;
       }
     } catch (e) {
       console.warn('Aviso ao sincronizar orçamentos do banco:', e);

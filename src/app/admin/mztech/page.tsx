@@ -32,6 +32,7 @@ import { MzDashboardMetrics, MzQuoteItem } from '@/types/mztech';
 export default function MzTechDashboardPage() {
   const [metrics, setMetrics] = useState<MzDashboardMetrics | null>(null);
   const [pendingQuotes, setPendingQuotes] = useState<MzQuoteItem[]>([]);
+  const [systemHealth, setSystemHealth] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -40,9 +41,10 @@ export default function MzTechDashboardPage() {
   const loadDashboard = async () => {
     try {
       setRefreshing(true);
-      const [dashRes, quotesRes] = await Promise.all([
+      const [dashRes, quotesRes, healthRes] = await Promise.all([
         fetch('/api/mztech/dashboard'),
         fetch('/api/mztech/quotes?status=AGUARDANDO_ANALISE'),
+        fetch('/api/mztech/system-health'),
       ]);
 
       if (dashRes.ok) {
@@ -52,6 +54,10 @@ export default function MzTechDashboardPage() {
       if (quotesRes.ok) {
         const q = await quotesRes.json();
         setPendingQuotes(q.quotes || []);
+      }
+      if (healthRes.ok) {
+        const h = await healthRes.json();
+        setSystemHealth(h);
       }
     } catch (err) {
       console.error('Erro ao carregar dashboard:', err);
@@ -93,7 +99,20 @@ export default function MzTechDashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Visão Geral & Indicadores mzTech</h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold text-white tracking-tight">Visão Geral & Indicadores mzTech</h1>
+            {systemHealth?.database?.connected ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                PostgreSQL Ativo & Persistente
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                <AlertCircle className="w-3 h-3" />
+                Aguardando PostgreSQL
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-400 mt-0.5">
             Acompanhamento em tempo real de vendas, contratos, fluxo financeiro e projetos.
           </p>
@@ -124,6 +143,18 @@ export default function MzTechDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {systemHealth && !systemHealth.database?.connected && (
+        <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-3 shadow-lg">
+          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-bold text-white text-sm">Aviso de Persistência na Railway (PostgreSQL)</p>
+            <p className="text-amber-300/90 leading-relaxed">
+              O site está funcionando normalmente em memória temporária. Para que clientes, orçamentos, contratos e portfólio <strong>nunca sejam resetados ao fazer redeploys</strong>, certifique-se de que o serviço do <strong>PostgreSQL</strong> está adicionado ao seu projeto na Railway e com a variável <code className="bg-amber-900/50 px-1 py-0.5 rounded text-white font-mono">DATABASE_URL</code> linkada ao serviço web.
+            </p>
+          </div>
+        </div>
+      )}
 
       {successToast && (
         <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in">
