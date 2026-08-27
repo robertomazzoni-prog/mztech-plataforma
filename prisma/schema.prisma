@@ -380,3 +380,24 @@ model MzCompanySetting {
   dataJson            String    @db.Text
   updatedAt           DateTime  @updatedAt
 }
+
+model MzPortfolio {
+  id              String   @id @default(uuid())
+  title           String
+  category        String
+  description     String   @db.Text
+  url             String
+  displayUrl      String?
+  tagline         String?
+  subheadline     String?
+  previewImage    String?
+  favicon         String?
+  featuresJson    String   @default("[]") @db.Text
+  badge           String?  @default("Em Produção")
+  infrastructure  String?  @default("Infraestrutura Railway")
+  featured        Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+

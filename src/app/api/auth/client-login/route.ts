@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         c.whatsapp?.replace(/\D/g, '').includes(cleanEmail.replace(/\D/g, ''))
     );
 
-    // 2. Se não encontrou na memória, busca no Prisma (mzClient ou User)
+    // 2. Se não encontrou na memória, busca no Prisma (mzClient, User ou MzQuote)
     const dbOnline = await isDatabaseOnline();
     if (!matchedClient && dbOnline) {
       try {
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
               { email: { equals: cleanEmail, mode: 'insensitive' } },
               { companyName: { equals: cleanEmail, mode: 'insensitive' } },
               { contactName: { equals: cleanEmail, mode: 'insensitive' } },
+              { whatsapp: { contains: cleanEmail.replace(/\D/g, '') } },
             ],
           },
         });
@@ -59,30 +60,58 @@ export async function POST(req: NextRequest) {
             updatedAt: dbClient.updatedAt?.toISOString() || new Date().toISOString(),
           };
         } else {
-          // Busca na tabela de Usuários
-          const dbUser = await prisma.user.findFirst({
+          // Busca em MzQuote para clientes com orçamento
+          const dbQuote = await prisma.mzQuote.findFirst({
             where: {
               OR: [
                 { email: { equals: cleanEmail, mode: 'insensitive' } },
-                { phone: { contains: cleanEmail.replace(/\D/g, '') } },
+                { company: { equals: cleanEmail, mode: 'insensitive' } },
+                { name: { equals: cleanEmail, mode: 'insensitive' } },
+                { whatsapp: { contains: cleanEmail.replace(/\D/g, '') } },
               ],
             },
           });
-          if (dbUser) {
+          if (dbQuote) {
             matchedClient = {
-              id: dbUser.id,
-              companyName: dbUser.name || 'Cliente',
-              contactName: dbUser.name || 'Cliente',
-              email: dbUser.email,
-              whatsapp: dbUser.phone || '',
+              id: dbQuote.linkedClientId || `client-quote-${dbQuote.id}`,
+              companyName: dbQuote.company || dbQuote.name,
+              contactName: dbQuote.name,
+              email: dbQuote.email,
+              whatsapp: dbQuote.whatsapp,
               domain: null,
               status: 'ATIVO',
               financialStatus: 'EM_DIA',
               codeDelivered: false,
               backupDelivered: false,
-              createdAt: dbUser.createdAt?.toISOString() || new Date().toISOString(),
-              updatedAt: dbUser.updatedAt?.toISOString() || new Date().toISOString(),
+              createdAt: dbQuote.createdAt?.toISOString() || new Date().toISOString(),
+              updatedAt: dbQuote.updatedAt?.toISOString() || new Date().toISOString(),
             };
+          } else {
+            // Busca na tabela de Usuários
+            const dbUser = await prisma.user.findFirst({
+              where: {
+                OR: [
+                  { email: { equals: cleanEmail, mode: 'insensitive' } },
+                  { phone: { contains: cleanEmail.replace(/\D/g, '') } },
+                ],
+              },
+            });
+            if (dbUser) {
+              matchedClient = {
+                id: dbUser.id,
+                companyName: dbUser.name || 'Cliente',
+                contactName: dbUser.name || 'Cliente',
+                email: dbUser.email,
+                whatsapp: dbUser.phone || '',
+                domain: null,
+                status: 'ATIVO',
+                financialStatus: 'EM_DIA',
+                codeDelivered: false,
+                backupDelivered: false,
+                createdAt: dbUser.createdAt?.toISOString() || new Date().toISOString(),
+                updatedAt: dbUser.updatedAt?.toISOString() || new Date().toISOString(),
+              };
+            }
           }
         }
       } catch (err) {}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getStoredPortfolio,
   createPortfolioItem,
+  syncPortfolioFromDb,
 } from '@/lib/portfolio-store';
 import { getUserFromRequest } from '@/lib/auth';
 
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const all = searchParams.get('all') === 'true';
-    const items = getStoredPortfolio();
+    const items = await syncPortfolioFromDb();
 
     if (all) {
       return NextResponse.json({ portfolio: items });

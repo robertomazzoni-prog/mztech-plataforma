@@ -80,8 +80,19 @@ export async function POST(req: NextRequest) {
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
-        await prisma.mzService.create({
-          data: {
+        await prisma.mzService.upsert({
+          where: { id: newService.id },
+          create: {
+            id: newService.id,
+            name: newService.name,
+            description: newService.description,
+            type: newService.type,
+            price: newService.price,
+            recurrence: newService.recurrence,
+            status: newService.status,
+            active: newService.active,
+          },
+          update: {
             name: newService.name,
             description: newService.description,
             type: newService.type,

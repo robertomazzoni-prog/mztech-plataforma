@@ -490,19 +490,105 @@ export function getStoredClients(): MzClientItem[] {
       if (fs.existsSync(CLIENTS_FILE)) {
         const content = fs.readFileSync(CLIENTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           clients = parsed;
+        } else {
+          clients = [...defaultClients];
+          saveStoredClients(clients);
         }
       } else {
         clients = [...defaultClients];
         saveStoredClients(clients);
       }
     } catch (e) {
-      clients = [];
+      clients = [...defaultClients];
     }
     globalObj[globalClientsKey] = clients;
   }
   return globalObj[globalClientsKey];
+}
+
+export async function syncClientsFromDb(): Promise<MzClientItem[]> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const dbClients = await prisma.mzClient.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          projects: true,
+          hostings: true,
+          maintenances: true,
+          contracts: true,
+          backups: true,
+          subscriptions: true,
+          payments: true,
+          _count: {
+            select: {
+              projects: true,
+              hostings: true,
+              maintenances: true,
+              backups: true,
+              subscriptions: true,
+              payments: true,
+            },
+          },
+        },
+      });
+      if (dbClients && dbClients.length > 0) {
+        const mapped: MzClientItem[] = dbClients.map((c: any) => ({
+          id: c.id,
+          companyName: c.companyName,
+          contactName: c.contactName,
+          whatsapp: c.whatsapp,
+          email: c.email,
+          domain: c.domain,
+          status: c.status as any,
+          financialStatus: c.financialStatus as any,
+          startDate: c.startDate ? c.startDate.toISOString() : null,
+          notes: c.notes,
+          cancellationDate: c.cancellationDate ? c.cancellationDate.toISOString() : null,
+          terminationEffectiveDate: c.terminationEffectiveDate ? c.terminationEffectiveDate.toISOString() : null,
+          cancellationReason: c.cancellationReason,
+          terminatedServices: c.terminatedServices,
+          codeDelivered: c.codeDelivered,
+          backupDelivered: c.backupDelivered,
+          deliveredAt: c.deliveredAt ? c.deliveredAt.toISOString() : null,
+          deliveredBy: c.deliveredBy,
+          terminationNotes: c.terminationNotes,
+          projects: c.projects || [],
+          hostings: c.hostings || [],
+          maintenances: c.maintenances || [],
+          contracts: c.contracts || [],
+          backups: c.backups || [],
+          subscriptions: c.subscriptions || [],
+          payments: c.payments || [],
+          _count: c._count || {
+            projects: c.projects?.length || 0,
+            hostings: c.hostings?.length || 0,
+            maintenances: c.maintenances?.length || 0,
+            backups: c.backups?.length || 0,
+          },
+          createdAt: c.createdAt.toISOString(),
+          updatedAt: c.updatedAt.toISOString(),
+        }));
+
+        const current = getStoredClients();
+        const dbIds = new Set(mapped.map((m) => m.id));
+        for (const localC of current) {
+          if (!dbIds.has(localC.id)) {
+            mapped.push(localC);
+            syncClientToPrisma(localC).catch(() => {});
+          }
+        }
+        globalObj[globalClientsKey] = mapped;
+        saveStoredClients(mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar clientes do banco:', e);
+    }
+  }
+  return getStoredClients();
 }
 
 async function syncClientToPrisma(client: MzClientItem) {
@@ -596,24 +682,86 @@ export function getStoredProjects(): MzProjectItem[] {
       if (fs.existsSync(PROJECTS_FILE)) {
         const content = fs.readFileSync(PROJECTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           projects = parsed;
+        } else {
+          projects = [...defaultProjects];
+          saveStoredProjects(projects);
         }
       } else {
         projects = [...defaultProjects];
         saveStoredProjects(projects);
       }
     } catch (e) {
-      projects = [];
+      projects = [...defaultProjects];
     }
     globalObj[globalProjectsKey] = projects;
   }
   return globalObj[globalProjectsKey];
 }
 
+export async function syncProjectsFromDb(): Promise<MzProjectItem[]> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const dbProjects = await prisma.mzProject.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          client: { select: { id: true, companyName: true, contactName: true, email: true, whatsapp: true } },
+          hostings: true,
+          maintenances: true,
+          contracts: true,
+          backups: true,
+        },
+      });
+      if (dbProjects && dbProjects.length > 0) {
+        const mapped: MzProjectItem[] = dbProjects.map((p: any) => ({
+          id: p.id,
+          clientId: p.clientId,
+          client: p.client,
+          name: p.name,
+          type: p.type,
+          status: p.status,
+          startDate: p.startDate ? p.startDate.toISOString() : null,
+          deliveryDate: p.deliveryDate ? p.deliveryDate.toISOString() : null,
+          domain: p.domain,
+          hostingUrl: p.hostingUrl,
+          githubRepo: p.githubRepo,
+          hostingPlatform: p.hostingPlatform || 'Railway Cloud',
+          notes: p.notes,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+        }));
+        const current = getStoredProjects();
+        const dbIds = new Set(mapped.map((m) => m.id));
+        for (const localP of current) {
+          if (!dbIds.has(localP.id)) {
+            mapped.push(localP);
+            syncProjectToPrisma(localP).catch(() => {});
+          }
+        }
+        globalObj[globalProjectsKey] = mapped;
+        saveStoredProjects(mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar projetos do banco:', e);
+    }
+  }
+  return getStoredProjects();
+}
+
 async function syncProjectToPrisma(project: MzProjectItem) {
   try {
     if (process.env.DATABASE_URL) {
+      // Garante que o cliente existe antes de salvar o projeto
+      if (project.clientId) {
+        const client = getStoredClientById(project.clientId);
+        if (client) {
+          await syncClientToPrisma(client);
+        }
+      }
+
       await prisma.mzProject.upsert({
         where: { id: project.id },
         create: {
@@ -687,24 +835,91 @@ export function getStoredContracts(): MzContractItem[] {
       if (fs.existsSync(CONTRACTS_FILE)) {
         const content = fs.readFileSync(CONTRACTS_FILE, 'utf-8');
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           contracts = parsed;
+        } else {
+          contracts = [...defaultContracts];
+          saveStoredContracts(contracts);
         }
       } else {
         contracts = [...defaultContracts];
         saveStoredContracts(contracts);
       }
     } catch (e) {
-      contracts = [];
+      contracts = [...defaultContracts];
     }
     globalObj[globalContractsKey] = contracts;
   }
   return globalObj[globalContractsKey];
 }
 
+export async function syncContractsFromDb(): Promise<MzContractItem[]> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const dbContracts = await prisma.mzContract.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          client: { select: { id: true, companyName: true, contactName: true, email: true, whatsapp: true } },
+          project: { select: { id: true, name: true, domain: true } },
+        },
+      });
+      if (dbContracts && dbContracts.length > 0) {
+        const mapped: MzContractItem[] = dbContracts.map((c: any) => ({
+          id: c.id,
+          contractNumber: c.id,
+          clientId: c.clientId,
+          client: c.client,
+          projectId: c.projectId,
+          project: c.project,
+          title: c.title,
+          content: c.content,
+          totalDevPrice: c.totalDevPrice,
+          monthlyPrice: c.monthlyPrice,
+          paymentMethod: c.paymentMethod,
+          termsVersion: c.termsVersion,
+          codeOwnershipType: c.codeOwnershipType,
+          scopeDevelopment: c.scopeDevelopment,
+          scopeHosting: c.scopeHosting,
+          scopeMaintenance: c.scopeMaintenance,
+          scopeSupport: c.scopeSupport,
+          backupRetentionDays: c.backupRetentionDays,
+          migrationExcluded: c.migrationExcluded,
+          status: c.status,
+          signedAt: c.signedAt ? c.signedAt.toISOString() : null,
+          notes: c.notes,
+          createdAt: c.createdAt.toISOString(),
+          updatedAt: c.updatedAt.toISOString(),
+        }));
+        const current = getStoredContracts();
+        const dbIds = new Set(mapped.map((m) => m.id));
+        for (const localC of current) {
+          if (!dbIds.has(localC.id)) {
+            mapped.push(localC);
+            syncContractToPrisma(localC).catch(() => {});
+          }
+        }
+        globalObj[globalContractsKey] = mapped;
+        saveStoredContracts(mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar contratos do banco:', e);
+    }
+  }
+  return getStoredContracts();
+}
+
 async function syncContractToPrisma(contract: MzContractItem) {
   try {
     if (process.env.DATABASE_URL) {
+      if (contract.clientId) {
+        const client = getStoredClientById(contract.clientId);
+        if (client) {
+          await syncClientToPrisma(client);
+        }
+      }
+
       await prisma.mzContract.upsert({
         where: { id: contract.id },
         create: {

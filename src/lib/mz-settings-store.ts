@@ -157,12 +157,51 @@ export function getStoredSettings(): CompanySettings {
   return globalObj[globalSettingsKey];
 }
 
+import { prisma } from '@/lib/db';
+import { isDatabaseOnline } from '@/lib/init-db';
+
+export async function syncSettingsFromDb(): Promise<CompanySettings> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const record = await prisma.mzCompanySetting.findUnique({
+        where: { id: 'company-settings' },
+      });
+      if (record && record.dataJson) {
+        const parsed = JSON.parse(record.dataJson);
+        if (parsed && typeof parsed === 'object') {
+          const merged: CompanySettings = { ...defaultCompanySettings, ...parsed };
+          globalObj[globalSettingsKey] = merged;
+          saveStoredSettings(merged);
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar configurações do banco:', e);
+    }
+  }
+  return getStoredSettings();
+}
+
 export function saveStoredSettings(settings: CompanySettings) {
   globalObj[globalSettingsKey] = settings;
   try {
     ensureDir();
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf-8');
   } catch (e) {}
+
+  if (process.env.DATABASE_URL) {
+    prisma.mzCompanySetting.upsert({
+      where: { id: 'company-settings' },
+      create: {
+        id: 'company-settings',
+        dataJson: JSON.stringify(settings),
+      },
+      update: {
+        dataJson: JSON.stringify(settings),
+      },
+    }).catch(() => {});
+  }
 }
 
 export function updateSettings(partial: Partial<CompanySettings>): CompanySettings {

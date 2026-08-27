@@ -8,6 +8,7 @@ import {
   saveStoredContracts,
   getStoredClients,
   getStoredProjects,
+  syncContractsFromDb,
 } from '@/lib/mz-entities-store';
 
 export const dynamic = 'force-dynamic';
@@ -23,32 +24,7 @@ export async function GET(req: NextRequest) {
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
 
-    let contracts = getStoredContracts();
-
-    const dbOnline = await isDatabaseOnline();
-    if (dbOnline) {
-      try {
-        const where: any = {};
-        if (clientId) where.clientId = clientId;
-        if (status && status !== 'ALL') where.status = status;
-
-        const dbContracts = await prisma.mzContract.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            client: {
-              select: { id: true, companyName: true, contactName: true, email: true, whatsapp: true },
-            },
-            project: {
-              select: { id: true, name: true, domain: true },
-            },
-          },
-        });
-        if (dbContracts && dbContracts.length > 0) {
-          contracts = dbContracts as any;
-        }
-      } catch (e) {}
-    }
+    let contracts = await syncContractsFromDb();
 
     if (clientId) {
       contracts = contracts.filter((c) => c.clientId === clientId);
@@ -133,8 +109,9 @@ export async function POST(req: NextRequest) {
     const matchedProject = projects.find((p) => p.id === projectId);
 
     const nowStr = new Date().toISOString();
+    const newContractId = `contrato-${Date.now()}`;
     const newContract: any = {
-      id: `contrato-${Date.now()}`,
+      id: newContractId,
       clientId: finalClientId,
       client: matchedClient
         ? {
@@ -176,8 +153,27 @@ export async function POST(req: NextRequest) {
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
-        await prisma.mzContract.create({
-          data: {
+        if (matchedClient) {
+          await prisma.mzClient.upsert({
+            where: { id: matchedClient.id },
+            create: {
+              id: matchedClient.id,
+              companyName: matchedClient.companyName,
+              contactName: matchedClient.contactName,
+              whatsapp: matchedClient.whatsapp,
+              email: matchedClient.email,
+              status: matchedClient.status || 'ATIVO',
+              financialStatus: matchedClient.financialStatus || 'EM_DIA',
+              notes: matchedClient.notes || null,
+            },
+            update: {},
+          }).catch(() => {});
+        }
+
+        await prisma.mzContract.upsert({
+          where: { id: newContract.id },
+          create: {
+            id: newContract.id,
             clientId: finalClientId,
             projectId: projectId && !projectId.startsWith('PLAN_') ? projectId : null,
             title,
@@ -189,6 +185,16 @@ export async function POST(req: NextRequest) {
             codeOwnershipType: codeOwnershipType || 'PROPRIEDADE_CLIENTE',
             backupRetentionDays: backupRetentionDays ? parseInt(backupRetentionDays, 10) : 30,
             migrationExcluded: migrationExcluded !== undefined ? Boolean(migrationExcluded) : true,
+            status: status || 'RASCUNHO',
+            signedAt: signedAt ? new Date(signedAt) : null,
+            notes: notes || null,
+          },
+          update: {
+            title,
+            content: content || DEFAULT_CONTRACT_TEMPLATE,
+            totalDevPrice: totalDevPrice !== undefined ? parseFloat(totalDevPrice) : 0.0,
+            monthlyPrice: monthlyPrice !== undefined ? parseFloat(monthlyPrice) : 79.90,
+            paymentMethod: paymentMethod || 'PIX / Boleto / Transferência',
             status: status || 'RASCUNHO',
             signedAt: signedAt ? new Date(signedAt) : null,
             notes: notes || null,

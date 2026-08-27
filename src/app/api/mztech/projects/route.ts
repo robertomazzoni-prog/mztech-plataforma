@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isDatabaseOnline } from '@/lib/init-db';
-import { getStoredProjects, saveStoredProjects, getStoredClients } from '@/lib/mz-entities-store';
+import {
+  getStoredProjects,
+  saveStoredProjects,
+  getStoredClients,
+  syncProjectsFromDb,
+} from '@/lib/mz-entities-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,43 +16,7 @@ export async function GET(req: NextRequest) {
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
 
-    let projects = getStoredProjects();
-
-    const dbOnline = await isDatabaseOnline();
-    if (dbOnline) {
-      try {
-        const where: any = {};
-        if (clientId) where.clientId = clientId;
-        if (status && status !== 'ALL') where.status = status;
-
-        const dbProjects = await prisma.mzProject.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            client: {
-              select: {
-                id: true,
-                companyName: true,
-                contactName: true,
-                email: true,
-                whatsapp: true,
-              },
-            },
-          },
-        });
-
-        if (dbProjects && dbProjects.length > 0) {
-          const existingIds = new Set(dbProjects.map((p) => p.id));
-          const combined: any[] = [...dbProjects];
-          for (const memP of projects) {
-            if (!existingIds.has(memP.id)) {
-              combined.push(memP);
-            }
-          }
-          return NextResponse.json({ projects: combined });
-        }
-      } catch (err) {}
-    }
+    let projects = await syncProjectsFromDb();
 
     let filtered = [...projects];
     if (clientId) filtered = filtered.filter((p) => p.clientId === clientId);
@@ -112,13 +81,14 @@ export async function POST(req: NextRequest) {
 
     if (!finalClientId || !name || !type) {
       return NextResponse.json(
-        { error: 'Campos obrigatórios: Nome do Cliente/Empresa, Nome do Projeto e Tipo.' },
+        { error: 'Campos obrigatórios: Cliente, Nome do Projeto e Tipo.' },
         { status: 400 }
       );
     }
 
+    const newProjectId = `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newProject: any = {
-      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: newProjectId,
       clientId: finalClientId,
       client: clientObj
         ? {
@@ -150,8 +120,27 @@ export async function POST(req: NextRequest) {
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
-        await prisma.mzProject.create({
-          data: {
+        if (clientObj) {
+          await prisma.mzClient.upsert({
+            where: { id: clientObj.id },
+            create: {
+              id: clientObj.id,
+              companyName: clientObj.companyName,
+              contactName: clientObj.contactName,
+              whatsapp: clientObj.whatsapp,
+              email: clientObj.email,
+              status: clientObj.status || 'ATIVO',
+              financialStatus: clientObj.financialStatus || 'EM_DIA',
+              notes: clientObj.notes || null,
+            },
+            update: {},
+          }).catch(() => {});
+        }
+
+        await prisma.mzProject.upsert({
+          where: { id: newProject.id },
+          create: {
+            id: newProject.id,
             clientId: finalClientId,
             name: newProject.name,
             type: newProject.type,
@@ -162,6 +151,15 @@ export async function POST(req: NextRequest) {
             hostingUrl: newProject.hostingUrl,
             githubRepo: newProject.githubRepo,
             hostingPlatform: newProject.hostingPlatform,
+            notes: newProject.notes,
+          },
+          update: {
+            name: newProject.name,
+            type: newProject.type,
+            status: newProject.status,
+            domain: newProject.domain,
+            hostingUrl: newProject.hostingUrl,
+            githubRepo: newProject.githubRepo,
             notes: newProject.notes,
           },
         });

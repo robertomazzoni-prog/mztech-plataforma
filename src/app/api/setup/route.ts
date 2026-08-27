@@ -96,19 +96,53 @@ export async function GET(req: NextRequest) {
           durationMinutes: 30,
           popular: true,
         },
-      });
-
-      return NextResponse.json({
-        ok: true,
-        message: 'Banco populado com sucesso! Usuários admin e cliente criados.',
-        adminEmail: 'admin@mazzoni.com',
-      });
+      }).catch(() => {});
     }
+
+    // 3. Garantir que as contas dos Administradores mzTech existam sempre
+    const adminPass = await bcrypt.hash('admin123', 10);
+    const robertPass = await bcrypt.hash('roberto123', 10);
+    const morvanPass = await bcrypt.hash('morvan123', 10);
+
+    await prisma.user.upsert({
+      where: { email: 'admin@mazzoni.com' },
+      create: {
+        name: 'Lucas Mazzoni (Admin)',
+        email: 'admin@mazzoni.com',
+        password: adminPass,
+        phone: '(11) 99999-8888',
+        role: 'ADMIN',
+      },
+      update: { role: 'ADMIN' },
+    }).catch(() => {});
+
+    await prisma.user.upsert({
+      where: { email: 'robertomazzoni123@gmail.com' },
+      create: {
+        name: 'Roberto Mazzoni (mzTech Sócio)',
+        email: 'robertomazzoni123@gmail.com',
+        password: robertPass,
+        phone: '5531986847049',
+        role: 'ADMIN',
+      },
+      update: { role: 'ADMIN' },
+    }).catch(() => {});
+
+    await prisma.user.upsert({
+      where: { email: 'morvan@mztech.com.br' },
+      create: {
+        name: 'Morvan (mzTech Sócio)',
+        email: 'morvan@mztech.com.br',
+        password: morvanPass,
+        phone: '5531993597136',
+        role: 'ADMIN',
+      },
+      update: { role: 'ADMIN' },
+    }).catch(() => {});
 
     return NextResponse.json({
       ok: true,
-      message: 'Banco conectado e operacional.',
-      totalUsers: userCount,
+      message: 'Banco conectado, tabelas sincronizadas e administradores protegidos.',
     });
   } catch (error: any) {
     console.error('Erro no setup:', error);

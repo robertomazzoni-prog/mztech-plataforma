@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStoredSettings, updateSettings } from '@/lib/mz-settings-store';
+import { getStoredSettings, updateSettings, syncSettingsFromDb } from '@/lib/mz-settings-store';
 import { getUserFromRequest } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const session = getUserFromRequest(req);
-    const settings = getStoredSettings();
+    const settings = await syncSettingsFromDb();
     
     // Se não for admin autenticado, mascarar o Access Token sensível do Mercado Pago
     const safeSettings = {

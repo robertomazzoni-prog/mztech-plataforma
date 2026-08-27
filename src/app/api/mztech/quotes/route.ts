@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MzQuoteItem, QuoteStatus, PaymentMethodChoice } from '@/types/mztech';
-import { getStoredQuotes, saveQuote } from '@/lib/quotes-store';
+import { getStoredQuotes, saveQuote, syncQuotesFromDb } from '@/lib/quotes-store';
 import { getStoredClients, saveStoredClients } from '@/lib/mz-entities-store';
 import { hashPassword, signToken, getUserFromRequest } from '@/lib/auth';
 import { formatPhoneNumber } from '@/lib/utils';
@@ -16,60 +16,7 @@ export async function GET(req: NextRequest) {
     const statusFilter = searchParams.get('status');
     const query = searchParams.get('q')?.toLowerCase();
 
-    let allQuotes = getStoredQuotes();
-
-    const dbOnline = await isDatabaseOnline();
-    if (dbOnline) {
-      try {
-        const dbQuotes = await prisma.mzQuote.findMany({
-          orderBy: { createdAt: 'desc' },
-        });
-        if (dbQuotes && dbQuotes.length > 0) {
-          const dbMapped: MzQuoteItem[] = dbQuotes.map((q: any) => ({
-            id: q.id,
-            quoteNumber: q.quoteNumber,
-            name: q.name,
-            company: q.company,
-            cnpjCpf: q.cnpjCpf,
-            whatsapp: q.whatsapp,
-            email: q.email,
-            selectedDev: q.selectedDev,
-            projectType: q.projectType,
-            serviceId: q.serviceId,
-            hasDomain: q.hasDomain,
-            needsHosting: q.needsHosting,
-            needsMaintenance: q.needsMaintenance,
-            projectDescription: q.projectDescription,
-            initialDevPrice: q.initialDevPrice,
-            monthlyPrice: q.monthlyPrice,
-            discount: q.discount,
-            finalPrice: q.finalPrice,
-            paymentMethodChoice: q.paymentMethodChoice as PaymentMethodChoice,
-            billingPeriodicity: q.billingPeriodicity,
-            dueDay: q.dueDay,
-            estimatedBudget: q.estimatedBudget,
-            desiredDeadline: q.desiredDeadline,
-            status: q.status as QuoteStatus,
-            notes: q.notes,
-            approvedBy: q.approvedBy,
-            approvedAt: q.approvedAt ? q.approvedAt.toISOString() : null,
-            responsibleAdmin: q.responsibleAdmin,
-            linkedClientId: q.linkedClientId,
-            linkedProjectId: q.linkedProjectId,
-            linkedContractId: q.linkedContractId,
-            linkedPaymentId: q.linkedPaymentId,
-            createdAt: q.createdAt.toISOString(),
-            updatedAt: q.updatedAt.toISOString(),
-          }));
-          const existingIds = new Set(allQuotes.map((q) => q.id));
-          for (const dbQ of dbMapped) {
-            if (!existingIds.has(dbQ.id)) {
-              allQuotes.push(dbQ);
-            }
-          }
-        }
-      } catch (e) {}
-    }
+    let allQuotes = await syncQuotesFromDb();
 
     let filtered = [...allQuotes];
 

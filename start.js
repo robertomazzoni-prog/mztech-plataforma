@@ -4,16 +4,16 @@ console.log('==============================================');
 console.log('🚀 mzTech Soluções Digitais - INICIANDO NA RAILWAY');
 console.log('==============================================');
 
-// Sincronização do Prisma com tratamento de erro
+// Sincronização do Prisma com tratamento de erro e proteção total contra perda de dados
 if (process.env.DATABASE_URL) {
   try {
-    console.log('📦 Executando prisma db push...');
-    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+    console.log('📦 Executando prisma db push seguro...');
+    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
   } catch (e) {
     console.error('⚠️ Aviso ao sincronizar Prisma:', e.message);
   }
 } else {
-  console.log('ℹ️ DATABASE_URL não configurada. Operando com armazenamento local JSON / memória com alta disponibilidade.');
+  console.log('ℹ️ DATABASE_URL não configurada. Operando com armazenamento local JSON / memória.');
 }
 
 const port = process.env.PORT || '3000';

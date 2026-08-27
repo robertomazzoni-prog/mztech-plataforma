@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isDatabaseOnline } from '@/lib/init-db';
-import { getStoredClients, saveStoredClients } from '@/lib/mz-entities-store';
+import { getStoredClients, saveStoredClients, syncClientsFromDb } from '@/lib/mz-entities-store';
 import { MzClientItem } from '@/types/mztech';
 
 export const dynamic = 'force-dynamic';
@@ -13,52 +13,7 @@ export async function GET(req: NextRequest) {
     const financialStatus = searchParams.get('financialStatus');
     const search = searchParams.get('search')?.toLowerCase();
 
-    let clients = getStoredClients();
-
-    const dbOnline = await isDatabaseOnline();
-    if (dbOnline) {
-      try {
-        const where: any = {};
-        if (status && status !== 'ALL') where.status = status;
-        if (financialStatus && financialStatus !== 'ALL') where.financialStatus = financialStatus;
-        if (search) {
-          where.OR = [
-            { companyName: { contains: search, mode: 'insensitive' } },
-            { contactName: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
-            { domain: { contains: search, mode: 'insensitive' } },
-          ];
-        }
-
-        const dbClients = await prisma.mzClient.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            projects: { select: { id: true, name: true, status: true } },
-            hostings: { select: { id: true, provider: true, monthlyPrice: true, status: true, customDomain: true, platformDomain: true } },
-            subscriptions: {
-              orderBy: { createdAt: 'desc' },
-              include: { payments: { orderBy: { dueDate: 'desc' }, take: 5 } },
-            },
-            payments: { orderBy: { dueDate: 'desc' }, take: 10 },
-            _count: {
-              select: {
-                projects: true,
-                hostings: true,
-                maintenances: true,
-                backups: true,
-                subscriptions: true,
-                payments: true,
-              },
-            },
-          },
-        });
-
-        if (dbClients && dbClients.length > 0) {
-          return NextResponse.json({ clients: dbClients });
-        }
-      } catch (err) {}
-    }
+    let clients = await syncClientsFromDb();
 
     let filtered = [...clients];
     if (status && status !== 'ALL') {
@@ -146,8 +101,20 @@ export async function POST(req: NextRequest) {
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
-        await prisma.mzClient.create({
-          data: {
+        await prisma.mzClient.upsert({
+          where: { id: newClient.id },
+          create: {
+            id: newClient.id,
+            companyName: newClient.companyName,
+            contactName: newClient.contactName,
+            whatsapp: newClient.whatsapp,
+            email: newClient.email,
+            domain: newClient.domain,
+            status: newClient.status,
+            financialStatus: newClient.financialStatus,
+            notes: newClient.notes,
+          },
+          update: {
             companyName: newClient.companyName,
             contactName: newClient.contactName,
             whatsapp: newClient.whatsapp,

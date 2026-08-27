@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { MzPortfolioItem } from '@/types/mztech';
+import { prisma } from '@/lib/db';
+import { isDatabaseOnline } from '@/lib/init-db';
 
 const DATA_DIR = path.join(process.cwd(), 'src', 'data');
 const PORTFOLIO_FILE = path.join(DATA_DIR, 'portfolio-store.json');
@@ -78,6 +80,51 @@ export function saveStoredPortfolio(items: MzPortfolioItem[]) {
   }
 }
 
+export async function syncPortfolioFromDb(): Promise<MzPortfolioItem[]> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const dbItems = await prisma.mzPortfolio.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+      if (dbItems && dbItems.length > 0) {
+        const mapped: MzPortfolioItem[] = dbItems.map((item: any) => {
+          let features: string[] = [];
+          try {
+            features = JSON.parse(item.featuresJson || '[]');
+          } catch (e) {
+            features = ['Design Responsivo', 'Alta Performance'];
+          }
+          return {
+            id: item.id,
+            title: item.title,
+            category: item.category,
+            description: item.description,
+            url: item.url,
+            displayUrl: item.displayUrl || item.url.replace(/^https?:\/\//i, ''),
+            tagline: item.tagline || '',
+            subheadline: item.subheadline || '',
+            previewImage: item.previewImage,
+            favicon: item.favicon,
+            features,
+            badge: item.badge || 'Em Produção',
+            infrastructure: item.infrastructure || 'Infraestrutura Railway',
+            featured: Boolean(item.featured),
+            active: item.active !== false,
+            createdAt: item.createdAt.toISOString(),
+            updatedAt: item.updatedAt.toISOString(),
+          };
+        });
+        saveStoredPortfolio(mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar portfólio do banco:', e);
+    }
+  }
+  return getStoredPortfolio();
+}
+
 export function createPortfolioItem(data: Omit<MzPortfolioItem, 'id' | 'createdAt' | 'updatedAt'>): MzPortfolioItem {
   const items = getStoredPortfolio();
   const now = new Date().toISOString();
@@ -92,6 +139,30 @@ export function createPortfolioItem(data: Omit<MzPortfolioItem, 'id' | 'createdA
 
   items.unshift(newItem);
   saveStoredPortfolio(items);
+
+  // Sincroniza em background com o PostgreSQL
+  if (process.env.DATABASE_URL) {
+    prisma.mzPortfolio.create({
+      data: {
+        id: newItem.id,
+        title: newItem.title,
+        category: newItem.category,
+        description: newItem.description,
+        url: newItem.url,
+        displayUrl: newItem.displayUrl,
+        tagline: newItem.tagline,
+        subheadline: newItem.subheadline,
+        previewImage: newItem.previewImage,
+        favicon: newItem.favicon,
+        featuresJson: JSON.stringify(newItem.features),
+        badge: newItem.badge,
+        infrastructure: newItem.infrastructure,
+        featured: newItem.featured,
+        active: newItem.active,
+      },
+    }).catch((e) => console.warn('Aviso ao salvar portfólio no Prisma:', e));
+  }
+
   return newItem;
 }
 
@@ -108,6 +179,29 @@ export function updatePortfolioItem(id: string, updates: Partial<MzPortfolioItem
 
   items[index] = updatedItem;
   saveStoredPortfolio(items);
+
+  if (process.env.DATABASE_URL) {
+    prisma.mzPortfolio.update({
+      where: { id },
+      data: {
+        ...(updatedItem.title && { title: updatedItem.title }),
+        ...(updatedItem.category && { category: updatedItem.category }),
+        ...(updatedItem.description && { description: updatedItem.description }),
+        ...(updatedItem.url && { url: updatedItem.url }),
+        ...(updatedItem.displayUrl !== undefined && { displayUrl: updatedItem.displayUrl }),
+        ...(updatedItem.tagline !== undefined && { tagline: updatedItem.tagline }),
+        ...(updatedItem.subheadline !== undefined && { subheadline: updatedItem.subheadline }),
+        ...(updatedItem.previewImage !== undefined && { previewImage: updatedItem.previewImage }),
+        ...(updatedItem.favicon !== undefined && { favicon: updatedItem.favicon }),
+        ...(updatedItem.features && { featuresJson: JSON.stringify(updatedItem.features) }),
+        ...(updatedItem.badge !== undefined && { badge: updatedItem.badge }),
+        ...(updatedItem.infrastructure !== undefined && { infrastructure: updatedItem.infrastructure }),
+        ...(updatedItem.featured !== undefined && { featured: updatedItem.featured }),
+        ...(updatedItem.active !== undefined && { active: updatedItem.active }),
+      },
+    }).catch((e) => console.warn('Aviso ao atualizar portfólio no Prisma:', e));
+  }
+
   return updatedItem;
 }
 
@@ -117,5 +211,11 @@ export function deletePortfolioItem(id: string): boolean {
   if (filtered.length === items.length) return false;
 
   saveStoredPortfolio(filtered);
+
+  if (process.env.DATABASE_URL) {
+    prisma.mzPortfolio.delete({ where: { id } }).catch(() => {});
+  }
+
   return true;
 }
+

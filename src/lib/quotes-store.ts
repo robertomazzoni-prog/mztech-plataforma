@@ -47,6 +47,71 @@ export function getStoredQuotes(): MzQuoteItem[] {
 }
 
 import { prisma } from '@/lib/db';
+import { isDatabaseOnline } from '@/lib/init-db';
+
+export async function syncQuotesFromDb(): Promise<MzQuoteItem[]> {
+  const online = await isDatabaseOnline();
+  if (online) {
+    try {
+      const dbQuotes = await prisma.mzQuote.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+      if (dbQuotes && dbQuotes.length > 0) {
+        const mapped: MzQuoteItem[] = dbQuotes.map((q: any) => ({
+          id: q.id,
+          quoteNumber: q.quoteNumber,
+          name: q.name,
+          company: q.company,
+          cnpjCpf: q.cnpjCpf,
+          whatsapp: q.whatsapp,
+          email: q.email,
+          selectedDev: q.selectedDev,
+          projectType: q.projectType,
+          serviceId: q.serviceId,
+          hasDomain: q.hasDomain,
+          needsHosting: q.needsHosting,
+          needsMaintenance: q.needsMaintenance,
+          projectDescription: q.projectDescription,
+          initialDevPrice: q.initialDevPrice,
+          monthlyPrice: q.monthlyPrice,
+          discount: q.discount,
+          finalPrice: q.finalPrice,
+          paymentMethodChoice: q.paymentMethodChoice as PaymentMethodChoice,
+          billingPeriodicity: q.billingPeriodicity,
+          dueDay: q.dueDay,
+          estimatedBudget: q.estimatedBudget,
+          desiredDeadline: q.desiredDeadline,
+          status: q.status as QuoteStatus,
+          notes: q.notes,
+          approvedBy: q.approvedBy,
+          approvedAt: q.approvedAt ? q.approvedAt.toISOString() : null,
+          responsibleAdmin: q.responsibleAdmin,
+          linkedClientId: q.linkedClientId,
+          linkedProjectId: q.linkedProjectId,
+          linkedContractId: q.linkedContractId,
+          linkedPaymentId: q.linkedPaymentId,
+          createdAt: q.createdAt.toISOString(),
+          updatedAt: q.updatedAt.toISOString(),
+        }));
+
+        const current = getStoredQuotes();
+        const dbIds = new Set(mapped.map((m) => m.id));
+        for (const localQ of current) {
+          if (!dbIds.has(localQ.id)) {
+            mapped.push(localQ);
+            syncQuoteToPrisma(localQ).catch(() => {});
+          }
+        }
+        globalObject[globalQuotesKey] = mapped;
+        writeQuotesToFile(mapped);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Aviso ao sincronizar orçamentos do banco:', e);
+    }
+  }
+  return getStoredQuotes();
+}
 
 async function syncQuoteToPrisma(quote: MzQuoteItem) {
   try {
