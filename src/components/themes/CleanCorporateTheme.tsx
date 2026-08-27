@@ -452,43 +452,92 @@ export default function CleanCorporateTheme({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {portfolioList && portfolioList.length > 0 ? (
-              portfolioList.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`rounded-2xl border ${theme.border} ${theme.surface} overflow-hidden shadow-sm flex flex-col justify-between`}
-                >
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded border ${theme.badgeBg}`}>
-                        {item.category || 'Sistema Web'}
-                      </span>
-                      <span className={`text-[11px] font-mono ${theme.textMuted}`}>Produção</span>
-                    </div>
-
-                    <div>
-                      <h3 className={`text-lg font-bold ${theme.textPrimary}`}>{item.title}</h3>
-                      <p className={`text-xs ${theme.textSecondary} mt-2 leading-relaxed`}>
-                        {item.description || 'Projeto corporativo de alta performance sob medida.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className={`p-4 border-t ${theme.border} bg-slate-50 dark:bg-[#0c1427] flex items-center justify-between`}>
-                    <span className={`text-xs ${theme.textMuted}`}>mzTech Cloud</span>
-                    {item.liveUrl && (
-                      <a
-                        href={item.liveUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
-                      >
-                        <span>Acessar Projeto</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
+              portfolioList.map((item, idx) => {
+                const projectUrl = item.url || item.liveUrl;
+                return (
+                  <div
+                    key={item.id || idx}
+                    className={`rounded-2xl border ${theme.border} ${theme.surface} overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow`}
+                  >
+                    {item.previewImage && (
+                      <div className="w-full h-44 overflow-hidden border-b border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
+                        <img
+                          src={item.previewImage}
+                          alt={item.title}
+                          className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
                     )}
+
+                    <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded border ${theme.badgeBg}`}>
+                            {item.category || 'Sistema Web'}
+                          </span>
+                          <span className={`text-[11px] font-mono ${theme.textMuted}`}>{item.badge || 'Produção'}</span>
+                        </div>
+
+                        <div className="flex items-start gap-2.5">
+                          {item.favicon && (
+                            <img
+                              src={item.favicon}
+                              alt=""
+                              className="w-5 h-5 rounded object-contain flex-shrink-0 mt-0.5"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <div>
+                            <h3 className={`text-lg font-bold ${theme.textPrimary}`}>{item.title}</h3>
+                            {item.tagline && (
+                              <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">
+                                {item.tagline}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className={`text-xs ${theme.textSecondary} leading-relaxed`}>
+                          {item.description || 'Projeto corporativo de alta performance sob medida desenvolvido pela mzTech.'}
+                        </p>
+                      </div>
+
+                      {item.features && item.features.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-2">
+                          {item.features.slice(0, 3).map((feat: string, fIdx: number) => (
+                            <span
+                              key={fIdx}
+                              className={`text-[10px] px-2 py-0.5 rounded ${theme.border} border bg-slate-50 dark:bg-slate-900/60 ${theme.textSecondary}`}
+                            >
+                              • {feat}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={`p-4 border-t ${theme.border} bg-slate-50 dark:bg-[#0c1427] flex items-center justify-between`}>
+                      <span className={`text-xs ${theme.textMuted}`}>{item.infrastructure || 'mzTech Cloud'}</span>
+                      {projectUrl && (
+                        <a
+                          href={projectUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
+                        >
+                          <span>Acessar Projeto</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="col-span-full text-center py-8">
                 <p className={`text-sm ${theme.textMuted}`}>Projetos em atualização no catálogo corporativo.</p>

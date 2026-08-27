@@ -30,6 +30,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface MzLayoutWrapperProps {
@@ -66,10 +67,11 @@ export default function MzLayoutWrapper({ children }: MzLayoutWrapperProps) {
       ],
     },
     {
-      groupName: 'COMERCIAL',
+      groupName: 'COMERCIAL & SITE',
       items: [
         { name: 'Orçamentos', href: '/admin/mztech/orcamentos', icon: FileCheck2 },
         { name: 'Clientes', href: '/admin/mztech/clientes', icon: Users },
+        { name: 'Portfólio do Site', href: '/admin/mztech/portfolio', icon: Sparkles },
         { name: 'Serviços & Planos', href: '/admin/mztech/servicos', icon: Layers },
       ],
     },
