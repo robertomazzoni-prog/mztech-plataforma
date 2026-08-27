@@ -4,6 +4,8 @@ import { hashPassword, signToken } from '@/lib/auth';
 import { cleanPhoneDigits, formatPhoneNumber } from '@/lib/utils';
 import { isDatabaseOnline } from '@/lib/init-db';
 import { getStoredClients, saveStoredClients } from '@/lib/mz-entities-store';
+import { validateBrazilianPhone } from '@/lib/validators';
+import { validateEmailDomainExists } from '@/lib/server-validators';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,22 +25,30 @@ export async function POST(req: NextRequest) {
 
     const finalContact = (contactName || name || '').trim();
     const finalCompany = (companyName || finalContact).trim();
-    const finalPhone = (whatsapp || phone || '').trim();
-    const finalEmail = (email || '').toLowerCase().trim();
+    const rawPhone = (whatsapp || phone || '').trim();
+    const rawEmail = (email || '').trim();
 
-    if (!finalContact || !finalEmail || !finalPhone || !password) {
+    if (!finalContact || !rawEmail || !rawPhone || !password) {
       return NextResponse.json(
         { error: 'Por favor, preencha seu nome, empresa, e-mail, WhatsApp e senha.' },
         { status: 400 }
       );
     }
 
-    if (cleanPhoneDigits(finalPhone).length < 10) {
-      return NextResponse.json(
-        { error: 'Informe um número de WhatsApp válido com DDD.' },
-        { status: 400 }
-      );
+    // Validação de Telefone / WhatsApp Brasileiro
+    const phoneCheck = validateBrazilianPhone(rawPhone);
+    if (!phoneCheck.isValid) {
+      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
     }
+
+    // Validação de E-mail existente
+    const emailCheck = await validateEmailDomainExists(rawEmail);
+    if (!emailCheck.isValid) {
+      return NextResponse.json({ error: emailCheck.error }, { status: 400 });
+    }
+
+    const finalEmail = emailCheck.cleanEmail;
+    const finalPhone = phoneCheck.formatted;
 
     if (password.length < 6) {
       return NextResponse.json(

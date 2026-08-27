@@ -18,6 +18,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { formatPhoneNumber, cleanPhoneDigits } from '@/lib/utils';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
 
 export default function ClientRegisterPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function ClientRegisterPage() {
   const [success, setSuccess] = useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWhatsapp(formatPhoneNumber(e.target.value));
+    setWhatsapp(formatPhoneInput(e.target.value));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,8 +45,15 @@ export default function ClientRegisterPage() {
       return;
     }
 
-    if (cleanPhoneDigits(whatsapp).length < 10) {
-      setError('Informe um WhatsApp válido com DDD.');
+    const phoneCheck = validateBrazilianPhone(whatsapp);
+    if (!phoneCheck.isValid) {
+      setError(phoneCheck.error || 'Informe um WhatsApp válido.');
+      return;
+    }
+
+    const emailCheck = validateEmailFormat(email);
+    if (!emailCheck.isValid) {
+      setError(emailCheck.error || 'Informe um e-mail válido.');
       return;
     }
 

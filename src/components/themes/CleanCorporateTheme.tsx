@@ -50,6 +50,7 @@ import {
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
 
 interface CleanCorporateThemeProps {
   settingsData: any;
@@ -774,7 +775,7 @@ export default function CleanCorporateTheme({
                       required
                       placeholder="(31) 99999-9999"
                       value={formData.whatsapp}
-                      onChange={(e) => setFormData((prev: any) => ({ ...prev, whatsapp: e.target.value }))}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, whatsapp: formatPhoneInput(e.target.value) }))}
                       className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
                     />
                   </div>

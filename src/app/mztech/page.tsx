@@ -45,6 +45,7 @@ import {
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
+import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat } from '@/lib/validators';
 import CleanCorporateTheme from '@/components/themes/CleanCorporateTheme';
 
 const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
@@ -205,6 +206,20 @@ export default function MzTechPublicPage() {
       return;
     }
 
+    // Validação rigorosa de Telefone Brasileiro
+    const phoneValidation = validateBrazilianPhone(formData.whatsapp);
+    if (!phoneValidation.isValid) {
+      alert(phoneValidation.error);
+      return;
+    }
+
+    // Validação rigorosa de E-mail
+    const emailValidation = validateEmailFormat(formData.email);
+    if (!emailValidation.isValid) {
+      alert(emailValidation.error);
+      return;
+    }
+
     if (!currentUser) {
       if (!formData.password || formData.password.length < 6) {
         alert('Por favor, crie uma senha de no mínimo 6 caracteres para seu acesso ao Portal do Cliente.');
@@ -228,6 +243,8 @@ export default function MzTechPublicPage() {
 
     const payload = {
       ...formData,
+      whatsapp: phoneValidation.formatted,
+      email: emailValidation.cleanEmail,
       hasDomain: domainDisplay,
       customDomain: formData.customDomain?.trim() || null,
     };
@@ -1516,7 +1533,7 @@ export default function MzTechPublicPage() {
                       required
                       placeholder="(31) 99999-9999"
                       value={formData.whatsapp}
-                      onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, whatsapp: formatPhoneInput(e.target.value) })}
                       className={`w-full ${
                         isDarkCyberGlow ? 'bg-[#080918] border-violet-500/30 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
                       } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}

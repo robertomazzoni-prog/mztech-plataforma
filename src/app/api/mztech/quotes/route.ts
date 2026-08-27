@@ -6,6 +6,8 @@ import { hashPassword, signToken, getUserFromRequest } from '@/lib/auth';
 import { formatPhoneNumber } from '@/lib/utils';
 import { prisma } from '@/lib/db';
 import { isDatabaseOnline } from '@/lib/init-db';
+import { validateBrazilianPhone } from '@/lib/validators';
+import { validateEmailDomainExists } from '@/lib/server-validators';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,8 +138,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const cleanEmail = email.toLowerCase().trim();
-    const cleanPhone = whatsapp.trim();
+    // Validação estrita de Telefone / WhatsApp Brasileiro
+    const phoneCheck = validateBrazilianPhone(whatsapp);
+    if (!phoneCheck.isValid) {
+      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
+    }
+
+    // Validação estrita de E-mail e checagem de domínio existente na internet
+    const emailCheck = await validateEmailDomainExists(email);
+    if (!emailCheck.isValid) {
+      return NextResponse.json({ error: emailCheck.error }, { status: 400 });
+    }
+
+    const cleanEmail = emailCheck.cleanEmail;
+    const cleanPhone = phoneCheck.formatted;
     const cleanName = name.trim();
     const cleanCompany = company ? company.trim() : cleanName;
 

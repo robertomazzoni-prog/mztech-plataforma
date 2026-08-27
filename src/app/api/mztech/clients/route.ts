@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db';
 import { isDatabaseOnline } from '@/lib/init-db';
 import { getStoredClients, saveStoredClients, syncClientsFromDb } from '@/lib/mz-entities-store';
 import { MzClientItem } from '@/types/mztech';
+import { validateBrazilianPhone } from '@/lib/validators';
+import { validateEmailDomainExists } from '@/lib/server-validators';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +61,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validação de Telefone / WhatsApp Brasileiro
+    const phoneCheck = validateBrazilianPhone(whatsapp);
+    if (!phoneCheck.isValid) {
+      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
+    }
+
+    // Validação de E-mail existente
+    const emailCheck = await validateEmailDomainExists(email);
+    if (!emailCheck.isValid) {
+      return NextResponse.json({ error: emailCheck.error }, { status: 400 });
+    }
+
     const newClientId = `client-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const nowStr = new Date().toISOString();
 
@@ -66,8 +80,8 @@ export async function POST(req: NextRequest) {
       id: newClientId,
       companyName: companyName.trim(),
       contactName: contactName.trim(),
-      whatsapp: whatsapp.trim(),
-      email: email.trim(),
+      whatsapp: phoneCheck.formatted,
+      email: emailCheck.cleanEmail,
       domain: domain || null,
       status: (status as any) || 'ATIVO',
       financialStatus: (financialStatus as any) || 'EM_DIA',
