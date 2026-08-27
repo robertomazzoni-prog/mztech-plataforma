@@ -127,25 +127,25 @@ export default function CleanCorporateTheme({
   const legalName = settingsData?.legalName || MZTECH_INFO.legalName;
   const workingHours = settingsData?.workingHours || 'Segunda a Sexta, 08h às 19h • Sábados, 09h às 14h';
 
-  // Classes de Estilo Condicionais para Modo Claro e Modo Escuro
+  // Classes de Estilo Condicionais para Modo Claro e Modo Escuro (Preto/Zinc puro no escuro)
   const theme = {
-    bg: isDarkMode ? 'bg-[#0a0f1d]' : 'bg-slate-50',
-    surface: isDarkMode ? 'bg-[#111c38]' : 'bg-white',
-    surfaceHover: isDarkMode ? 'hover:bg-[#162244]' : 'hover:bg-slate-50',
-    surfaceMuted: isDarkMode ? 'bg-[#162244]' : 'bg-slate-100',
-    border: isDarkMode ? 'border-slate-800' : 'border-slate-200',
+    bg: isDarkMode ? 'bg-[#09090b]' : 'bg-slate-50',
+    surface: isDarkMode ? 'bg-[#121215]' : 'bg-white',
+    surfaceHover: isDarkMode ? 'hover:bg-[#18181c]' : 'hover:bg-slate-50',
+    surfaceMuted: isDarkMode ? 'bg-[#18181c]' : 'bg-slate-100',
+    border: isDarkMode ? 'border-[#27272a]' : 'border-slate-200',
     borderFocus: isDarkMode ? 'focus:border-blue-500' : 'focus:border-blue-600',
     textPrimary: isDarkMode ? 'text-white' : 'text-slate-900',
-    textSecondary: isDarkMode ? 'text-slate-300' : 'text-slate-600',
-    textMuted: isDarkMode ? 'text-slate-400' : 'text-slate-500',
-    badgeBg: isDarkMode ? 'bg-blue-950/60 text-blue-300 border-blue-800/60' : 'bg-blue-50 text-blue-700 border-blue-200',
-    badgeSuccess: isDarkMode ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    textSecondary: isDarkMode ? 'text-zinc-300' : 'text-slate-600',
+    textMuted: isDarkMode ? 'text-zinc-400' : 'text-slate-500',
+    badgeBg: isDarkMode ? 'bg-zinc-800/80 text-blue-400 border-zinc-700' : 'bg-blue-50 text-blue-700 border-blue-200',
+    badgeSuccess: isDarkMode ? 'bg-zinc-800/80 text-emerald-400 border-zinc-700' : 'bg-emerald-50 text-emerald-700 border-emerald-200',
     btnPrimary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-semibold transition-all',
     btnSecondary: isDarkMode
-      ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition-all'
+      ? 'bg-[#18181c] hover:bg-[#222227] text-zinc-200 border border-[#27272a] font-semibold transition-all'
       : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm font-semibold transition-all',
     input: isDarkMode
-      ? 'bg-[#0e172e] border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/20'
+      ? 'bg-[#121215] border-[#27272a] text-white placeholder-zinc-500 focus:ring-2 focus:ring-blue-500/20'
       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20',
   };
 
@@ -155,7 +155,7 @@ export default function CleanCorporateTheme({
       {/* ============================================================ */}
       {/* 1. TOP BAR CORPORATIVA DE INFRAESTRUTURA & CONTATO */}
       {/* ============================================================ */}
-      <div className={`${isDarkMode ? 'bg-[#080c18] border-b border-slate-800/80' : 'bg-slate-900 border-b border-slate-800'} px-4 py-2 text-xs text-slate-300`}>
+      <div className={`${isDarkMode ? 'bg-[#000000] border-b border-[#27272a]' : 'bg-slate-900 border-b border-slate-800'} px-4 py-2 text-xs text-slate-300`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -181,7 +181,7 @@ export default function CleanCorporateTheme({
       {/* ============================================================ */}
       {/* 2. HEADER / NAVBAR CORPORATIVA */}
       {/* ============================================================ */}
-      <header className={`sticky top-0 z-40 ${isDarkMode ? 'bg-[#0e172e]/95 border-b border-slate-800' : 'bg-white/95 border-b border-slate-200'} backdrop-blur-md shadow-sm transition-colors duration-200`}>
+      <header className={`sticky top-0 z-40 ${isDarkMode ? 'bg-[#09090b]/95 border-b border-[#27272a]' : 'bg-white/95 border-b border-slate-200'} backdrop-blur-md shadow-sm transition-colors duration-200`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between">
           
           {/* Logo & Marca */}
@@ -218,7 +218,7 @@ export default function CleanCorporateTheme({
               onClick={toggleDarkMode}
               className={`p-2 rounded-lg border flex items-center justify-center transition-all ${
                 isDarkMode
-                  ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700'
+                  ? 'bg-[#18181c] border-[#27272a] text-amber-300 hover:bg-[#222227]'
                   : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100 shadow-sm'
               }`}
               title={isDarkMode ? 'Alternar para Modo Claro (☀️)' : 'Alternar para Modo Escuro (🌙)'}
@@ -247,124 +247,83 @@ export default function CleanCorporateTheme({
       {/* 3. HERO SECTION CORPORATIVO & LIMPO */}
       {/* ============================================================ */}
       <section className={`py-16 sm:py-24 border-b ${theme.border} relative overflow-hidden`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Coluna de Conteúdo */}
-            <div className="lg:col-span-7 space-y-6">
-              
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold ${theme.badgeBg}`}>
-                <Building2 className="w-3.5 h-3.5 text-blue-600" />
-                <span>Soluções Digitais & Engenharia Web Corporativa</span>
-              </div>
-
-              <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${theme.textPrimary} leading-tight`}>
-                Seu negócio merece uma <span className="text-blue-600">presença digital profissional</span>.
-              </h1>
-
-              <p className={`text-base sm:text-lg ${theme.textSecondary} leading-relaxed max-w-2xl font-normal`}>
-                Desenvolvemos sites institucionais, sistemas corporativos e lojas digitais sob medida com código nativo, alta velocidade, hospedagem em nuvem gerenciada e suporte técnico direto.
-              </p>
-
-              {/* 4 Badges de Garantia Corporativa */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-2">
-                <div className={`p-3 rounded-lg border ${theme.border} ${theme.surface} flex items-center gap-3`}>
-                  <Code2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold block">Código Sob Medida</strong>
-                    <span className={`text-[11px] ${theme.textMuted}`}>Next.js & PostgreSQL</span>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border ${theme.border} ${theme.surface} flex items-center gap-3`}>
-                  <Server className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold block">Hospedagem Cloud</strong>
-                    <span className={`text-[11px] ${theme.textMuted}`}>SSL, DNS & Backups</span>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border ${theme.border} ${theme.surface} flex items-center gap-3`}>
-                  <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold block">Segurança & LGPD</strong>
-                    <span className={`text-[11px] ${theme.textMuted}`}>Proteção de Dados</span>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border ${theme.border} ${theme.surface} flex items-center gap-3`}>
-                  <Users className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold block">Atendimento Direto</strong>
-                    <span className={`text-[11px] ${theme.textMuted}`}>{robertoName} & {morvanName}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões CTA */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
-                <a
-                  href="#orcamento"
-                  className={`px-6 py-3.5 rounded-lg ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2`}
-                >
-                  <span>Solicitar Proposta Comercial</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-                <a
-                  href="#planos"
-                  className={`px-6 py-3.5 rounded-lg ${theme.btnSecondary} text-center text-sm flex items-center justify-center gap-2`}
-                >
-                  <span>Ver Planos de Hospedagem</span>
-                </a>
-              </div>
-
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          
+          <div className="space-y-4">
+            <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold ${theme.badgeBg}`}>
+              <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Soluções Digitais & Engenharia Web Corporativa</span>
             </div>
 
-            {/* Coluna Visual: Card de Visão Geral Corporativa */}
-            <div className="lg:col-span-5">
-              <div className={`rounded-2xl border ${theme.border} ${theme.surface} p-6 shadow-lg space-y-5`}>
-                
-                <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-bold text-current">Painel Operacional mzTech</span>
-                  </div>
-                  <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${theme.badgeSuccess}`}>
-                    Status: Online
-                  </span>
-                </div>
+            <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${theme.textPrimary} leading-tight max-w-4xl mx-auto`}>
+              Seu negócio merece uma <span className="text-blue-600 dark:text-blue-400">presença digital profissional</span>.
+            </h1>
 
-                {/* Métricas Corporativas */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`p-3.5 rounded-xl ${theme.surfaceMuted} border ${theme.border}`}>
-                    <span className={`text-[11px] ${theme.textMuted} block`}>Disponibilidade (SLA)</span>
-                    <strong className="text-lg font-bold text-emerald-500">99.9%</strong>
-                  </div>
-                  <div className={`p-3.5 rounded-xl ${theme.surfaceMuted} border ${theme.border}`}>
-                    <span className={`text-[11px] ${theme.textMuted} block`}>Tempo de Resposta</span>
-                    <strong className="text-lg font-bold text-blue-600">&lt; 150ms</strong>
-                  </div>
-                </div>
-
-                <div className={`p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border} space-y-2`}>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold">Tecnologia Utilizada</span>
-                    <span className="font-mono text-blue-600 font-bold">Next.js 14 • PostgreSQL</span>
-                  </div>
-                  <p className={`text-xs ${theme.textMuted} leading-relaxed`}>
-                    Ambiente corporativo de alta escalabilidade, com rotinas automáticas de backup e monitoramento contínuo.
-                  </p>
-                </div>
-
-                <div className="pt-2 flex items-center justify-between text-xs">
-                  <span className={theme.textMuted}>Contato Comercial:</span>
-                  <span className="font-semibold text-blue-600">{robertoPhone}</span>
-                </div>
-
-              </div>
-            </div>
-
+            <p className={`text-base sm:text-lg ${theme.textSecondary} leading-relaxed max-w-3xl mx-auto font-normal`}>
+              Desenvolvemos sites institucionais, sistemas corporativos e lojas digitais sob medida com código nativo, alta velocidade, hospedagem em nuvem gerenciada e suporte técnico direto.
+            </p>
           </div>
+
+          {/* Botões CTA */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <a
+              href="#orcamento"
+              className={`px-8 py-3.5 rounded-xl ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20`}
+            >
+              <span>Solicitar Proposta Comercial</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href="#planos"
+              className={`px-8 py-3.5 rounded-xl ${theme.btnSecondary} text-center text-sm flex items-center justify-center gap-2`}
+            >
+              <span>Ver Planos de Hospedagem</span>
+            </a>
+          </div>
+
+          {/* 4 Badges de Garantia Corporativa */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 max-w-4xl mx-auto text-left">
+            <div className={`p-4 rounded-xl border ${theme.border} ${theme.surface} flex items-center gap-3.5 shadow-sm`}>
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-xs font-bold block text-current">Código Sob Medida</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>Next.js & PostgreSQL</span>
+              </div>
+            </div>
+
+            <div className={`p-4 rounded-xl border ${theme.border} ${theme.surface} flex items-center gap-3.5 shadow-sm`}>
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <Server className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-xs font-bold block text-current">Hospedagem Cloud</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>SSL, DNS & Backups</span>
+              </div>
+            </div>
+
+            <div className={`p-4 rounded-xl border ${theme.border} ${theme.surface} flex items-center gap-3.5 shadow-sm`}>
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-xs font-bold block text-current">Segurança & LGPD</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>Proteção de Dados</span>
+              </div>
+            </div>
+
+            <div className={`p-4 rounded-xl border ${theme.border} ${theme.surface} flex items-center gap-3.5 shadow-sm`}>
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-xs font-bold block text-current">Atendimento Direto</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>{robertoName} & {morvanName}</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -573,7 +532,7 @@ export default function CleanCorporateTheme({
                 className={`p-6 sm:p-8 rounded-2xl border-2 transition-all flex flex-col justify-between shadow-sm relative ${
                   plan.recommended
                     ? isDarkMode
-                      ? 'border-blue-500 bg-[#142040] shadow-blue-500/10'
+                      ? 'border-blue-500 bg-[#18181c] shadow-blue-500/10'
                       : 'border-blue-600 bg-white shadow-md'
                     : `${theme.border} ${theme.surface}`
                 }`}
@@ -859,7 +818,7 @@ export default function CleanCorporateTheme({
       {/* ============================================================ */}
       {/* 10. FOOTER CORPORATIVO */}
       {/* ============================================================ */}
-      <footer id="contato" className={`${isDarkMode ? 'bg-[#080c18] border-t border-slate-800' : 'bg-slate-900 text-slate-300'} py-12 px-4 sm:px-6 lg:px-8 text-xs`}>
+      <footer id="contato" className={`${isDarkMode ? 'bg-[#000000] border-t border-[#27272a]' : 'bg-slate-900 text-slate-300'} py-12 px-4 sm:px-6 lg:px-8 text-xs`}>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           
           {/* Coluna 1: Empresa */}
