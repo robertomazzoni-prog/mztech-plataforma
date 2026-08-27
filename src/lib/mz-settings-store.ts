@@ -17,7 +17,7 @@ export interface CompanyPixItem {
   isPrimary?: boolean;
 }
 
-export type SiteThemeStyle = 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM';
+export type SiteThemeStyle = 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE';
 
 export interface CompanySettings {
   name: string;

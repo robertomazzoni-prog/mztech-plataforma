@@ -45,6 +45,7 @@ import {
   DEFAULT_CONTRACT_TEMPLATE,
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
+import CleanCorporateTheme from '@/components/themes/CleanCorporateTheme';
 
 const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
   if (plan.toLowerCase().includes('apenas')) return 0;
@@ -286,12 +287,37 @@ export default function MzTechPublicPage() {
     window.open(whatsappUrl, '_blank');
   };
 
-  const currentTheme: 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' =
+  const currentTheme: 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE' =
     settingsData?.siteTheme === 'CYBER_DARK'
       ? 'CYBER_DARK'
       : settingsData?.siteTheme === 'STUDIO_PREMIUM'
       ? 'STUDIO_PREMIUM'
+      : settingsData?.siteTheme === 'CLEAN_CORPORATE'
+      ? 'CLEAN_CORPORATE'
       : 'DARK_CYBER_GLOW';
+
+  if (currentTheme === 'CLEAN_CORPORATE') {
+    return (
+      <CleanCorporateTheme
+        settingsData={settingsData}
+        servicesList={servicesList}
+        portfolioList={portfolioList}
+        currentUser={currentUser}
+        formData={formData}
+        setFormData={setFormData}
+        handleFormSubmit={handleSubmitQuote}
+        formLoading={formLoading}
+        formSubmitted={formSubmitted}
+        openFaqIndex={openFaqIndex}
+        setOpenFaqIndex={setOpenFaqIndex}
+        termsModalOpen={termsModalOpen}
+        setTermsModalOpen={setTermsModalOpen}
+        devServices={devServices}
+        recurringServices={monthlyPlans}
+        getMonthlyPriceFromPlan={getMonthlyPriceFromPlan}
+      />
+    );
+  }
 
   const isDarkCyberGlow = currentTheme === 'DARK_CYBER_GLOW';
 
