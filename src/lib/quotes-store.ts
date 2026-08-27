@@ -297,23 +297,44 @@ export function updateQuote(
   return null;
 }
 
-export function deleteQuote(id: string): boolean {
+export async function deleteQuote(id: string): Promise<boolean> {
   let current = getStoredQuotes();
-  const quote = current.find((q) => q.id === id);
+  const quote = current.find((q) => q.id === id || q.quoteNumber === id);
+  const targetId = quote ? quote.id : id;
+  const targetNumber = quote ? quote.quoteNumber : id;
+
   const initialLength = current.length;
-  current = current.filter((q) => q.id !== id);
-  if (current.length !== initialLength) {
+  current = current.filter((q) => q.id !== targetId && q.quoteNumber !== targetNumber && q.id !== id && q.quoteNumber !== id);
+  
+  if (current.length !== initialLength || quote) {
     globalObject[globalQuotesKey] = current;
     writeQuotesToFile(current);
+
+    if (process.env.DATABASE_URL) {
+      try {
+        await prisma.mzQuote.deleteMany({
+          where: {
+            OR: [
+              { id: targetId },
+              { id: id },
+              { quoteNumber: targetNumber },
+              { quoteNumber: id },
+            ],
+          },
+        });
+      } catch (e) {
+        console.warn('Aviso ao excluir orçamento do banco:', e);
+      }
+    }
 
     if (quote) {
       logActivity({
         actor: 'Administrador',
         action: 'EXCLUIR_ORCAMENTO',
         category: 'ORCAMENTO',
-        targetId: id,
-        targetNumber: quote.quoteNumber,
-        description: `Orçamento ${quote.quoteNumber || id} foi excluído da fila comercial.`,
+        targetId: targetId,
+        targetNumber: targetNumber,
+        description: `Orçamento ${targetNumber || targetId} foi excluído da fila comercial.`,
       });
     }
 

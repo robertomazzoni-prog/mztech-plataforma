@@ -192,7 +192,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const success = deleteQuote(params.id);
+    const success = await deleteQuote(params.id);
     if (!success) {
       return NextResponse.json({ error: 'Orçamento não encontrado.' }, { status: 404 });
     }

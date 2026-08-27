@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const contracts = getStoredContracts();
-    const contract = contracts.find((c) => c.id === params.id);
+    const contract = contracts.find((c) => c.id === params.id || c.contractNumber === params.id);
 
     if (!contract) {
       return NextResponse.json({ error: 'Contrato não encontrado.' }, { status: 404 });
@@ -107,7 +107,7 @@ export async function PATCH(
     // 2. ASSINATURA DIGITAL DO CLIENTE (Contratante)
     if (action === 'SIGN_CLIENT' || action === 'ACCEPT_ONLINE') {
       const contracts = getStoredContracts();
-      const current = contracts.find((c) => c.id === params.id);
+      const current = contracts.find((c) => c.id === params.id || c.contractNumber === params.id);
       const signer = clientName || current?.client?.contactName || 'Cliente';
       const certHash = current?.signatureCertificateHash || `MZ-CERT-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${new Date().getFullYear()}`;
 

@@ -232,13 +232,17 @@ export default function MzTechContractsPage() {
 
       if (res.ok) {
         const d = await res.json();
-        setSelectedContract(d.contract);
+        if (d.contract) {
+          setSelectedContract(d.contract);
+          setContracts((prev) => prev.map((c) => (c.id === d.contract.id || c.contractNumber === d.contract.contractNumber ? d.contract : c)));
+        }
         setProviderSignModalOpen(false);
         setFeedbackToast(`Contrato assinado digitalmente por ${selectedProviderSigner}!`);
         loadData();
         setTimeout(() => setFeedbackToast(null), 5000);
       } else {
-        alert('Erro ao assinar contrato como prestador.');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Erro ao assinar contrato como prestador.');
       }
     } catch (e) {
       alert('Erro de conexão.');
@@ -267,13 +271,17 @@ export default function MzTechContractsPage() {
 
       if (res.ok) {
         const d = await res.json();
-        setSelectedContract(d.contract);
+        if (d.contract) {
+          setSelectedContract(d.contract);
+          setContracts((prev) => prev.map((c) => (c.id === d.contract.id || c.contractNumber === d.contract.contractNumber ? d.contract : c)));
+        }
         setClientSignModalOpen(false);
         setFeedbackToast('Assinatura do cliente registrada com sucesso!');
         loadData();
         setTimeout(() => setFeedbackToast(null), 5000);
       } else {
-        alert('Erro ao registrar assinatura.');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Erro ao registrar assinatura.');
       }
     } catch (e) {
       alert('Erro de conexão.');

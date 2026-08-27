@@ -877,33 +877,63 @@ export async function syncContractsFromDb(): Promise<MzContractItem[]> {
         },
       });
       if (dbContracts && dbContracts.length > 0) {
-        const mapped: MzContractItem[] = dbContracts.map((c: any) => ({
-          id: c.id,
-          contractNumber: c.id,
-          clientId: c.clientId,
-          client: c.client,
-          projectId: c.projectId,
-          project: c.project,
-          title: c.title,
-          content: c.content,
-          totalDevPrice: c.totalDevPrice,
-          monthlyPrice: c.monthlyPrice,
-          paymentMethod: c.paymentMethod,
-          termsVersion: c.termsVersion,
-          codeOwnershipType: c.codeOwnershipType,
-          scopeDevelopment: c.scopeDevelopment,
-          scopeHosting: c.scopeHosting,
-          scopeMaintenance: c.scopeMaintenance,
-          scopeSupport: c.scopeSupport,
-          backupRetentionDays: c.backupRetentionDays,
-          migrationExcluded: c.migrationExcluded,
-          status: c.status,
-          signedAt: c.signedAt ? c.signedAt.toISOString() : null,
-          notes: c.notes,
-          createdAt: c.createdAt.toISOString(),
-          updatedAt: c.updatedAt.toISOString(),
-        }));
         const current = getStoredContracts();
+        const localMap = new Map(current.map((c) => [c.id, c]));
+        current.forEach((c) => {
+          if (c.contractNumber) localMap.set(c.contractNumber, c);
+        });
+
+        const mapped: MzContractItem[] = dbContracts.map((c: any) => {
+          const local = localMap.get(c.id);
+          return {
+            id: c.id,
+            contractNumber: local?.contractNumber || c.id,
+            clientId: c.clientId,
+            client: c.client || local?.client,
+            projectId: c.projectId || local?.projectId,
+            project: c.project || local?.project,
+            title: c.title,
+            content: c.content,
+            totalDevPrice: c.totalDevPrice,
+            monthlyPrice: c.monthlyPrice,
+            discount: local?.discount || 0,
+            dueDay: local?.dueDay || 10,
+            paymentMethod: c.paymentMethod,
+            periodicity: local?.periodicity || 'Mensal',
+            termsVersion: c.termsVersion,
+            codeOwnershipType: c.codeOwnershipType,
+            scopeDevelopment: c.scopeDevelopment,
+            scopeHosting: c.scopeHosting,
+            scopeMaintenance: c.scopeMaintenance,
+            scopeSupport: c.scopeSupport,
+            backupRetentionDays: c.backupRetentionDays,
+            migrationExcluded: c.migrationExcluded,
+            status: c.status,
+            signedAt: c.signedAt ? c.signedAt.toISOString() : local?.signedAt || null,
+            providerSigned: local?.providerSigned !== undefined ? local.providerSigned : Boolean(c.signedAt),
+            providerSignedBy: local?.providerSignedBy,
+            providerSignedAt: local?.providerSignedAt,
+            providerSignedIp: local?.providerSignedIp,
+            providerSignatureDataUrl: local?.providerSignatureDataUrl,
+            clientSigned: local?.clientSigned !== undefined ? local.clientSigned : Boolean(c.signedAt),
+            clientSignedBy: local?.clientSignedBy,
+            clientSignedDocument: local?.clientSignedDocument,
+            clientSignedAt: local?.clientSignedAt,
+            clientSignedIp: local?.clientSignedIp,
+            clientSignedUserAgent: local?.clientSignedUserAgent,
+            clientSignatureDataUrl: local?.clientSignatureDataUrl,
+            acceptedOnline: local?.acceptedOnline !== undefined ? local.acceptedOnline : Boolean(c.signedAt),
+            acceptedAt: local?.acceptedAt,
+            acceptedIp: local?.acceptedIp,
+            acceptedUserAgent: local?.acceptedUserAgent,
+            signatureCertificateHash: local?.signatureCertificateHash,
+            snapshot: local?.snapshot,
+            notes: c.notes,
+            createdAt: c.createdAt.toISOString(),
+            updatedAt: c.updatedAt.toISOString(),
+          };
+        });
+
         const dbIds = new Set(mapped.map((m) => m.id));
         for (const localC of current) {
           if (!dbIds.has(localC.id)) {
@@ -957,7 +987,8 @@ async function syncContractToPrisma(contract: MzContractItem) {
           scopeSupport: contract.scopeSupport || null,
           backupRetentionDays: contract.backupRetentionDays || 30,
           migrationExcluded: contract.migrationExcluded !== undefined ? contract.migrationExcluded : true,
-          status: contract.status || 'RASCUNHO',
+          status: contract.status || (contract.clientSigned ? 'ATIVO' : 'RASCUNHO'),
+          signedAt: contract.signedAt ? new Date(contract.signedAt) : (contract.clientSignedAt ? new Date(contract.clientSignedAt) : null),
           notes: contract.notes || null,
         },
         update: {
@@ -965,7 +996,8 @@ async function syncContractToPrisma(contract: MzContractItem) {
           content: contract.content || '',
           totalDevPrice: contract.totalDevPrice || 0,
           monthlyPrice: contract.monthlyPrice || 0,
-          status: contract.status || 'RASCUNHO',
+          status: contract.status || (contract.clientSigned ? 'ATIVO' : 'RASCUNHO'),
+          signedAt: contract.signedAt ? new Date(contract.signedAt) : (contract.clientSignedAt ? new Date(contract.clientSignedAt) : null),
           notes: contract.notes || null,
         },
       });
@@ -987,12 +1019,12 @@ export function saveStoredContracts(contracts: MzContractItem[]) {
 
 export function getStoredContractById(id: string): MzContractItem | null {
   const contracts = getStoredContracts();
-  return contracts.find((c) => c.id === id) || null;
+  return contracts.find((c) => c.id === id || c.contractNumber === id) || null;
 }
 
 export function updateStoredContract(id: string, updates: Partial<MzContractItem>): MzContractItem | null {
   const contracts = getStoredContracts();
-  const contract = contracts.find((c) => c.id === id);
+  const contract = contracts.find((c) => c.id === id || c.contractNumber === id);
   if (!contract) return null;
 
   Object.assign(contract, updates, { updatedAt: new Date().toISOString() });
@@ -1002,11 +1034,24 @@ export function updateStoredContract(id: string, updates: Partial<MzContractItem
 
 export function deleteStoredContract(id: string): boolean {
   let contracts = getStoredContracts();
-  const initialCount = contracts.length;
-  contracts = contracts.filter((c) => c.id !== id);
+  const contract = contracts.find((c) => c.id === id || c.contractNumber === id);
+  const targetId = contract ? contract.id : id;
 
-  if (contracts.length !== initialCount) {
+  const initialCount = contracts.length;
+  contracts = contracts.filter((c) => c.id !== targetId && c.contractNumber !== id && c.id !== id);
+
+  if (contracts.length !== initialCount || contract) {
     saveStoredContracts(contracts);
+    if (process.env.DATABASE_URL) {
+      prisma.mzContract.deleteMany({
+        where: {
+          OR: [
+            { id: targetId },
+            { id: id },
+          ],
+        },
+      }).catch(() => {});
+    }
     return true;
   }
   return false;
