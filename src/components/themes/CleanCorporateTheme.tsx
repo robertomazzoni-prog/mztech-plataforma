@@ -269,15 +269,15 @@ export default function CleanCorporateTheme({
           <div className="space-y-4">
             <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold ${theme.badgeBg}`}>
               <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>Soluções Digitais & Engenharia Web Corporativa</span>
+              <span>Desenvolvimento de Software & Web</span>
             </div>
 
             <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${theme.textPrimary} leading-tight max-w-4xl mx-auto`}>
-              Seu negócio merece uma <span className="text-blue-600 dark:text-blue-400">presença digital profissional</span>.
+              Sites e sistemas desenvolvidos sob medida <span className="text-blue-600 dark:text-blue-400">para a sua empresa</span>.
             </h1>
 
             <p className={`text-base sm:text-lg ${theme.textSecondary} leading-relaxed max-w-3xl mx-auto font-normal`}>
-              Desenvolvemos sites institucionais, sistemas corporativos e lojas digitais sob medida com código nativo, alta velocidade, hospedagem em nuvem gerenciada e suporte técnico direto.
+              Criamos páginas institucionais, lojas virtuais e plataformas web com código próprio em Next.js, hospedagem gerenciada e atendimento direto com os desenvolvedores.
             </p>
           </div>
 
@@ -288,7 +288,7 @@ export default function CleanCorporateTheme({
                 href="#orcamento"
                 className={`px-8 py-3.5 rounded-xl ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20`}
               >
-                <span>Solicitar Proposta Comercial</span>
+                <span>Solicitar Orçamento</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
             </PulsatingBorder>
@@ -300,15 +300,15 @@ export default function CleanCorporateTheme({
             </a>
           </div>
 
-          {/* 4 Badges de Garantia Corporativa */}
+          {/* 4 Badges de Garantia */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 max-w-4xl mx-auto text-left">
             <div className={`p-4 rounded-xl border ${theme.border} ${theme.surface} flex items-center gap-3.5 shadow-sm`}>
               <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
                 <Code2 className="w-5 h-5" />
               </div>
               <div>
-                <strong className="text-xs font-bold block text-current">Código Sob Medida</strong>
-                <span className={`text-[11px] ${theme.textMuted}`}>Next.js & PostgreSQL</span>
+                <strong className="text-xs font-bold block text-current">Código Próprio</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>Next.js & TypeScript</span>
               </div>
             </div>
 
@@ -317,8 +317,8 @@ export default function CleanCorporateTheme({
                 <Server className="w-5 h-5" />
               </div>
               <div>
-                <strong className="text-xs font-bold block text-current">Hospedagem Cloud</strong>
-                <span className={`text-[11px] ${theme.textMuted}`}>SSL, DNS & Backups</span>
+                <strong className="text-xs font-bold block text-current">Hospedagem Gerenciada</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>SSL, DNS e Backups</span>
               </div>
             </div>
 
@@ -327,8 +327,8 @@ export default function CleanCorporateTheme({
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <strong className="text-xs font-bold block text-current">Segurança & LGPD</strong>
-                <span className={`text-[11px] ${theme.textMuted}`}>Proteção de Dados</span>
+                <strong className="text-xs font-bold block text-current">Segurança & Estabilidade</strong>
+                <span className={`text-[11px] ${theme.textMuted}`}>Monitoramento Contínuo</span>
               </div>
             </div>
 
@@ -338,7 +338,7 @@ export default function CleanCorporateTheme({
               </div>
               <div>
                 <strong className="text-xs font-bold block text-current">Atendimento Direto</strong>
-                <span className={`text-[11px] ${theme.textMuted}`}>{robertoName} & {morvanName}</span>
+                <span className={`text-[11px] ${theme.textMuted}`}>Com {robertoName} e {morvanName}</span>
               </div>
             </div>
           </div>
@@ -354,13 +354,13 @@ export default function CleanCorporateTheme({
           
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Nossos Serviços
+              O que fazemos
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Soluções Completas para a sua Empresa
+              Desenvolvimento, hospedagem e manutenção
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Do planejamento e desenvolvimento até a hospedagem segura e suporte contínuo.
+              Cuidamos de todas as etapas técnicas: da programação ao suporte contínuo.
             </p>
           </div>
 
@@ -399,7 +399,7 @@ export default function CleanCorporateTheme({
                     href="#orcamento"
                     className={`w-full py-2.5 rounded-lg ${theme.btnSecondary} text-center text-xs flex items-center justify-center gap-1.5`}
                   >
-                    <span>Solicitar Detalhes</span>
+                    <span>Pedir orçamento deste serviço</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -418,13 +418,13 @@ export default function CleanCorporateTheme({
           
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Projetos Entregues
+              Portfólio
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Portfólio de Soluções em Produção
+              Projetos que desenvolvemos e mantemos no ar
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Conheça alguns dos sites e sistemas desenvolvidos e mantidos pela infraestrutura mzTech.
+              Conheça alguns dos sites e sistemas em produção criados e mantidos pela mzTech.
             </p>
           </div>
 
@@ -481,7 +481,7 @@ export default function CleanCorporateTheme({
                         </div>
 
                         <p className={`text-xs ${theme.textSecondary} leading-relaxed`}>
-                          {item.description || 'Projeto corporativo de alta performance sob medida desenvolvido pela mzTech.'}
+                          {item.description || 'Aplicação web desenvolvida sob medida com código próprio e hospedagem gerenciada.'}
                         </p>
                       </div>
 
@@ -534,13 +534,13 @@ export default function CleanCorporateTheme({
           
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Planos & Mensalidades
+              Mensalidades
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Hospedagem & Gestão Contínua
+              Planos de hospedagem e manutenção
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Planos transparentes para manter sua presença digital no ar com segurança e estabilidade.
+              Valores fixos para manter a sua aplicação rápida, segura e com suporte direto.
             </p>
           </div>
 
@@ -617,13 +617,13 @@ export default function CleanCorporateTheme({
           
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Processo de Trabalho
+              Processo
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Metodologia de Engenharia Web
+              Como funciona o desenvolvimento
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Fluxo ágil e transparente para entrega do seu projeto no prazo e com máxima qualidade.
+              Etapas claras, da primeira conversa até a publicação e acompanhamento contínuo.
             </p>
           </div>
 
@@ -650,13 +650,13 @@ export default function CleanCorporateTheme({
           
           <div className="text-center space-y-3">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${theme.badgeBg}`}>
-              Dê o Próximo Passo
+              Contato
             </span>
             <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${theme.textPrimary}`}>
-              Solicite seu Orçamento
+              Peça um orçamento para o seu projeto
             </h2>
             <p className={`text-sm sm:text-base ${theme.textSecondary}`}>
-              Preencha os dados abaixo para receber uma análise técnica e proposta comercial personalizada.
+              Conte o que a sua empresa precisa. Respondemos com a análise técnica e proposta de custos.
             </p>
           </div>
 

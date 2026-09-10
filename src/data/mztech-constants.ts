@@ -1,9 +1,9 @@
 export const MZTECH_INFO = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
-  tagline: 'Tecnologia que coloca sua empresa no digital.',
+  tagline: 'Desenvolvimento de sites e sistemas sob medida.',
   description:
-    'A mzTech desenvolve, hospeda e mantém sites e sistemas para empresas que buscam autoridade, estabilidade e crescimento contínuo no ambiente digital.',
+    'Desenvolvemos, hospedamos e mantemos aplicações web para empresas que precisam de estabilidade, velocidade e atendimento direto com os desenvolvedores.',
   whatsapp: '5531986847049',
   whatsappDisplay: '(31) 98684-7049',
   robertoName: 'Roberto',

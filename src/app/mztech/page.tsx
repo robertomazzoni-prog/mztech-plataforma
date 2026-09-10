@@ -489,7 +489,7 @@ export default function MzTechPublicPage() {
 
                 {/* Headline Principal Oficial */}
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-                  Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-300 to-indigo-300">presença digital profissional.</span>
+                  Sites e sistemas desenvolvidos sob medida <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-300 to-indigo-300">para a sua empresa.</span>
                 </h1>
 
                 {/* Subtítulo Oficial */}
@@ -622,7 +622,7 @@ export default function MzTechPublicPage() {
 
             {/* Título Principal */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] max-w-4xl mx-auto">
-              Engenharia de software de alta performance, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">sistemas sob medida</span> e presença digital sólida.
+              Desenvolvimento de software, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">sistemas sob medida</span> e hospedagem gerenciada.
             </h1>
 
             {/* Subtítulo Realista & Humanizado */}
@@ -743,7 +743,7 @@ export default function MzTechPublicPage() {
 
             {/* Título Principal Oficial */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
-              Seu negócio merece uma <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">presença digital profissional.</span>
+              Sites e sistemas desenvolvidos sob medida <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">para a sua empresa.</span>
             </h1>
 
             {/* Subtítulo Oficial */}
@@ -780,13 +780,13 @@ export default function MzTechPublicPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-mono`}>
-              Soluções Completas de Software
+              O que fazemos
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              O Que a mzTech Constrói
+              Desenvolvimento, Hospedagem e Manutenção
             </h2>
             <p className="text-slate-400 text-base sm:text-lg mt-3">
-              Do código-fonte à infraestrutura em produção: engenharia moderna com estabilidade e segurança.
+              Cuidamos de todas as etapas técnicas: da programação da sua aplicação ao suporte contínuo.
             </p>
           </div>
 
@@ -891,13 +891,13 @@ export default function MzTechPublicPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
-              Processo Transparente
+              Processo
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              Como Funciona a Contratação
+              Como funciona o desenvolvimento
             </h2>
             <p className="text-slate-400 text-base sm:text-lg mt-3">
-              Um passo a passo claro, sem surpresas e focado na entrega do melhor resultado.
+              Etapas claras, da primeira conversa até a publicação e suporte contínuo.
             </p>
           </div>
 
@@ -962,13 +962,13 @@ export default function MzTechPublicPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-3xl mx-auto mb-12">
                 <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
-                  Casos Reais em Produção
+                  Portfólio
                 </span>
                 <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-                  Portfólio de Projetos
+                  Projetos que desenvolvemos e mantemos no ar
                 </h2>
                 <p className="text-slate-400 text-base sm:text-lg mt-3">
-                  Projetos construídos pela mzTech com foco em usabilidade, velocidade e geração de negócios.
+                  Conheça algumas das aplicações web em produção desenvolvidas e mantidas pela mzTech.
                 </p>
               </div>
 
@@ -1079,13 +1079,13 @@ export default function MzTechPublicPage() {
           
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-mono`}>
-              Transparência Comercial
+              Mensalidades
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              Planos mzTech
+              Planos de Hospedagem e Manutenção
             </h2>
             <p className="text-slate-300 text-base sm:text-lg mt-3">
-              O desenvolvimento do projeto é contratado sob medida e a mensalidade refere-se à infraestrutura em nuvem e aos serviços contínuos de hospedagem e manutenção técnica.
+              O projeto é desenvolvido sob medida com valor único. A mensalidade cobre o servidor em nuvem, certificado SSL e o suporte técnico contínuo.
             </p>
           </div>
 
@@ -1409,13 +1409,13 @@ export default function MzTechPublicPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className={`text-xs font-bold uppercase tracking-widest ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>
-              Dê o Próximo Passo
+              Contato
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              Solicite seu orçamento
+              Peça um orçamento para o seu projeto
             </h2>
             <p className="text-slate-300 text-sm sm:text-base mt-2 max-w-xl mx-auto">
-              Preencha os dados abaixo para receber uma análise técnica e proposta comercial personalizada.
+              Envie as informações da sua empresa. Analisamos o escopo e retornamos com a proposta técnica e de custos.
             </p>
           </div>
 
