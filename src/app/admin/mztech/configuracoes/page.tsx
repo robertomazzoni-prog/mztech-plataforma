@@ -589,16 +589,16 @@ export default function AdminSettingsPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-white text-base">Studio de Software</h4>
-                      <p className="text-[11px] text-blue-400 font-mono">Autoridade • Fundadores</p>
+                      <p className="text-[11px] text-blue-400 font-mono">Apresentação dos Fundadores</p>
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed pt-1">
-                    Visual sofisticado de estúdio de engenharia de software internacional, com malha geométrica e apresentação dos fundadores.
+                    Visual limpo com foco nos projetos desenvolvidos e na apresentação direta dos fundadores.
                   </p>
 
                   <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1 mt-2">
                     <span className="text-[10px] text-blue-400 font-mono block">mzTech • Estúdio</span>
-                    <strong className="text-white text-xs block">Engenharia de software de alta performance sob medida.</strong>
+                    <strong className="text-white text-xs block">Desenvolvimento de software e sistemas sob medida.</strong>
                   </div>
                 </div>
 

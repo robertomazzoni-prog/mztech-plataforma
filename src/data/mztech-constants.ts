@@ -22,12 +22,12 @@ export const MZTECH_SERVICE_CATEGORIES = [
     name: '1. Desenvolvimento de Sites & Sistemas',
     tag: 'Contratação Sob Medida por Projeto',
     description:
-      'Criação de sites institucionais, landing pages e sistemas personalizados sob demanda. O valor é definido na proposta de acordo com a complexidade, quantidade de páginas e regras de negócio.',
+      'Criação de sites, landing pages e sistemas web sob medida. O valor do desenvolvimento é definido na proposta com base no número de páginas e funcionalidades necessárias.',
     features: [
       'Desenvolvimento exclusivo e sob medida',
       'Design responsivo e otimizado para celulares',
       'Código limpo com Next.js, React e TypeScript',
-      'Entrega do projeto homologado e pronto para produção',
+      'Entrega do projeto testado e pronto para produção',
     ],
   },
   {
@@ -35,11 +35,11 @@ export const MZTECH_SERVICE_CATEGORIES = [
     name: '2. Hospedagem Gerenciada na Nuvem',
     tag: 'Serviço Recorrente Mensal',
     description:
-      'Manutenção contínua da infraestrutura em nuvem, garantindo disponibilidade, certificado de segurança SSL e estabilidade técnica com suporte da mzTech.',
+      'Gerenciamento dos servidores em nuvem, renovação do certificado SSL e monitoramento para manter seu site online.',
     features: [
-      'Infraestrutura em nuvem (Railway, DigitalOcean, VPS ou provedores adequados)',
+      'Infraestrutura em nuvem (Railway, DigitalOcean ou VPS dedicada)',
       'Certificado de Segurança SSL automático e renovado',
-      'Monitoramento de uptime e disponibilidade',
+      'Monitoramento de estabilidade do servidor',
       'Banco de dados relacional dedicado e seguro',
     ],
   },
@@ -48,11 +48,11 @@ export const MZTECH_SERVICE_CATEGORIES = [
     name: '3. Manutenção Técnica & Suporte',
     tag: 'Serviço Recorrente Vinculado ao Plano',
     description:
-      'Atualizações preventivas de segurança, correções técnicas, pequenas edições de conteúdo e suporte direto via WhatsApp para garantir tranquilidade.',
+      'Atualizações de segurança, correções no código, pequenas alterações de textos ou telefones e suporte direto com os desenvolvedores por WhatsApp.',
     features: [
       'Correções de bugs e atualizações de segurança',
       'Pequenas alterações de textos, telefones e imagens',
-      'Backups periódicos de segurança operacional',
+      'Backups periódicos do banco de dados',
       'Suporte técnico direto com quem desenvolveu',
     ],
   },
@@ -82,7 +82,7 @@ export const MZTECH_PLANS = [
     name: 'Plano Hospedagem + Manutenção',
     price: 79.90,
     period: '/mês',
-    description: 'A solução mais completa e recomendada para manter seu site rápido, seguro, atualizado e com suporte prioritário.',
+    description: 'Plano recomendado para quem quer hospedagem na nuvem, manutenção preventiva contínua e atendimento prioritário por WhatsApp.',
     features: [
       'Tudo incluído no Plano Hospedagem',
       'Manutenção preventiva e corretiva contínua',
@@ -163,35 +163,35 @@ export const MZTECH_SCOPE_EXCLUDED = [
 export const MZTECH_FAQ = [
   {
     q: 'Por que o desenvolvimento é cobrado separadamente da mensalidade?',
-    a: 'O desenvolvimento é o trabalho especializado de criar o design, programar o código e estruturar o sistema sob medida. A mensalidade cobre a infraestrutura em nuvem, certificado SSL, monitoramento, backups operacionais e a manutenção contínua para mantê-lo funcionando com segurança.',
+    a: 'O desenvolvimento é o trabalho de criar o design, programar o código e testar o sistema sob medida. A mensalidade cobre os custos de servidor na nuvem, certificado SSL, rotinas de backup e o suporte contínuo para manter tudo funcionando.',
   },
   {
     q: 'Como funciona o cancelamento dos serviços recorrentes?',
-    a: 'O cliente pode solicitar o cancelamento dos serviços recorrentes (hospedagem, manutenção e suporte) a qualquer momento conforme as condições contratuais. O cancelamento encerra as cobranças e os serviços gerenciados pela mzTech.',
+    a: 'Você pode solicitar o cancelamento da hospedagem e manutenção a qualquer momento, avisando nossa equipe. Com o cancelamento, os serviços mensais e cobranças são encerrados.',
   },
   {
     q: 'O que recebo caso decida cancelar os serviços?',
-    a: 'Após a solicitação e encerramento dos serviços (respeitadas as condições de quitação do contrato), a mzTech entrega os ativos previstos na contratação, tais como o código-fonte desenvolvido, arquivos do projeto e o backup recente do banco de dados.',
+    a: 'Com os pagamentos do desenvolvimento quitados, a mzTech entrega todo o código-fonte desenvolvido, os arquivos do projeto e o backup mais recente do banco de dados.',
   },
   {
     q: 'Se eu cancelar, a mzTech configura meu novo servidor ou VPS?',
-    a: 'Não. Após a entrega dos arquivos, a responsabilidade pela contratação, instalação de Node.js, PostgreSQL, deploy, DNS, SSL e manutenção da nova infraestrutura é exclusivamente do cliente. A mzTech oferece o serviço de migração como um Serviço Adicional mediante orçamento separado.',
+    a: 'Não. Após a entrega dos arquivos, a contratação e configuração da nova hospedagem são de responsabilidade do cliente. Caso queira que nossa equipe execute essa migração técnica, o trabalho é orçado à parte como serviço adicional.',
   },
   {
     q: 'A migração para outro servidor está inclusa na mensalidade?',
-    a: 'Não. A mensalidade cobre a manutenção dentro da infraestrutura gerenciada pela mzTech. Caso o cliente solicite que a equipe da mzTech execute a migração e configuração em um novo servidor externo, esse trabalho é orçado separadamente como Serviço Adicional de Migração.',
+    a: 'Não. A mensalidade cobre os custos dentro dos servidores que nós mesmos gerenciamos. Migrar o sistema para outro provedor externo é um serviço pontual orçado separadamente.',
   },
   {
     q: 'O domínio próprio é meu ou da mzTech?',
-    a: 'O domínio próprio (ex: suaempresa.com.br) registrado em seu nome permanece sob sua titularidade exclusiva. O cancelamento da hospedagem não cancela o seu domínio próprio. Endereços técnicos temporários da plataforma (ex: *.up.railway.app) são apenas endereços de deploy e não constituem domínio do cliente.',
+    a: 'O domínio próprio (ex: suaempresa.com.br) registrado em seu nome é sempre seu. O cancelamento da hospedagem não interfere na titularidade do seu domínio.',
   },
   {
     q: 'Qual é a infraestrutura utilizada pela mzTech?',
-    a: 'A mzTech utiliza provedores modernos em nuvem de alta confiabilidade (como Railway, DigitalOcean, VPS gerenciadas, Hetzner ou AWS) selecionados de acordo com as necessidades de cada projeto, garantindo 99.9% de disponibilidade.',
+    a: 'Utilizamos servidores em nuvem de alta confiabilidade (como Railway, DigitalOcean, VPS e AWS), dimensionados conforme as necessidades e o tráfego do projeto.',
   },
   {
     q: 'Como funcionam os backups e a retenção?',
-    a: 'Os backups são mecanismos de segurança e recuperação operacional. Eles são mantidos durante a vigência do contrato e pelo período de retenção estabelecido após o encerramento, não constituindo arquivo morto permanente ou ilimitado.',
+    a: 'Fazemos cópias regulares de segurança do banco de dados para proteção operacional. Os backups são mantidos durante a vigência do contrato para recuperação rápida em caso de imprevistos técnicos.',
   },
 ];
 

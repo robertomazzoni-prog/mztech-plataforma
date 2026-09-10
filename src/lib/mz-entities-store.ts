@@ -44,9 +44,9 @@ export const defaultServices: any[] = [
     status: 'ATIVO',
     active: true,
     features: [
-      'Design exclusivo focado em conversão',
+      'Design focado em apresentar sua oferta com clareza',
       'Botão WhatsApp flutuante integrado',
-      'Carregamento ultra-rápido (< 1s)',
+      'Carregamento rápido em celulares e computadores',
       'Otimização completa para celulares',
       'Configuração de tags de SEO e Meta tags',
     ],
@@ -62,8 +62,8 @@ export const defaultServices: any[] = [
     status: 'ATIVO',
     active: true,
     features: [
-      'Estrutura multi-páginas de alta autoridade',
-      'Formulário inteligente de captação de clientes',
+      'Estrutura multi-páginas para apresentar seus serviços',
+      'Formulário de contato com envio para WhatsApp e e-mail',
       'Integração com e-mail e WhatsApp',
       'Código limpo com Next.js, React e TypeScript',
       'Certificado de Segurança SSL incluso',

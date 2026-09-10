@@ -808,7 +808,7 @@ export default function MzTechPublicPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Sites Institucionais</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Sites corporativos rápidos, responsivos e otimizados para mecanismos de busca (SEO). Criados para transmitir autoridade máxima e converter visitantes em clientes.
+                Páginas rápidas, responsivas e indexadas no Google, desenhadas para apresentar seus serviços com clareza e facilitar o contato do cliente.
               </p>
             </div>
 
@@ -823,7 +823,7 @@ export default function MzTechPublicPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Sistemas Web & Dashboards</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Plataformas administrativas sob medida, agendamentos automáticos, fluxos operacionais e controle de dados para automatizar processos na sua empresa.
+                Painéis administrativos, controle de agendamentos, cadastros e relatórios organizados de acordo com o fluxo de trabalho da sua equipe.
               </p>
             </div>
 
@@ -836,9 +836,9 @@ export default function MzTechPublicPage() {
               } flex items-center justify-center mb-5 transition-colors`}>
                 <Server className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Hospedagem Cloud Gerenciada</h3>
+              <h3 className="text-xl font-bold text-white mb-2">Hospedagem Gerenciada na Nuvem</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Infraestrutura em nuvem moderna (Railway Cloud, AWS) dimensionada para seu projeto. Cuidamos de DNS, SSL, escalabilidade e deploys contínuos.
+                Servidores em nuvem configurados para o tamanho do seu projeto. Cuidamos de DNS, certificado SSL, atualizações e estabilidade do servidor.
               </p>
             </div>
 
@@ -853,7 +853,7 @@ export default function MzTechPublicPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Manutenção Preventiva</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Patches de segurança, atualizações de dependências e pequenas melhorias de textos e componentes para manter sua aplicação estável 24/7.
+                Atualizações de segurança, correções no código e pequenos ajustes de textos e contatos para manter seu site seguro e no ar.
               </p>
             </div>
 
@@ -868,7 +868,7 @@ export default function MzTechPublicPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Segurança & Backups</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Certificados SSL automatizados, sanitização contra ataques, banco de dados isolado e rotinas de backup com retenção de dados.
+                Certificado SSL com conexão criptografada, proteção contra acessos indevidos e cópias regulares do banco de dados para recuperação se necessário.
               </p>
             </div>
 
@@ -883,7 +883,7 @@ export default function MzTechPublicPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Suporte com Desenvolvedores</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Atendimento humanizado e direto com quem programa o seu sistema, sem atendentes robóticos ou filas de espera desnecessárias.
+                Você conversa diretamente com os desenvolvedores responsáveis pelo projeto, por WhatsApp ou chamada, sem intermediários.
               </p>
             </div>
           </div>
@@ -1186,10 +1186,10 @@ export default function MzTechPublicPage() {
               <span>Por que existe uma mensalidade?</span>
             </h3>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              A criação do site é a etapa de engenharia e desenvolvimento inicial. Após o lançamento em produção, existem atividades e custos contínuos para manter a aplicação veloz, segura e 100% online.
+              O valor de desenvolvimento cobre o planejamento, o design e a programação do projeto. Depois que o site é publicado, há custos de servidor e rotinas de manutenção para mantê-lo no ar e seguro.
             </p>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              A mensalidade cobre a infraestrutura em nuvem, certificados de segurança SSL, rotinas de backup, monitoramento de disponibilidade e suporte técnico direto. A mzTech entrega uma solução gerenciada completa para que sua empresa foque no negócio enquanto cuidamos de toda a operação técnica.
+              A mensalidade paga a hospedagem em nuvem, a renovação do certificado SSL, as cópias de backup e o suporte direto conosco quando você precisar de ajustes ou tirar dúvidas.
             </p>
           </div>
         </div>
@@ -1206,10 +1206,10 @@ export default function MzTechPublicPage() {
             Escopo Sob Medida
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-            Seu Projeto Desenvolvido Sob Medida
+            Projetos desenvolvidos sob medida
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            O valor de desenvolvimento é calculado com precisão de acordo com o escopo técnico, quantidade de telas, complexidade das regras de negócio e integrações necessárias.
+            O valor de desenvolvimento varia de acordo com o número de páginas, recursos do sistema e integrações com WhatsApp ou bancos de dados.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -1217,9 +1217,9 @@ export default function MzTechPublicPage() {
               'Site institucional corporativo',
               'Landing page de alta conversão',
               'Sistemas web sob medida',
-              'Sistema de agendamento online 24h',
-              'Painel administrativo e dashboards',
-              'Integrações com WhatsApp e APIs REST',
+              'Sistema de agendamento online',
+              'Painel administrativo e relatórios',
+              'Integrações com WhatsApp e APIs',
               'Banco de dados PostgreSQL dedicado',
             ].map((item) => (
               <span
@@ -1308,20 +1308,20 @@ export default function MzTechPublicPage() {
               <h3 className="text-xl font-bold text-white">Domínio Próprio</h3>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              O domínio é o endereço exclusivo utilizado para acessar o seu site na web, como <code className="text-cyan-400 font-mono">suaempresa.com.br</code>.
+              O domínio é o endereço do seu site na internet, como <code className="text-cyan-400 font-mono">suaempresa.com.br</code>.
             </p>
             <ul className="space-y-2 text-xs text-slate-400">
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
-                <span>O domínio pode ser registrado diretamente por você ou com o auxílio técnico da nossa equipe.</span>
+                <span>Você pode registrar o domínio diretamente no Registro.br ou nós ajudamos no passo a passo.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
-                <span>O domínio <strong>permanece de propriedade exclusiva do cliente</strong> quando registrado em seu nome.</span>
+                <span>O registro fica sempre em seu nome e no seu CNPJ ou CPF.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-cyan-400" />
-                <span>A mzTech cuida de toda a configuração técnica de DNS, apontamento de servidores e certificados.</span>
+                <span>Configuramos os apontamentos de DNS, servidores e certificados de segurança.</span>
               </li>
             </ul>
           </div>
@@ -1330,23 +1330,23 @@ export default function MzTechPublicPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-4">
             <div className="flex items-center gap-2.5">
               <Server className="w-6 h-6 text-emerald-400" />
-              <h3 className="text-xl font-bold text-white">Hospedagem Cloud mzTech</h3>
+              <h3 className="text-xl font-bold text-white">Hospedagem em Nuvem</h3>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              A mzTech gerencia infraestrutura em nuvem de alta disponibilidade para manter seus serviços operando com estabilidade ininterrupta.
+              Hospedamos os projetos em servidores modernos em nuvem, configurados para estabilidade e rapidez no carregamento.
             </p>
             <ul className="space-y-2 text-xs text-slate-400">
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Servidores em nuvem de alta velocidade dimensionados para o desempenho do seu projeto.</span>
+                <span>Servidores dimensionados para atender ao tráfego do seu site sem lentidão.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Certificado SSL com criptografia de ponta a ponta renovado automaticamente.</span>
+                <span>Certificado SSL (cadeado verde HTTPS) configurado e renovado sem custo extra.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Total responsabilidade técnica assumida diretamente pela mzTech.</span>
+                <span>Acompanhamento técnico contínuo direto com os desenvolvedores.</span>
               </li>
             </ul>
           </div>
@@ -2133,10 +2133,10 @@ export default function MzTechPublicPage() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                "Desenvolvimento, tecnologia e soluções digitais."
+                Desenvolvimento de sites e sistemas sob medida.
               </p>
               <p className="text-xs text-slate-500">
-                Você contrata o projeto. A mzTech cuida da parte técnica para manter sua empresa funcionando no digital.
+                Desenvolvemos o seu projeto e cuidamos da hospedagem e manutenção técnica para mantê-lo funcionando com segurança.
               </p>
             </div>
 

@@ -367,7 +367,7 @@ export async function ensureDatabaseReady() {
           {
             id: 'serv-site-institucional',
             name: 'Site Institucional Profissional',
-            description: 'Site corporativo multi-páginas de alta autoridade.',
+            description: 'Site corporativo multi-páginas para apresentar seus serviços com clareza.',
             type: 'DESENVOLVIMENTO',
             price: 1500.00,
             recurrence: 'UNICA',
