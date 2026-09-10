@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
   // Form State
   const [name, setName] = useState('mzTech');
   const [legalName, setLegalName] = useState('mzTech Soluções Digitais & Desenvolvimento');
-  const [tagline, setTagline] = useState('Tecnologia que coloca sua empresa no digital.');
+  const [tagline, setTagline] = useState('Desenvolvimento de sites e sistemas sob medida.');
   const [siteTheme, setSiteTheme] = useState<'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE'>('DARK_CYBER_GLOW');
   
   // E-mails dinâmicos
@@ -92,7 +92,7 @@ export default function AdminSettingsPage() {
         const s = data.settings;
         setName(s.name || 'mzTech');
         setLegalName(s.legalName || 'mzTech Soluções Digitais & Desenvolvimento');
-        setTagline(s.tagline || 'Tecnologia que coloca sua empresa no digital.');
+        setTagline(s.tagline || 'Desenvolvimento de sites e sistemas sob medida.');
         setSiteTheme(s.siteTheme || 'DARK_CYBER_GLOW');
         setRobertoName(s.robertoName || 'Roberto');
         setRobertoPhone(s.robertoPhone || '(31) 98684-7049');

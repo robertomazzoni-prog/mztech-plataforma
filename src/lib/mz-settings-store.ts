@@ -51,7 +51,7 @@ const SETTINGS_FILE = path.join(DATA_DIR, 'company-settings.json');
 export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
-  tagline: 'Tecnologia que coloca sua empresa no digital.',
+  tagline: 'Desenvolvimento de sites e sistemas sob medida.',
   siteTheme: 'DARK_CYBER_GLOW',
   email: 'robertomazzoni956@gmail.com',
   emails: [
@@ -115,6 +115,11 @@ export function getStoredSettings(): CompanySettings {
         if (parsed && typeof parsed === 'object') {
           const merged: CompanySettings = { ...defaultCompanySettings, ...parsed };
           
+          // Auto-migra tagline antiga/robótica para a versão humanizada oficial
+          if (!merged.tagline || merged.tagline === 'Tecnologia que coloca sua empresa no digital.') {
+            merged.tagline = defaultCompanySettings.tagline;
+          }
+          
           // Garante que emails seja um array válido
           if (!Array.isArray(merged.emails) || merged.emails.length === 0) {
             merged.emails = [
@@ -171,6 +176,9 @@ export async function syncSettingsFromDb(): Promise<CompanySettings> {
         const parsed = JSON.parse(record.dataJson);
         if (parsed && typeof parsed === 'object') {
           const merged: CompanySettings = { ...defaultCompanySettings, ...parsed };
+          if (!merged.tagline || merged.tagline === 'Tecnologia que coloca sua empresa no digital.') {
+            merged.tagline = defaultCompanySettings.tagline;
+          }
           globalObj[globalSettingsKey] = merged;
           saveStoredSettings(merged);
           return merged;

@@ -450,16 +450,18 @@ export default function MzTechPublicPage() {
                 <span>Criar Conta</span>
               </Link>
 
-              <Link
-                href="#orcamento"
-                className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm ${
-                  isDarkCyberGlow
-                    ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
-                } shadow-lg hover:scale-105 transition-all`}
-              >
-                Solicitar Orçamento
-              </Link>
+              <PulsatingBorder radius={12} thickness={3} spread={10}>
+                <Link
+                  href="#orcamento"
+                  className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm ${
+                    isDarkCyberGlow
+                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
+                      : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
+                  } shadow-lg hover:scale-105 transition-all flex items-center justify-center`}
+                >
+                  Solicitar Orçamento
+                </Link>
+              </PulsatingBorder>
             </div>
           </div>
         </div>
@@ -484,7 +486,7 @@ export default function MzTechPublicPage() {
                 {/* Badge de Posicionamento Oficial */}
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#121638]/90 border border-violet-500/30 text-violet-300 text-xs sm:text-sm font-semibold shadow-md shadow-violet-500/10">
                   <Sparkles className="w-4 h-4 text-violet-400" />
-                  <span>{settingsData?.tagline || MZTECH_INFO.tagline}</span>
+                  <span>{settingsData?.tagline && settingsData.tagline !== 'Tecnologia que coloca sua empresa no digital.' ? settingsData.tagline : MZTECH_INFO.tagline}</span>
                 </div>
 
                 {/* Headline Principal Oficial */}
@@ -651,13 +653,15 @@ export default function MzTechPublicPage() {
 
             {/* Botões CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link
-                href="#orcamento"
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                <span>Solicitar Orçamento do Projeto</span>
-              </Link>
+              <PulsatingBorder radius={12} thickness={4} spread={14}>
+                <Link
+                  href="#orcamento"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Solicitar Orçamento do Projeto</span>
+                </Link>
+              </PulsatingBorder>
 
               <Link
                 href="#portfolio"
@@ -738,7 +742,7 @@ export default function MzTechPublicPage() {
             {/* Badge Posicionamento */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-8 shadow-md shadow-cyan-500/5 animate-in fade-in slide-in-from-bottom-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>{settingsData?.tagline || MZTECH_INFO.tagline}</span>
+              <span>{settingsData?.tagline && settingsData.tagline !== 'Tecnologia que coloca sua empresa no digital.' ? settingsData.tagline : MZTECH_INFO.tagline}</span>
             </div>
 
             {/* Título Principal Oficial */}
@@ -753,13 +757,15 @@ export default function MzTechPublicPage() {
 
             {/* Botões CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="#orcamento"
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                <span>Solicitar orçamento</span>
-              </Link>
+              <PulsatingBorder radius={12} thickness={4} spread={14}>
+                <Link
+                  href="#orcamento"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Solicitar orçamento</span>
+                </Link>
+              </PulsatingBorder>
 
               <Link
                 href="#servicos"
@@ -1032,19 +1038,21 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className="pt-4 flex flex-wrap items-center gap-4">
-                    <a
-                      href={currentCase.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`px-6 py-3 rounded-xl ${
-                        isDarkCyberGlow
-                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
-                          : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
-                      } font-bold text-sm inline-flex items-center gap-2 shadow-lg transition-all hover:scale-[1.02]`}
-                    >
-                      <span>Abrir Site do Projeto (Produção)</span>
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+                    <PulsatingBorder radius={12} thickness={3} spread={10}>
+                      <a
+                        href={currentCase.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-6 py-3 rounded-xl ${
+                          isDarkCyberGlow
+                            ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
+                            : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/10'
+                        } font-bold text-sm inline-flex items-center gap-2 shadow-lg transition-all hover:scale-[1.02]`}
+                      >
+                        <span>Abrir Site do Projeto (Produção)</span>
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </PulsatingBorder>
                     <span className="text-xs text-slate-500 font-mono">{currentCase.infrastructure || 'Infraestrutura Railway'}</span>
                   </div>
                 </div>
@@ -1147,20 +1155,22 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className={`mt-8 pt-6 border-t ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'}`}>
-                    <button
-                      onClick={() => handleSelectPlan(plan)}
-                      className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
-                        isRec
-                          ? isDarkCyberGlow
-                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-violet-600/25'
-                            : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
-                          : isDarkCyberGlow
-                          ? 'bg-[#121638] hover:bg-[#181d4a] text-white border border-violet-500/30'
-                          : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
-                      }`}
-                    >
-                      {plan.cta || `Escolher ${plan.name.replace('Plano ', '')}`}
-                    </button>
+                    <PulsatingBorder className="w-full" radius={12} thickness={isRec ? 4 : 2} spread={isRec ? 12 : 8}>
+                      <button
+                        onClick={() => handleSelectPlan(plan)}
+                        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
+                          isRec
+                            ? isDarkCyberGlow
+                              ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-violet-600/25'
+                              : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
+                            : isDarkCyberGlow
+                            ? 'bg-[#121638] hover:bg-[#181d4a] text-white border border-violet-500/30'
+                            : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                        }`}
+                      >
+                        {plan.cta || `Escolher ${plan.name.replace('Plano ', '')}`}
+                      </button>
+                    </PulsatingBorder>
                   </div>
                 </div>
               );
