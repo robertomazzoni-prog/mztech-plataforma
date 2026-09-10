@@ -10,6 +10,8 @@
     "postinstall": "npx prisma@5.22.0 generate"
   },
   "dependencies": {
+    "@paper-design/shaders": "^0.0.61",
+    "@paper-design/shaders-react": "^0.0.61",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.4",
