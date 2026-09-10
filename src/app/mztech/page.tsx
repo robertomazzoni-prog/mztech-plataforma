@@ -47,6 +47,7 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 import CleanCorporateTheme from '@/components/themes/CleanCorporateTheme';
+import PulsatingBorder from '@/components/originkit/ui/pulsating-border';
 
 const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
   if (plan.toLowerCase().includes('apenas')) return 0;
@@ -498,13 +499,15 @@ export default function MzTechPublicPage() {
 
                 {/* Botões CTA */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                  <Link
-                    href="#orcamento"
-                    className="px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-violet-600/25 hover:scale-[1.02] transition-all flex items-center justify-center gap-2.5"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Solicitar orçamento</span>
-                  </Link>
+                  <PulsatingBorder radius={12} thickness={4} spread={14}>
+                    <Link
+                      href="#orcamento"
+                      className="px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-violet-600/25 hover:scale-[1.02] transition-all flex items-center justify-center gap-2.5"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>Solicitar orçamento</span>
+                    </Link>
+                  </PulsatingBorder>
 
                   <Link
                     href="#servicos"
@@ -2023,22 +2026,24 @@ export default function MzTechPublicPage() {
                 </div>
 
                 <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={formLoading}
-                    className={`w-full py-4 rounded-xl ${
-                      isDarkCyberGlow
-                        ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/30'
-                        : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
-                    } font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
-                  >
-                    {formLoading ? (
-                      <Activity className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5" />
-                    )}
-                    <span>Enviar Solicitação de Orçamento</span>
-                  </button>
+                  <PulsatingBorder className="w-full" radius={12} thickness={4} spread={14}>
+                    <button
+                      type="submit"
+                      disabled={formLoading}
+                      className={`w-full py-4 rounded-xl ${
+                        isDarkCyberGlow
+                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/30'
+                          : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
+                      } font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
+                    >
+                      {formLoading ? (
+                        <Activity className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span>Enviar Solicitação de Orçamento</span>
+                    </button>
+                  </PulsatingBorder>
                   <p className="text-[11px] text-slate-500 text-center mt-3">
                     Ao enviar, você receberá atendimento direto pelo WhatsApp com nossa equipe técnica para análise e aprovação formal.
                   </p>

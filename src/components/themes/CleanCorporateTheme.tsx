@@ -51,6 +51,7 @@ import {
 } from '@/data/mztech-constants';
 import { formatCurrency } from '@/lib/utils';
 import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
+import PulsatingBorder from '@/components/originkit/ui/pulsating-border';
 
 interface CleanCorporateThemeProps {
   settingsData: any;
@@ -245,13 +246,15 @@ export default function CleanCorporateTheme({
               )}
             </button>
 
-            <a
-              href="#orcamento"
-              className={`px-4 py-2 rounded-lg ${theme.btnPrimary} text-xs sm:text-sm flex items-center gap-2`}
-            >
-              <span>Solicitar Orçamento</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
+            <PulsatingBorder radius={10} thickness={3} spread={10}>
+              <a
+                href="#orcamento"
+                className={`px-4 py-2 rounded-lg ${theme.btnPrimary} text-xs sm:text-sm flex items-center gap-2`}
+              >
+                <span>Solicitar Orçamento</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </PulsatingBorder>
           </div>
 
         </div>
@@ -280,13 +283,15 @@ export default function CleanCorporateTheme({
 
           {/* Botões CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            <a
-              href="#orcamento"
-              className={`px-8 py-3.5 rounded-xl ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20`}
-            >
-              <span>Solicitar Proposta Comercial</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
+            <PulsatingBorder radius={12} thickness={4} spread={14}>
+              <a
+                href="#orcamento"
+                className={`px-8 py-3.5 rounded-xl ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20`}
+              >
+                <span>Solicitar Proposta Comercial</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </PulsatingBorder>
             <a
               href="#planos"
               className={`px-8 py-3.5 rounded-xl ${theme.btnSecondary} text-center text-sm flex items-center justify-center gap-2`}
@@ -585,14 +590,16 @@ export default function CleanCorporateTheme({
                   </div>
 
                   <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectPlan(plan)}
-                      className={`w-full py-3 rounded-lg ${isRec ? theme.btnPrimary : theme.btnSecondary} text-center text-xs font-semibold flex items-center justify-center gap-2`}
-                    >
-                      <span>{plan.cta || `Escolher ${plan.name?.replace('Plano ', '')}`}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    <PulsatingBorder className="w-full" radius={8} thickness={isRec ? 4 : 2} spread={isRec ? 12 : 8}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectPlan(plan)}
+                        className={`w-full py-3 rounded-lg ${isRec ? theme.btnPrimary : theme.btnSecondary} text-center text-xs font-semibold flex items-center justify-center gap-2`}
+                      >
+                        <span>{plan.cta || `Escolher ${plan.name?.replace('Plano ', '')}`}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </PulsatingBorder>
                   </div>
                 </div>
               );
@@ -1218,18 +1225,20 @@ export default function CleanCorporateTheme({
                 </div>
 
                 <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={formLoading}
-                    className={`w-full py-4 rounded-xl ${theme.btnPrimary} font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
-                  >
-                    {formLoading ? (
-                      <Activity className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5" />
-                    )}
-                    <span>Enviar Solicitação de Orçamento</span>
-                  </button>
+                  <PulsatingBorder className="w-full" radius={12} thickness={4} spread={14}>
+                    <button
+                      type="submit"
+                      disabled={formLoading}
+                      className={`w-full py-4 rounded-xl ${theme.btnPrimary} font-bold text-base shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]`}
+                    >
+                      {formLoading ? (
+                        <Activity className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span>Enviar Solicitação de Orçamento</span>
+                    </button>
+                  </PulsatingBorder>
                   <p className={`text-[11px] ${theme.textMuted} text-center mt-3`}>
                     Ao enviar, seu orçamento e conta de cliente serão salvos no painel da mzTech e nossa equipe entrará em contato.
                   </p>

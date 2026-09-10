@@ -4,7 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { PulsingBorder } from "@paper-design/shaders-react";
 
-interface PulsatingBorderProps {
+export interface PulsatingBorderProps {
   colors?: string[];
   colorBack?: string;
   speed?: number;
@@ -15,21 +15,24 @@ interface PulsatingBorderProps {
   bloom?: number;
   spotSize?: number;
   spread?: number;
+  usePortal?: boolean;
   style?: React.CSSProperties;
+  className?: string;
+  children?: React.ReactNode;
 }
 
-const DEFAULT_COLORS = ["#F2244F", "#4DA6E6", "#379590"];
+const DEFAULT_COLORS = ["#2563eb", "#06b6d4", "#6366f1"];
 
 const DEFAULTS = {
   colorBack: "rgba(0, 0, 0, 0)",
   speed: 1,
-  radius: 35,
-  thickness: 5,
-  softness: 75,
-  intensity: 30,
-  bloom: 50,
-  spotSize: 60,
-  spread: 31,
+  radius: 14,
+  thickness: 4,
+  softness: 60,
+  intensity: 35,
+  bloom: 45,
+  spotSize: 55,
+  spread: 12,
 };
 
 const SPOTS = 3;
@@ -37,8 +40,8 @@ const PULSE = 0;
 const SMOKE = 0.35;
 const SMOKE_SIZE = 0.63;
 
-const GLOW_ROOM = 0.4;
-const MAX_ROOM = 480;
+const GLOW_ROOM = 0.3;
+const MAX_ROOM = 360;
 
 export default function PulsatingBorder(props: PulsatingBorderProps) {
   const {
@@ -51,7 +54,10 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
     bloom = DEFAULTS.bloom,
     spotSize = DEFAULTS.spotSize,
     spread = DEFAULTS.spread,
+    usePortal = false,
     style,
+    className,
+    children,
   } = props;
 
   const colors =
@@ -62,13 +68,13 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
   const hostRef = React.useRef<HTMLDivElement>(null);
 
   const [rect, setRect] = React.useState({ left: 0, top: 0, w: 0, h: 0 });
-  const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(
-    null
-  );
+  const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
 
   React.useEffect(() => {
-    setPortalTarget(document.body);
-  }, []);
+    if (usePortal) {
+      setPortalTarget(document.body);
+    }
+  }, [usePortal]);
 
   React.useEffect(() => {
     const host = hostRef.current;
@@ -77,8 +83,8 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
     const read = () => {
       raf = 0;
       const r = host.getBoundingClientRect();
-      const w = host.clientWidth;
-      const h = host.clientHeight;
+      const w = host.clientWidth || r.width;
+      const h = host.clientHeight || r.height;
       setRect((prev) =>
         prev.left === r.left &&
         prev.top === r.top &&
@@ -96,15 +102,19 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
     const ro = new ResizeObserver(schedule);
     ro.observe(host);
 
-    window.addEventListener("scroll", schedule, true);
+    if (usePortal) {
+      window.addEventListener("scroll", schedule, true);
+    }
     window.addEventListener("resize", schedule);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
-      window.removeEventListener("scroll", schedule, true);
+      if (usePortal) {
+        window.removeEventListener("scroll", schedule, true);
+      }
       window.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [usePortal]);
 
   const worldW = rect.w + spread * 2;
   const worldH = rect.h + spread * 2;
@@ -120,7 +130,7 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
   const canvasH = rect.h + bleed * 2;
   const measured = rect.w > 0 && rect.h > 0;
 
-  const escapes = portalTarget !== null;
+  const escapes = usePortal && portalTarget !== null;
 
   const layer = measured ? (
     <PulsingBorder
@@ -158,6 +168,7 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
         width: canvasW,
         height: canvasH,
         pointerEvents: "none",
+        zIndex: 10,
       }}
     />
   ) : null;
@@ -165,16 +176,21 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
   return (
     <div
       ref={hostRef}
+      className={className}
       style={{
         position: "relative",
-        width: "100%",
-        height: "100%",
+        display: children ? (className?.includes("w-full") ? "block" : "inline-block") : "block",
+        width: children ? (className?.includes("w-full") ? "100%" : "fit-content") : "100%",
+        height: children ? "auto" : "100%",
         flexShrink: 0,
         overflow: "visible",
         ...style,
       }}
     >
       {escapes ? createPortal(layer, portalTarget) : layer}
+      <div style={{ position: "relative", zIndex: 20 }}>
+        {children}
+      </div>
     </div>
   );
 }
