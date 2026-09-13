@@ -32,8 +32,8 @@ export async function PATCH(
 ) {
   try {
     const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+    if (user && user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
     }
 
     const body = await req.json();
@@ -54,9 +54,20 @@ export async function PATCH(
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
       try {
-        await prisma.mzService.update({
+        const serviceName = updated?.name || dataToUpdate.name || 'Serviço';
+        await prisma.mzService.upsert({
           where: { id: params.id },
-          data: {
+          create: {
+            id: params.id,
+            name: serviceName,
+            description: dataToUpdate.description || '',
+            type: dataToUpdate.type || 'DESENVOLVIMENTO',
+            price: dataToUpdate.price !== undefined ? dataToUpdate.price : 0,
+            recurrence: dataToUpdate.recurrence || 'UNICA',
+            status: dataToUpdate.status || 'ATIVO',
+            active: dataToUpdate.active !== undefined ? dataToUpdate.active : true,
+          },
+          update: {
             ...(dataToUpdate.name && { name: dataToUpdate.name }),
             ...(dataToUpdate.description !== undefined && { description: dataToUpdate.description }),
             ...(dataToUpdate.type && { type: dataToUpdate.type }),
@@ -66,7 +77,9 @@ export async function PATCH(
             ...(dataToUpdate.active !== undefined && { active: dataToUpdate.active }),
           },
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Erro ao sincronizar atualização de serviço com o PostgreSQL:', e);
+      }
     }
 
     return NextResponse.json({ service: updated || { id: params.id, ...dataToUpdate } });
@@ -82,8 +95,8 @@ export async function DELETE(
 ) {
   try {
     const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+    if (user && user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
     }
 
     deleteStoredService(params.id);

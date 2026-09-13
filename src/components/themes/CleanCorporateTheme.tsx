@@ -580,7 +580,22 @@ export default function CleanCorporateTheme({
                     </div>
 
                     <ul className="space-y-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
-                      {Array.isArray(plan.features) && plan.features.map((feat: string, fIdx: number) => (
+                      {((Array.isArray(plan.features) && plan.features.length > 0)
+                        ? plan.features
+                        : (MZTECH_PLANS.find(
+                            (p) =>
+                              p.name.toLowerCase().includes(plan.name?.toLowerCase() || '') ||
+                              plan.name?.toLowerCase().includes(p.name?.toLowerCase() || '') ||
+                              (p.id === 'hospedagem' && plan.type === 'HOSPEDAGEM') ||
+                              (p.id === 'hospedagem-manutencao' && plan.type === 'MANUTENCAO')
+                          )?.features || [
+                            'Hospedagem em nuvem gerenciada pela mzTech',
+                            'Certificado de Segurança SSL incluso',
+                            'Configuração de Domínio Próprio e DNS',
+                            'Monitoramento de disponibilidade contínuo',
+                            'Suporte técnico direto via WhatsApp',
+                          ])
+                      ).map((feat: string, fIdx: number) => (
                         <li key={fIdx} className="flex items-start gap-2.5 text-xs">
                           <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                           <span className={theme.textSecondary}>{feat}</span>
@@ -709,8 +724,8 @@ export default function CleanCorporateTheme({
                   autoComplete="off"
                 />
 
-                {/* Banner de Usuário Logado ou Criação de Conta */}
-                {currentUser ? (
+                {/* Banner de Usuário Logado se houver */}
+                {currentUser && (
                   <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">
@@ -726,26 +741,6 @@ export default function CleanCorporateTheme({
                     <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] uppercase tracking-wider">
                       Conta Ativa
                     </span>
-                  </div>
-                ) : (
-                  <div className={`p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border} flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs`}>
-                    <div className="flex items-start sm:items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className={`font-bold ${theme.textPrimary} block`}>Criação Obrigatória de Conta no Portal do Cliente</span>
-                        <span className={`text-[11px] ${theme.textMuted}`}>
-                          Para solicitar o orçamento, preencha os dados e defina sua senha para acompanhar o projeto e contratos no portal.
-                        </span>
-                      </div>
-                    </div>
-                    <Link
-                      href="/cliente/login"
-                      className="text-blue-600 dark:text-blue-400 hover:underline font-bold text-[11px] whitespace-nowrap self-start sm:self-auto"
-                    >
-                      Já tem uma conta? Entrar
-                    </Link>
                   </div>
                 )}
 
@@ -788,7 +783,7 @@ export default function CleanCorporateTheme({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>E-mail Comercial (Login do Portal) *</label>
+                    <label className={`text-xs font-semibold ${theme.textSecondary}`}>E-mail Comercial *</label>
                     <input
                       type="email"
                       required
@@ -799,46 +794,6 @@ export default function CleanCorporateTheme({
                     />
                   </div>
                 </div>
-
-                {/* Campos de Senha Obrigatórios (se não estiver autenticado) */}
-                {!currentUser && (
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl ${theme.surfaceMuted} border ${theme.border}`}>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
-                          <Lock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                          <span>Definir Senha de Acesso *</span>
-                        </label>
-                        <span className={`text-[10px] ${theme.textMuted} font-mono`}>Mínimo 6 dígitos</span>
-                      </div>
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        placeholder="••••••••"
-                        value={formData.password || ''}
-                        onChange={(e) => setFormData((prev: any) => ({ ...prev, password: e.target.value }))}
-                        className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className={`text-xs font-semibold ${theme.textSecondary} flex items-center gap-1.5`}>
-                        <Lock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                        <span>Confirmar Senha *</span>
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        placeholder="••••••••"
-                        value={formData.confirmPassword || ''}
-                        onChange={(e) => setFormData((prev: any) => ({ ...prev, confirmPassword: e.target.value }))}
-                        className={`w-full px-4 py-2.5 rounded-lg border text-xs sm:text-sm ${theme.input}`}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Seleção do Desenvolvedor / Sócio Responsável */}
                 <div className="space-y-2.5 pt-1">
@@ -1236,11 +1191,11 @@ export default function CleanCorporateTheme({
                       ) : (
                         <Send className="w-5 h-5" />
                       )}
-                      <span>Enviar Solicitação de Orçamento</span>
+                      <span>Solicitar Orçamento no WhatsApp do Dev ({formData.selectedDev})</span>
                     </button>
                   </PulsatingBorder>
                   <p className={`text-[11px] ${theme.textMuted} text-center mt-3`}>
-                    Ao enviar, seu orçamento e conta de cliente serão salvos no painel da mzTech e nossa equipe entrará em contato.
+                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp de {formData.selectedDev} com todos os dados preenchidos para atendimento imediato.
                   </p>
                 </div>
 

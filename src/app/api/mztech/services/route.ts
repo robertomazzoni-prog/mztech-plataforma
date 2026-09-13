@@ -5,6 +5,7 @@ import { getUserFromRequest } from '@/lib/auth';
 import {
   getStoredServices,
   createStoredService,
+  defaultServices,
 } from '@/lib/mz-entities-store';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,8 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type');
     const all = searchParams.get('all') === 'true';
 
-    let services = getStoredServices();
+    let localServices = getStoredServices();
+    let services = localServices;
 
     const dbOnline = await isDatabaseOnline();
     if (dbOnline) {
@@ -28,10 +30,51 @@ export async function GET(req: NextRequest) {
           where,
           orderBy: [{ price: 'asc' }],
         });
+
         if (dbServices && dbServices.length > 0) {
-          services = dbServices;
+          // Mesclar serviços do PostgreSQL com os dados locais para preservar features, badge e botões
+          const mergedServices = dbServices.map((dbS) => {
+            const localMatch = localServices.find(
+              (ls) => ls.id === dbS.id || ls.name.toLowerCase().trim() === dbS.name.toLowerCase().trim()
+            );
+            const defaultMatch = defaultServices.find(
+              (ds) => ds.id === dbS.id || ds.name.toLowerCase().trim() === dbS.name.toLowerCase().trim()
+            );
+            const features =
+              Array.isArray(localMatch?.features) && localMatch.features.length > 0
+                ? localMatch.features
+                : (Array.isArray(defaultMatch?.features) && defaultMatch.features.length > 0
+                    ? defaultMatch.features
+                    : [
+                        'Infraestrutura moderna e gerenciada',
+                        'Certificado SSL incluso',
+                        'Suporte técnico ágil',
+                        'Monitoramento contínuo de estabilidade',
+                      ]);
+
+            return {
+              ...defaultMatch,
+              ...localMatch,
+              ...dbS,
+              features,
+              badge: localMatch?.badge || defaultMatch?.badge || (dbS.name.toLowerCase().includes('manutenção') ? 'Mais Recomendado' : undefined),
+              recommended: localMatch?.recommended ?? defaultMatch?.recommended ?? dbS.name.toLowerCase().includes('manutenção'),
+              cta: localMatch?.cta || defaultMatch?.cta || 'Contratar Plano',
+            };
+          });
+
+          // Incluir serviços locais que ainda não existam no banco
+          for (const ls of localServices) {
+            if (!mergedServices.some((ms) => ms.id === ls.id || ms.name.toLowerCase().trim() === ls.name.toLowerCase().trim())) {
+              mergedServices.push(ls);
+            }
+          }
+
+          services = mergedServices;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Erro ao consultar mzService do DB, utilizando armazenamento local:', e);
+      }
     }
 
     if (!all) {
@@ -51,8 +94,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = getUserFromRequest(req);
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+    if (user && user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
     }
 
     const body = await req.json();

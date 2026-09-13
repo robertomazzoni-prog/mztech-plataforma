@@ -62,7 +62,7 @@ export const MZTECH_PLANS = [
   {
     id: 'hospedagem',
     name: 'Plano Hospedagem',
-    price: 39.90,
+    price: 29.90,
     period: '/mês',
     description: 'Para quem já tem o site pronto e precisa apenas de hospedagem gerenciada com segurança e suporte.',
     features: [
@@ -80,7 +80,7 @@ export const MZTECH_PLANS = [
   {
     id: 'hospedagem-manutencao',
     name: 'Plano Hospedagem + Manutenção',
-    price: 79.90,
+    price: 45.90,
     period: '/mês',
     description: 'Plano recomendado para quem quer hospedagem na nuvem, manutenção preventiva contínua e atendimento prioritário por WhatsApp.',
     features: [

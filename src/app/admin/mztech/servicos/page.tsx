@@ -132,12 +132,14 @@ export default function MzTechServicesPage() {
       const method = editingService ? 'PATCH' : 'POST';
 
       const validFeatures = formData.features.filter((f) => f.trim().length > 0);
+      const parsedPrice = parseFloat(String(formData.price).replace(',', '.'));
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          price: isNaN(parsedPrice) ? 0 : parsedPrice,
           features: validFeatures,
         }),
       });

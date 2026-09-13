@@ -152,7 +152,33 @@ export default function MzTechPublicPage() {
 
   // Separar planos mensais e serviços de desenvolvimento cadastrados no painel
   const monthlyPlans = servicesList.length > 0
-    ? servicesList.filter((s) => s.recurrence === 'MENSAL' || s.type === 'HOSPEDAGEM' || s.type === 'MANUTENCAO' || s.type === 'SUPORTE')
+    ? servicesList
+        .filter((s) => s.recurrence === 'MENSAL' || s.type === 'HOSPEDAGEM' || s.type === 'MANUTENCAO' || s.type === 'SUPORTE')
+        .map((s) => {
+          const defaultMatch = MZTECH_PLANS.find(
+            (p) =>
+              p.name.toLowerCase().includes(s.name.toLowerCase()) ||
+              s.name.toLowerCase().includes(p.name.toLowerCase()) ||
+              (p.id === 'hospedagem' && s.type === 'HOSPEDAGEM') ||
+              (p.id === 'hospedagem-manutencao' && s.type === 'MANUTENCAO')
+          );
+          return {
+            ...s,
+            features:
+              Array.isArray(s.features) && s.features.length > 0
+                ? s.features
+                : (defaultMatch?.features || [
+                    'Hospedagem em nuvem gerenciada pela mzTech',
+                    'Certificado de Segurança SSL incluso',
+                    'Configuração de Domínio Próprio e DNS',
+                    'Monitoramento contínuo de estabilidade',
+                    'Backups periódicos e suporte técnico',
+                  ]),
+            badge: s.badge || defaultMatch?.badge || (s.name.toLowerCase().includes('manutenção') ? 'Mais Recomendado' : 'Hospedagem Gerenciada'),
+            recommended: s.recommended ?? (defaultMatch?.recommended ?? s.name.toLowerCase().includes('manutenção')),
+            cta: s.cta || defaultMatch?.cta || 'Escolher Plano',
+          };
+        })
     : MZTECH_PLANS.map((p) => ({
         id: p.id,
         name: p.name,
@@ -228,17 +254,6 @@ export default function MzTechPublicPage() {
       return;
     }
 
-    if (!currentUser) {
-      if (!formData.password || formData.password.length < 6) {
-        alert('Por favor, crie uma senha de no mínimo 6 caracteres para seu acesso ao Portal do Cliente.');
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        alert('A confirmação de senha não confere com a senha digitada.');
-        return;
-      }
-    }
-
     setFormLoading(true);
 
     const hasCustom =
@@ -257,23 +272,21 @@ export default function MzTechPublicPage() {
       customDomain: formData.customDomain?.trim() || null,
     };
 
+    // Salvar proposta no painel de orçamentos em segundo plano sem travar o envio para WhatsApp
     try {
       const res = await fetch('/api/mztech/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || 'Erro ao processar solicitação de orçamento.');
-        setFormLoading(false);
-        return;
-      }
-      if (data.user) {
-        setCurrentUser(data.user);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.user) {
+          setCurrentUser(data.user);
+        }
       }
     } catch (err) {
-      console.warn('Registro de orçamento gravado:', err);
+      console.warn('Registro de orçamento no sistema:', err);
     }
 
     const payChoiceText =
@@ -285,12 +298,12 @@ export default function MzTechPublicPage() {
         ? 'Entrada PIX + Mensalidade no Cartão'
         : 'Cartão de Crédito';
 
-    // Formatar mensagem para WhatsApp da mzTech
+    // Formatar mensagem direta para WhatsApp do Desenvolvedor Selecionado
     const message = `🚀 *NOVA SOLICITAÇÃO DE ORÇAMENTO - mzTech*\n\n` +
       `👤 *Nome:* ${formData.name}\n` +
       `🏢 *Empresa:* ${formData.company || 'Não informada'}\n` +
-      `📱 *WhatsApp:* ${formData.whatsapp}\n` +
-      `✉️ *E-mail:* ${formData.email}\n` +
+      `📱 *WhatsApp:* ${phoneValidation.formatted}\n` +
+      `✉️ *E-mail:* ${emailValidation.cleanEmail}\n` +
       `👨‍💻 *Desenvolvedor Escolhido:* ${formData.selectedDev}\n` +
       `📂 *Tipo de Projeto:* ${formData.projectType}\n` +
       `🌐 *Possui Domínio?* ${domainDisplay}\n` +
@@ -299,12 +312,22 @@ export default function MzTechPublicPage() {
       `⏱️ *Prazo Desejado:* ${formData.desiredDeadline}\n` +
       `💰 *Orçamento Estimado:* ${formData.estimatedBudget}\n` +
       `📝 *Descrição:* ${formData.projectDescription || 'Apresentação inicial.'}\n\n` +
-      `_Enviado através do site oficial mzTech._`;
+      `_Enviado através do site oficial mzTech direto para o dev ${formData.selectedDev}._`;
 
     const encodedMessage = encodeURIComponent(message);
-    const targetPhone = formData.selectedDev === 'Morvan'
-      ? (settingsData?.morvanWhatsapp || MZTECH_INFO.morvanWhatsapp || '5531993597136').replace(/\D/g, '')
-      : (settingsData?.robertoWhatsapp || MZTECH_INFO.robertoWhatsapp || '5531986847049').replace(/\D/g, '');
+    let targetPhone = '5531986847049'; // Roberto padrão
+    if (formData.selectedDev === 'Morvan') {
+      const rawMorvan = settingsData?.morvanWhatsapp || MZTECH_INFO.morvanWhatsapp || '31993597136';
+      targetPhone = rawMorvan.replace(/\D/g, '');
+    } else {
+      const rawRoberto = settingsData?.robertoWhatsapp || MZTECH_INFO.robertoWhatsapp || '31986847049';
+      targetPhone = rawRoberto.replace(/\D/g, '');
+    }
+
+    if (!targetPhone.startsWith('55')) {
+      targetPhone = `55${targetPhone}`;
+    }
+
     const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
 
     setFormLoading(false);
@@ -1478,8 +1501,8 @@ export default function MzTechPublicPage() {
                   autoComplete="off"
                 />
 
-                {/* Banner de Usuário Logado ou Criação de Conta */}
-                {currentUser ? (
+                {/* Banner de Usuário Logado se houver */}
+                {currentUser && (
                   <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
@@ -1493,26 +1516,6 @@ export default function MzTechPublicPage() {
                     <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-[10px] uppercase tracking-wider">
                       Conta Ativa
                     </span>
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="flex items-start sm:items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-white block">Criação Obrigatória de Conta no Portal do Cliente</span>
-                        <span className="text-slate-300 text-[11px]">
-                          Para solicitar o orçamento, preencha os dados e defina sua senha para acompanhar o projeto e contratos no portal.
-                        </span>
-                      </div>
-                    </div>
-                    <a
-                      href="/cliente/login"
-                      className="text-violet-300 hover:text-violet-200 underline font-bold text-[11px] whitespace-nowrap self-start sm:self-auto"
-                    >
-                      Já tem uma conta? Entrar
-                    </a>
                   </div>
                 )}
 
@@ -1561,7 +1564,7 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-slate-400">E-mail Comercial (Login do Portal) *</label>
+                    <label className="text-xs font-bold uppercase text-slate-400">E-mail Comercial *</label>
                     <input
                       type="email"
                       required
@@ -1574,50 +1577,6 @@ export default function MzTechPublicPage() {
                     />
                   </div>
                 </div>
-
-                {/* Campos de Senha Obrigatórios (se não estiver autenticado) */}
-                {!currentUser && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-[#090b1e]/90 border border-violet-500/20">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold uppercase text-violet-300 flex items-center gap-1.5">
-                          <Lock className="w-3.5 h-3.5 text-violet-400" />
-                          <span>Definir Senha de Acesso *</span>
-                        </label>
-                        <span className="text-[10px] text-slate-400 font-mono">Mínimo 6 dígitos</span>
-                      </div>
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className={`w-full ${
-                          isDarkCyberGlow ? 'bg-[#080918] border-violet-500/40 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
-                        } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase text-violet-300 flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-violet-400" />
-                        <span>Confirmar Senha *</span>
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        placeholder="••••••••"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        className={`w-full ${
-                          isDarkCyberGlow ? 'bg-[#080918] border-violet-500/40 focus:border-violet-400' : 'bg-slate-950 border-slate-800 focus:border-cyan-400'
-                        } border rounded-xl px-4 py-3 text-white text-sm focus:outline-none`}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Seleção do Desenvolvedor / Sócio Responsável */}
                 <div className="space-y-2.5 pt-1">
@@ -2051,11 +2010,11 @@ export default function MzTechPublicPage() {
                       ) : (
                         <Send className="w-5 h-5" />
                       )}
-                      <span>Enviar Solicitação de Orçamento</span>
+                      <span>Solicitar Orçamento no WhatsApp do Dev ({formData.selectedDev})</span>
                     </button>
                   </PulsatingBorder>
                   <p className="text-[11px] text-slate-500 text-center mt-3">
-                    Ao enviar, você receberá atendimento direto pelo WhatsApp com nossa equipe técnica para análise e aprovação formal.
+                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp de {formData.selectedDev} com todos os dados preenchidos para atendimento imediato.
                   </p>
                 </div>
               </form>
