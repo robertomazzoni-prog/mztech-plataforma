@@ -473,10 +473,15 @@ export default function MzTechPublicPage() {
                 <span>Criar Conta</span>
               </Link>
 
-              <PulsatingBorder radius={12} thickness={3} spread={0}>
+              <PulsatingBorder
+                colors={isDarkCyberGlow ? ['#8b5cf6', '#a855f7', '#06b6d4'] : ['#06b6d4', '#2563eb', '#6366f1']}
+                radius={12}
+                thickness={3}
+                spread={0}
+              >
                 <Link
                   href="#orcamento"
-                  className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm ${
+                  className={`px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap ${
                     isDarkCyberGlow
                       ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-600/25'
                       : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'

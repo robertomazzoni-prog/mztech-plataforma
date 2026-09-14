@@ -70,3 +70,21 @@ body {
   background: linear-gradient(135deg, #ebdcb2 0%, #dfba73 50%, #c59b27 100%);
   box-shadow: 0 4px 20px rgba(197, 155, 39, 0.4);
 }
+
+/* Pulsating Border Animation & Safety Overrides */
+@keyframes pulsating-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+canvas,
+[data-paper-shader],
+[data-paper-shader] canvas {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+

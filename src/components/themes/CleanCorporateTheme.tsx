@@ -249,7 +249,7 @@ export default function CleanCorporateTheme({
             <PulsatingBorder radius={8} thickness={3} spread={0}>
               <a
                 href="#orcamento"
-                className={`px-4 py-2 rounded-lg ${theme.btnPrimary} text-xs sm:text-sm flex items-center gap-2`}
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg ${theme.btnPrimary} text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap`}
               >
                 <span>Solicitar Orçamento</span>
                 <ArrowRight className="w-4 h-4" />
