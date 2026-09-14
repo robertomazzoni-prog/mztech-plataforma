@@ -805,16 +805,10 @@ export default function CleanCorporateTheme({
                     <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">Atendimento direto com o sócio</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     {/* Roberto */}
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev: any) => ({ ...prev, selectedDev: 'Roberto' }))}
-                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                        formData.selectedDev === 'Roberto'
-                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
-                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
-                      }`}
+                    <div
+                      className={`p-4 rounded-xl border text-left relative flex flex-col justify-between bg-blue-500/10 border-blue-500 shadow-sm`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
@@ -824,14 +818,8 @@ export default function CleanCorporateTheme({
                             </div>
                             <span className={`font-bold ${theme.textPrimary} text-sm`}>{robertoName}</span>
                           </div>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              formData.selectedDev === 'Roberto'
-                                ? 'border-blue-600 bg-blue-600 text-white'
-                                : 'border-slate-400 dark:border-slate-600'
-                            }`}
-                          >
-                            {formData.selectedDev === 'Roberto' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                            Atendimento Direto
                           </span>
                         </div>
                         <p className="text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400">Sócio & Dev Full Stack</p>
@@ -839,81 +827,7 @@ export default function CleanCorporateTheme({
                           Especialista em Interfaces Web, Next.js, React e Soluções Digitais
                         </p>
                       </div>
-                    </button>
-
-                    {/* Morvan */}
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev: any) => ({ ...prev, selectedDev: 'Morvan' }))}
-                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                        formData.selectedDev === 'Morvan'
-                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
-                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
-                              M
-                            </div>
-                            <span className={`font-bold ${theme.textPrimary} text-sm`}>{morvanName}</span>
-                          </div>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              formData.selectedDev === 'Morvan'
-                                ? 'border-blue-600 bg-blue-600 text-white'
-                                : 'border-slate-400 dark:border-slate-600'
-                            }`}
-                          >
-                            {formData.selectedDev === 'Morvan' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                          </span>
-                        </div>
-                        <p className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">Sócio & Dev Full Stack</p>
-                        <p className={`text-[11px] ${theme.textMuted} leading-tight mt-1`}>
-                          Especialista em Sistemas Web, Banco de Dados e Arquitetura Cloud
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* Sem preferência */}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev: any) => ({ ...prev, selectedDev: 'Sem Preferência (Roberto ou Morvan)' }))
-                      }
-                      className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                        formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
-                          ? 'bg-blue-500/10 border-blue-500 shadow-sm'
-                          : `${theme.border} ${theme.surface} hover:border-slate-400 dark:hover:border-slate-600`
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-slate-600 text-white font-bold text-xs flex items-center justify-center">
-                              mz
-                            </div>
-                            <span className={`font-bold ${theme.textPrimary} text-sm`}>Indiferente</span>
-                          </div>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)'
-                                ? 'border-blue-600 bg-blue-600 text-white'
-                                : 'border-slate-400 dark:border-slate-600'
-                            }`}
-                          >
-                            {formData.selectedDev === 'Sem Preferência (Roberto ou Morvan)' && (
-                              <Check className="w-2.5 h-2.5 stroke-[3]" />
-                            )}
-                          </span>
-                        </div>
-                        <p className={`text-[10px] font-mono font-bold ${theme.textMuted}`}>Equipe mzTech</p>
-                        <p className={`text-[11px] ${theme.textMuted} leading-tight mt-1`}>
-                          Qualquer um dos dois desenvolvedores sócios disponível
-                        </p>
-                      </div>
-                    </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1191,11 +1105,11 @@ export default function CleanCorporateTheme({
                       ) : (
                         <Send className="w-5 h-5" />
                       )}
-                      <span>Solicitar Orçamento no WhatsApp do Dev ({formData.selectedDev})</span>
+                      <span>Solicitar Orçamento no WhatsApp</span>
                     </button>
                   </PulsatingBorder>
                   <p className={`text-[11px] ${theme.textMuted} text-center mt-3`}>
-                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp de {formData.selectedDev} com todos os dados preenchidos para atendimento imediato.
+                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp com todos os dados preenchidos para atendimento imediato.
                   </p>
                 </div>
 
