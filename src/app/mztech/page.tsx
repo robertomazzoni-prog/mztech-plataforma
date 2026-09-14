@@ -1588,13 +1588,19 @@ export default function MzTechPublicPage() {
                     <span className={`text-[11px] ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} font-medium`}>Atendimento direto com o sócio</span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {/* Opção Roberto */}
-                    <div
-                      className={`p-4 rounded-2xl border text-left relative flex flex-col justify-between ${
-                        isDarkCyberGlow
-                          ? 'bg-violet-500/15 border-violet-400 shadow-lg shadow-violet-500/10'
-                          : 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10'
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, selectedDev: 'Roberto' })}
+                      className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                        formData.selectedDev === 'Roberto'
+                          ? isDarkCyberGlow
+                            ? 'bg-violet-500/15 border-violet-400 shadow-lg shadow-violet-500/10 scale-[1.01]'
+                            : 'bg-cyan-500/15 border-cyan-400 shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40 hover:bg-[#0e1128]'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
                       }`}
                     >
                       <div>
@@ -1605,8 +1611,16 @@ export default function MzTechPublicPage() {
                             </div>
                             <span className="font-bold text-white text-sm">Roberto</span>
                           </div>
-                          <span className={`px-2.5 py-0.5 rounded-full ${isDarkCyberGlow ? 'bg-violet-600' : 'bg-cyan-500 text-slate-950'} text-white text-[10px] font-bold uppercase tracking-wider`}>
-                            Atendimento Direto
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              formData.selectedDev === 'Roberto'
+                                ? isDarkCyberGlow
+                                  ? 'border-violet-400 bg-violet-500 text-white'
+                                  : 'border-cyan-400 bg-cyan-500 text-slate-950'
+                                : 'border-slate-700'
+                            }`}
+                          >
+                            {formData.selectedDev === 'Roberto' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </span>
                         </div>
                         <p className={`text-[10px] font-mono font-bold ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`}>Sócio & Dev Full Stack</p>
@@ -1614,7 +1628,48 @@ export default function MzTechPublicPage() {
                           Especialista em Interfaces Web, Next.js, React e Soluções Digitais
                         </p>
                       </div>
-                    </div>
+                    </button>
+
+                    {/* Opção Morvan */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, selectedDev: 'Morvan' })}
+                      className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                        formData.selectedDev === 'Morvan'
+                          ? isDarkCyberGlow
+                            ? 'bg-indigo-500/15 border-indigo-400 shadow-lg shadow-indigo-500/10 scale-[1.01]'
+                            : 'bg-blue-500/15 border-blue-400 shadow-lg shadow-blue-500/10 scale-[1.01]'
+                          : isDarkCyberGlow
+                          ? 'bg-[#080918] border-violet-500/20 hover:border-violet-500/40 hover:bg-[#0e1128]'
+                          : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-full ${isDarkCyberGlow ? 'bg-indigo-500/20 text-indigo-400' : 'bg-blue-500/20 text-blue-400'} font-bold text-xs flex items-center justify-center`}>
+                              M
+                            </div>
+                            <span className="font-bold text-white text-sm">Morvan</span>
+                          </div>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              formData.selectedDev === 'Morvan'
+                                ? isDarkCyberGlow
+                                  ? 'border-indigo-400 bg-indigo-500 text-white'
+                                  : 'border-cyan-400 bg-cyan-500 text-slate-950'
+                                : 'border-slate-700'
+                            }`}
+                          >
+                            {formData.selectedDev === 'Morvan' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </span>
+                        </div>
+                        <p className={`text-[10px] font-mono font-bold ${isDarkCyberGlow ? 'text-indigo-400' : 'text-blue-400'}`}>Sócio & Dev Full Stack</p>
+                        <p className="text-[11px] text-slate-400 leading-tight mt-1">
+                          Especialista em Sistemas Web, Banco de Dados e Arquitetura Cloud
+                        </p>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -1910,11 +1965,11 @@ export default function MzTechPublicPage() {
                       ) : (
                         <Send className="w-5 h-5" />
                       )}
-                      <span>Solicitar Orçamento no WhatsApp</span>
+                      <span>Solicitar Orçamento no WhatsApp ({formData.selectedDev})</span>
                     </button>
                   </PulsatingBorder>
                   <p className="text-[11px] text-slate-500 text-center mt-3">
-                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp com todos os dados preenchidos para atendimento imediato.
+                    Ao enviar, sua solicitação abrirá diretamente no WhatsApp de {formData.selectedDev} com todos os dados preenchidos para atendimento imediato.
                   </p>
                 </div>
               </form>
