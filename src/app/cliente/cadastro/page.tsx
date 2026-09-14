@@ -269,7 +269,7 @@ export default function ClientRegisterPage() {
             </div>
 
             <div className="pt-2">
-              <PulsatingBorder className="w-full" radius={12} thickness={4} spread={14}>
+              <PulsatingBorder className="w-full" radius={12} thickness={3.5} spread={0}>
                 <button
                   type="submit"
                   disabled={loading}

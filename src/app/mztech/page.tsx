@@ -473,7 +473,7 @@ export default function MzTechPublicPage() {
                 <span>Criar Conta</span>
               </Link>
 
-              <PulsatingBorder radius={12} thickness={3} spread={10}>
+              <PulsatingBorder radius={12} thickness={3} spread={0}>
                 <Link
                   href="#orcamento"
                   className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm ${
@@ -524,7 +524,7 @@ export default function MzTechPublicPage() {
 
                 {/* Botões CTA */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                  <PulsatingBorder radius={12} thickness={4} spread={14}>
+                  <PulsatingBorder radius={12} thickness={3.5} spread={0}>
                     <Link
                       href="#orcamento"
                       className="px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-violet-600/25 hover:scale-[1.02] transition-all flex items-center justify-center gap-2.5"
@@ -676,7 +676,7 @@ export default function MzTechPublicPage() {
 
             {/* Botões CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <PulsatingBorder radius={12} thickness={4} spread={14}>
+              <PulsatingBorder radius={12} thickness={3.5} spread={0}>
                 <Link
                   href="#orcamento"
                   className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
@@ -780,7 +780,7 @@ export default function MzTechPublicPage() {
 
             {/* Botões CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <PulsatingBorder radius={12} thickness={4} spread={14}>
+              <PulsatingBorder radius={12} thickness={3.5} spread={0}>
                 <Link
                   href="#orcamento"
                   className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base shadow-xl shadow-cyan-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
@@ -1061,7 +1061,7 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className="pt-4 flex flex-wrap items-center gap-4">
-                    <PulsatingBorder radius={12} thickness={3} spread={10}>
+                    <PulsatingBorder radius={12} thickness={3} spread={0}>
                       <a
                         href={currentCase.url}
                         target="_blank"
@@ -1178,7 +1178,7 @@ export default function MzTechPublicPage() {
                   </div>
 
                   <div className={`mt-8 pt-6 border-t ${isDarkCyberGlow ? 'border-violet-500/20' : 'border-slate-800'}`}>
-                    <PulsatingBorder className="w-full" radius={12} thickness={isRec ? 4 : 2} spread={isRec ? 12 : 8}>
+                    <PulsatingBorder className="w-full" radius={12} thickness={isRec ? 3.5 : 2} spread={0}>
                       <button
                         onClick={() => handleSelectPlan(plan)}
                         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-md ${
@@ -1895,7 +1895,7 @@ export default function MzTechPublicPage() {
                 </div>
 
                 <div className="pt-2">
-                  <PulsatingBorder className="w-full" radius={12} thickness={4} spread={14}>
+                  <PulsatingBorder className="w-full" radius={12} thickness={3.5} spread={0}>
                     <button
                       type="submit"
                       disabled={formLoading}

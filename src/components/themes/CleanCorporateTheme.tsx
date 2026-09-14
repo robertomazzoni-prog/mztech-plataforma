@@ -246,7 +246,7 @@ export default function CleanCorporateTheme({
               )}
             </button>
 
-            <PulsatingBorder radius={10} thickness={3} spread={10}>
+            <PulsatingBorder radius={8} thickness={3} spread={0}>
               <a
                 href="#orcamento"
                 className={`px-4 py-2 rounded-lg ${theme.btnPrimary} text-xs sm:text-sm flex items-center gap-2`}
@@ -283,7 +283,7 @@ export default function CleanCorporateTheme({
 
           {/* Botões CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            <PulsatingBorder radius={12} thickness={4} spread={14}>
+            <PulsatingBorder radius={12} thickness={3.5} spread={0}>
               <a
                 href="#orcamento"
                 className={`px-8 py-3.5 rounded-xl ${theme.btnPrimary} text-center text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20`}
@@ -605,7 +605,7 @@ export default function CleanCorporateTheme({
                   </div>
 
                   <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
-                    <PulsatingBorder className="w-full" radius={8} thickness={isRec ? 4 : 2} spread={isRec ? 12 : 8}>
+                    <PulsatingBorder className="w-full" radius={8} thickness={isRec ? 3.5 : 2} spread={0}>
                       <button
                         type="button"
                         onClick={() => handleSelectPlan(plan)}
@@ -1094,7 +1094,7 @@ export default function CleanCorporateTheme({
                 </div>
 
                 <div className="pt-2">
-                  <PulsatingBorder className="w-full" radius={12} thickness={4} spread={14}>
+                  <PulsatingBorder className="w-full" radius={12} thickness={3.5} spread={0}>
                     <button
                       type="submit"
                       disabled={formLoading}

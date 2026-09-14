@@ -26,13 +26,13 @@ const DEFAULT_COLORS = ["#2563eb", "#06b6d4", "#6366f1"];
 const DEFAULTS = {
   colorBack: "rgba(0, 0, 0, 0)",
   speed: 1,
-  radius: 14,
-  thickness: 4,
+  radius: 12,
+  thickness: 3.5,
   softness: 60,
   intensity: 35,
   bloom: 45,
   spotSize: 55,
-  spread: 12,
+  spread: 0,
 };
 
 const SPOTS = 3;
@@ -132,12 +132,22 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
 
   const escapes = usePortal && portalTarget !== null;
 
+  const maxR = Math.min(rect.w, rect.h) / 2;
+  const effectiveRoundness =
+    maxR > 0
+      ? radius > 1
+        ? Math.min(1, Math.max(0, radius / maxR))
+        : Math.min(1, Math.max(0, radius))
+      : radius > 1
+      ? radius / 24
+      : radius;
+
   const layer = measured ? (
     <PulsingBorder
       colors={colors}
       colorBack={colorBack}
       speed={speed}
-      roundness={radius / 100}
+      roundness={effectiveRoundness}
       thickness={thickness / 100}
       softness={softness / 100}
       intensity={intensity / 100}
@@ -188,7 +198,7 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
       }}
     >
       {escapes ? createPortal(layer, portalTarget) : layer}
-      <div style={{ position: "relative", zIndex: 20 }}>
+      <div style={{ position: "relative", zIndex: 20, width: "100%", height: "100%" }}>
         {children}
       </div>
     </div>
