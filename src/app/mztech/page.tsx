@@ -48,6 +48,7 @@ import { formatCurrency } from '@/lib/utils';
 import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 import CleanCorporateTheme from '@/components/themes/CleanCorporateTheme';
 import PulsatingBorder from '@/components/originkit/ui/pulsating-border';
+import StripedWaves from '@/components/originkit/ui/striped-waves';
 
 const getMonthlyPriceFromPlan = (plan: string, customPlans: any[] = []): number => {
   if (plan.toLowerCase().includes('apenas')) return 0;
@@ -501,6 +502,31 @@ export default function MzTechPublicPage() {
       {currentTheme === 'DARK_CYBER_GLOW' ? (
         /* NOVO TEMA: DARK CYBER & GLOW (ROXO/VIOLETA, 2 COLUNAS & TECH ARCHITECTURE PREVIEW) */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
+          {/* Originkit Striped Waves Interactive Background */}
+          <div className="absolute inset-0 pointer-events-auto opacity-40 overflow-hidden z-0">
+            <StripedWaves
+              background="#080915"
+              color1="#3b0764"
+              color2="#7c3aed"
+              color3="#06b6d4"
+              preset="2"
+              speed={35}
+              density={130}
+              lineWidth={12}
+              angle={30}
+              glowOnHover={true}
+              hoverGlowIntensity={80}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                minWidth: 0,
+                minHeight: 0,
+              }}
+            />
+          </div>
+
           {/* Subtle Ambient Radial Lighting */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-violet-600/15 via-purple-600/10 to-indigo-600/0 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -639,6 +665,31 @@ export default function MzTechPublicPage() {
       ) : currentTheme === 'STUDIO_PREMIUM' ? (
         /* ESTILO 2: STUDIO DE ENGENHARIA & MINIMALIST PRO */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
+          {/* Originkit Striped Waves Interactive Background */}
+          <div className="absolute inset-0 pointer-events-auto opacity-30 overflow-hidden z-0">
+            <StripedWaves
+              background="#090a16"
+              color1="#082f49"
+              color2="#0284c7"
+              color3="#06b6d4"
+              preset="1"
+              speed={30}
+              density={120}
+              lineWidth={10}
+              angle={-20}
+              glowOnHover={true}
+              hoverGlowIntensity={75}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                minWidth: 0,
+                minHeight: 0,
+              }}
+            />
+          </div>
+
           {/* Background Grid Sutil e Foco de Luz Tecnológico */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-cyan-950/25 via-slate-950 to-slate-950 pointer-events-none" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
@@ -763,6 +814,31 @@ export default function MzTechPublicPage() {
       ) : (
         /* ESTILO 1: DARK CYBER & CYAN GLOW (CLÁSSICO) */
         <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
+          {/* Originkit Striped Waves Interactive Background */}
+          <div className="absolute inset-0 pointer-events-auto opacity-35 overflow-hidden z-0">
+            <StripedWaves
+              background="#020617"
+              color1="#0c4a6e"
+              color2="#0284c7"
+              color3="#38bdf8"
+              preset="2"
+              speed={35}
+              density={130}
+              lineWidth={12}
+              angle={25}
+              glowOnHover={true}
+              hoverGlowIntensity={80}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                minWidth: 0,
+                minHeight: 0,
+              }}
+            />
+          </div>
+
           {/* Glowing Background Orbs */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-cyan-500/20 via-blue-500/10 to-indigo-500/0 rounded-full blur-3xl pointer-events-none" />
           

@@ -52,6 +52,7 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { formatPhoneInput, validateBrazilianPhone, validateEmailFormat, validateRealName } from '@/lib/validators';
 import PulsatingBorder from '@/components/originkit/ui/pulsating-border';
+import StripedWaves from '@/components/originkit/ui/striped-waves';
 
 interface CleanCorporateThemeProps {
   settingsData: any;
@@ -264,7 +265,31 @@ export default function CleanCorporateTheme({
       {/* 3. HERO SECTION CORPORATIVO & LIMPO */}
       {/* ============================================================ */}
       <section className={`py-16 sm:py-24 border-b ${theme.border} relative overflow-hidden`}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+        {/* Originkit Striped Waves Ambient Background */}
+        <div className="absolute inset-0 pointer-events-auto opacity-20 overflow-hidden z-0">
+          <StripedWaves
+            background={isDarkMode ? "#09090b" : "#f8fafc"}
+            color1="#1d4ed8"
+            color2="#2563eb"
+            color3="#38bdf8"
+            preset="1"
+            speed={25}
+            density={110}
+            lineWidth={8}
+            glowOnHover={true}
+            hoverGlowIntensity={60}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              minWidth: 0,
+              minHeight: 0,
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           
           <div className="space-y-4">
             <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold ${theme.badgeBg}`}>
