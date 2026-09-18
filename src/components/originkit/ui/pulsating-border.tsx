@@ -102,7 +102,6 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
 
   React.useEffect(() => {
     setIsMounted(true);
-    // Detect mobile / touch devices or screens with strict WebGL context limits
     const checkMobile = () => {
       const isTouch =
         typeof window !== "undefined" &&
@@ -114,18 +113,6 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
-    // Test WebGL2 support
-    try {
-      const testCanvas = document.createElement("canvas");
-      const gl = testCanvas.getContext("webgl2");
-      if (!gl) {
-        setHasWebGlError(true);
-      }
-    } catch {
-      setHasWebGlError(true);
-    }
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -353,7 +340,7 @@ export default function PulsatingBorder(props: PulsatingBorderProps) {
         ...style,
       }}
     >
-      {useWebGl ? (escapes ? createPortal(webGlLayer, portalTarget) : webGlLayer) : renderCssBorder()}
+      {renderCssBorder()}
       <div style={{ position: "relative", zIndex: 20, width: "100%", height: "100%" }}>
         {children}
       </div>
