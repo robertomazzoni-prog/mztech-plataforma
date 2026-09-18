@@ -337,13 +337,13 @@ export default function MzTechPublicPage() {
   };
 
   const currentTheme: 'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE' =
-    settingsData?.siteTheme === 'CYBER_DARK'
-      ? 'CYBER_DARK'
+    settingsData?.siteTheme === 'DARK_CYBER_GLOW'
+      ? 'DARK_CYBER_GLOW'
       : settingsData?.siteTheme === 'STUDIO_PREMIUM'
       ? 'STUDIO_PREMIUM'
       : settingsData?.siteTheme === 'CLEAN_CORPORATE'
       ? 'CLEAN_CORPORATE'
-      : 'DARK_CYBER_GLOW';
+      : 'CYBER_DARK';
 
   if (currentTheme === 'CLEAN_CORPORATE') {
     return (
@@ -503,19 +503,19 @@ export default function MzTechPublicPage() {
         /* NOVO TEMA: DARK CYBER & GLOW (ROXO/VIOLETA, 2 COLUNAS & TECH ARCHITECTURE PREVIEW) */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-40 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#080915"
               color1="#3b0764"
-              color2="#7c3aed"
+              color2="#8b5cf6"
               color3="#06b6d4"
-              preset="2"
+              preset="1"
               speed={35}
-              density={130}
-              lineWidth={12}
+              density={120}
+              lineWidth={110}
               angle={30}
               glowOnHover={true}
-              hoverGlowIntensity={80}
+              hoverGlowIntensity={85}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -666,19 +666,19 @@ export default function MzTechPublicPage() {
         /* ESTILO 2: STUDIO DE ENGENHARIA & MINIMALIST PRO */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-30 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#090a16"
-              color1="#082f49"
+              color1="#075985"
               color2="#0284c7"
-              color3="#06b6d4"
+              color3="#38bdf8"
               preset="1"
               speed={30}
               density={120}
-              lineWidth={10}
+              lineWidth={110}
               angle={-20}
               glowOnHover={true}
-              hoverGlowIntensity={75}
+              hoverGlowIntensity={80}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -815,19 +815,19 @@ export default function MzTechPublicPage() {
         /* ESTILO 1: DARK CYBER & CYAN GLOW (CLÁSSICO) */
         <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-35 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#020617"
-              color1="#0c4a6e"
+              color1="#002680"
               color2="#0284c7"
-              color3="#38bdf8"
-              preset="2"
-              speed={35}
-              density={130}
-              lineWidth={12}
+              color3="#00e5ff"
+              preset="1"
+              speed={32}
+              density={120}
+              lineWidth={110}
               angle={25}
               glowOnHover={true}
-              hoverGlowIntensity={80}
+              hoverGlowIntensity={85}
               style={{
                 position: "absolute",
                 inset: 0,

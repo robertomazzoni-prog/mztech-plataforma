@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
   const [name, setName] = useState('mzTech');
   const [legalName, setLegalName] = useState('mzTech Soluções Digitais & Desenvolvimento');
   const [tagline, setTagline] = useState('Desenvolvimento de sites e sistemas sob medida.');
-  const [siteTheme, setSiteTheme] = useState<'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE'>('DARK_CYBER_GLOW');
+  const [siteTheme, setSiteTheme] = useState<'DARK_CYBER_GLOW' | 'CYBER_DARK' | 'STUDIO_PREMIUM' | 'CLEAN_CORPORATE'>('CYBER_DARK');
   
   // E-mails dinâmicos
   const [emails, setEmails] = useState<CompanyEmailItem[]>([

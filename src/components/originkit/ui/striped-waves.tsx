@@ -349,7 +349,7 @@ export default function StripedWaves(props: Props) {
         color3 = DEFAULTS.color3,
         speed = 50,
         density = 200,
-        lineWidth = 10,
+        lineWidth = 100,
         distance = 100,
         angle = 38,
         glowOnHover = true,
@@ -393,7 +393,8 @@ export default function StripedWaves(props: Props) {
     useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return
-        const gl = canvas.getContext("webgl", { antialias: false, alpha: false, depth: false, stencil: false })
+        const gl = (canvas.getContext("webgl", { antialias: false, alpha: false, depth: false, stencil: false }) ||
+                    canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null
         if (!gl) {
             console.error("StripedWaves: WebGL unavailable")
             return
@@ -496,8 +497,23 @@ export default function StripedWaves(props: Props) {
             raf = requestAnimationFrame(render)
         }
 
+        const handleContextLost = (e: Event) => {
+            e.preventDefault()
+            cancelAnimationFrame(raf)
+        }
+        canvas.addEventListener("webglcontextlost", handleContextLost, false)
+
         raf = requestAnimationFrame(render)
-        return () => cancelAnimationFrame(raf)
+        return () => {
+            cancelAnimationFrame(raf)
+            canvas.removeEventListener("webglcontextlost", handleContextLost)
+            try {
+                gl.deleteProgram(prog)
+                gl.deleteShader(vs)
+                gl.deleteShader(fs)
+                gl.deleteBuffer(buf)
+            } catch {}
+        }
     }, [])
 
     return (
@@ -508,8 +524,8 @@ export default function StripedWaves(props: Props) {
                 position: "relative",
                 overflow: "hidden",
                 background,
-                minWidth: 1200,
-                minHeight: 800,
+                minWidth: 0,
+                minHeight: 0,
                 width: typeof width === "number" && width > 0 ? width : "100%",
                 height: typeof height === "number" && height > 0 ? height : "100%",
                 ...style,

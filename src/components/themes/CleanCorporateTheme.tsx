@@ -266,7 +266,7 @@ export default function CleanCorporateTheme({
       {/* ============================================================ */}
       <section className={`py-16 sm:py-24 border-b ${theme.border} relative overflow-hidden`}>
         {/* Originkit Striped Waves Ambient Background */}
-        <div className="absolute inset-0 pointer-events-auto opacity-20 overflow-hidden z-0">
+        <div className="absolute inset-0 pointer-events-auto opacity-65 overflow-hidden z-0">
           <StripedWaves
             background={isDarkMode ? "#09090b" : "#f8fafc"}
             color1="#1d4ed8"
@@ -275,9 +275,9 @@ export default function CleanCorporateTheme({
             preset="1"
             speed={25}
             density={110}
-            lineWidth={8}
+            lineWidth={95}
             glowOnHover={true}
-            hoverGlowIntensity={60}
+            hoverGlowIntensity={70}
             style={{
               position: "absolute",
               inset: 0,

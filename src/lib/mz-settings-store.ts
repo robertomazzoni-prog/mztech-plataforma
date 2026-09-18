@@ -52,7 +52,7 @@ export const defaultCompanySettings: CompanySettings = {
   name: 'mzTech',
   legalName: 'mzTech Soluções Digitais & Desenvolvimento',
   tagline: 'Desenvolvimento de sites e sistemas sob medida.',
-  siteTheme: 'DARK_CYBER_GLOW',
+  siteTheme: 'CYBER_DARK',
   email: 'robertomazzoni956@gmail.com',
   emails: [
     {
@@ -148,7 +148,7 @@ export function getStoredSettings(): CompanySettings {
 
           // Garante que siteTheme tenha fallback
           if (!merged.siteTheme) {
-            merged.siteTheme = 'DARK_CYBER_GLOW';
+            merged.siteTheme = 'CYBER_DARK';
           }
 
           globalObj[globalSettingsKey] = merged;
