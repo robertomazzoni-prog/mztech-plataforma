@@ -417,9 +417,6 @@ export default function MzTechPublicPage() {
               <Link href="#faq" className={`hover:${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'} transition-colors`}>
                 FAQ
               </Link>
-              <Link href="/cliente" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
-                Portal do Cliente
-              </Link>
             </nav>
 
             {/* CTA Navbar */}
