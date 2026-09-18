@@ -377,41 +377,6 @@ export default function MzTechPublicPage() {
         : 'bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950'
     } antialiased flex flex-col font-sans`}>
       
-      {/* Top Bar de Status da Infraestrutura */}
-      <div className={`${
-        isDarkCyberGlow ? 'bg-[#0b0e22]/95 border-b border-violet-500/20' : 'bg-slate-900/90 border-b border-slate-800'
-      } px-4 py-2 text-center text-xs text-slate-400 backdrop-blur-md`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-300 font-semibold">mzTech Cloud Infrastructure:</span>
-            <span className={`${isDarkCyberGlow ? 'text-violet-300' : 'text-emerald-400'} font-mono font-bold hidden sm:inline`}>100% Online & Seguro</span>
-          </div>
-
-          <div className="flex items-center gap-3 sm:gap-4 text-xs">
-            <Link
-              href="/cliente/cadastro"
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${
-                isDarkCyberGlow
-                  ? 'bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 hover:text-violet-200 border border-violet-500/40'
-                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40'
-              } font-bold transition-all shadow-sm group hover:scale-105`}
-            >
-              <UserPlus className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-emerald-400'} group-hover:rotate-12 transition-transform`} />
-              <span>Cadastre-se</span>
-            </Link>
-
-            <Link
-              href="/cliente"
-              className={`text-slate-300 ${isDarkCyberGlow ? 'hover:text-violet-300' : 'hover:text-cyan-300'} font-semibold flex items-center gap-1.5 transition-colors`}
-            >
-              <Users className={`w-3.5 h-3.5 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-              <span>Área do Cliente</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* Navbar Institucional */}
       <header className={`sticky top-0 z-40 ${
         isDarkCyberGlow ? 'bg-[#080915]/90 border-b border-violet-500/20' : 'bg-slate-950/85 border-b border-slate-800/80'
