@@ -29,10 +29,7 @@ import {
   X,
   Phone,
   Mail,
-  Lock,
   Users,
-  UserCheck,
-  UserPlus,
   CreditCard,
 } from 'lucide-react';
 import {
@@ -427,18 +424,6 @@ export default function MzTechPublicPage() {
 
             {/* CTA Navbar */}
             <div className="flex items-center gap-2.5">
-              <Link
-                href="/cliente/cadastro"
-                className={`hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs ${
-                  isDarkCyberGlow
-                    ? 'bg-[#0f1330] hover:bg-[#161c42] text-violet-200 border border-violet-500/30 hover:border-violet-400 shadow-violet-500/10'
-                    : 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-cyan-200 border border-cyan-500/40 hover:border-cyan-400 shadow-cyan-500/10'
-                } shadow-md hover:scale-105 transition-all`}
-              >
-                <UserPlus className={`w-4 h-4 ${isDarkCyberGlow ? 'text-violet-400' : 'text-cyan-400'}`} />
-                <span>Criar Conta</span>
-              </Link>
-
               <PulsatingBorder
                 colors={isDarkCyberGlow ? ['#8b5cf6', '#a855f7', '#06b6d4'] : ['#06b6d4', '#2563eb', '#6366f1']}
                 radius={12}
