@@ -503,7 +503,7 @@ export default function MzTechPublicPage() {
         /* NOVO TEMA: DARK CYBER & GLOW (ROXO/VIOLETA, 2 COLUNAS & TECH ARCHITECTURE PREVIEW) */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-none sm:pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#080915"
               color1="#3b0764"
@@ -666,7 +666,7 @@ export default function MzTechPublicPage() {
         /* ESTILO 2: STUDIO DE ENGENHARIA & MINIMALIST PRO */
         <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-none sm:pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#090a16"
               color1="#075985"
@@ -815,7 +815,7 @@ export default function MzTechPublicPage() {
         /* ESTILO 1: DARK CYBER & CYAN GLOW (CLÁSSICO) */
         <section className="relative pt-20 pb-28 sm:pt-28 sm:pb-36 overflow-hidden">
           {/* Originkit Striped Waves Interactive Background */}
-          <div className="absolute inset-0 pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-none sm:pointer-events-auto opacity-75 sm:opacity-85 overflow-hidden z-0">
             <StripedWaves
               background="#020617"
               color1="#002680"

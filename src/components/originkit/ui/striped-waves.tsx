@@ -358,6 +358,7 @@ export default function StripedWaves(props: Props) {
         height,
     } = props
 
+    const containerRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const sizeRef = useRef({ w: 0, h: 0 })
     sizeRef.current = { w: num(width, 0), h: num(height, 0) }
@@ -381,6 +382,8 @@ export default function StripedWaves(props: Props) {
 
     const hoverRef = useRef({ nx: 0.5, ny: 0.5, amount: 0, target: 0 })
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        // Ignore touch scroll drags to avoid unnecessary uniform churn and keep scrolling native
+        if (e.pointerType === "touch") return
         const rect = e.currentTarget.getBoundingClientRect()
         hoverRef.current.nx = (e.clientX - rect.left) / rect.width
         hoverRef.current.ny = (e.clientY - rect.top) / rect.height
@@ -392,6 +395,7 @@ export default function StripedWaves(props: Props) {
 
     useEffect(() => {
         const canvas = canvasRef.current
+        const container = containerRef.current
         if (!canvas) return
         const gl = (canvas.getContext("webgl", { antialias: false, alpha: false, depth: false, stencil: false }) ||
                     canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null
@@ -430,8 +434,18 @@ export default function StripedWaves(props: Props) {
         let raf = 0
         let last = performance.now()
         let clock = 0
+        let isLooping = false
+        let isVisible = true
+
+        const getDpr = () => {
+            if (typeof window === "undefined") return 1
+            const isMobile = window.innerWidth <= 768 || ("ontouchstart" in window && window.innerWidth <= 1024)
+            const maxAllowed = isMobile ? 1.0 : MAX_DPR
+            return Math.min(window.devicePixelRatio || 1, maxAllowed)
+        }
 
         const render = (now: number) => {
+            if (!isLooping) return
             const dt = clampN((now - last) / 1000, 0, 0.05)
             last = now
             const v = vRef.current
@@ -441,7 +455,7 @@ export default function StripedWaves(props: Props) {
             const hoverFollow = 1 - Math.exp(-dt * 8.0)
             hoverRef.current.amount += (hoverRef.current.target - hoverRef.current.amount) * hoverFollow
 
-            const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+            const dpr = getDpr()
             const cw = sizeRef.current.w || canvas.clientWidth || 1200
             const ch = sizeRef.current.h || canvas.clientHeight || 800
             const bw = Math.max(1, Math.round(cw * dpr))
@@ -497,15 +511,61 @@ export default function StripedWaves(props: Props) {
             raf = requestAnimationFrame(render)
         }
 
+        const startRender = () => {
+            if (!isLooping && isVisible && !document.hidden) {
+                isLooping = true
+                last = performance.now()
+                raf = requestAnimationFrame(render)
+            }
+        }
+
+        const stopRender = () => {
+            if (isLooping) {
+                isLooping = false
+                cancelAnimationFrame(raf)
+            }
+        }
+
         const handleContextLost = (e: Event) => {
             e.preventDefault()
-            cancelAnimationFrame(raf)
+            stopRender()
         }
         canvas.addEventListener("webglcontextlost", handleContextLost, false)
 
-        raf = requestAnimationFrame(render)
+        // IntersectionObserver: automatically pauses rendering when scrolled off-screen
+        let observer: IntersectionObserver | null = null
+        if (typeof IntersectionObserver !== "undefined" && container) {
+            observer = new IntersectionObserver(
+                (entries) => {
+                    const [entry] = entries
+                    if (entry && entry.isIntersecting) {
+                        isVisible = true
+                        startRender()
+                    } else {
+                        isVisible = false
+                        stopRender()
+                    }
+                },
+                { rootMargin: "80px 0px" }
+            )
+            observer.observe(container)
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                stopRender()
+            } else if (isVisible) {
+                startRender()
+            }
+        }
+        document.addEventListener("visibilitychange", handleVisibilityChange)
+
+        startRender()
+
         return () => {
-            cancelAnimationFrame(raf)
+            stopRender()
+            if (observer) observer.disconnect()
+            document.removeEventListener("visibilitychange", handleVisibilityChange)
             canvas.removeEventListener("webglcontextlost", handleContextLost)
             try {
                 gl.deleteProgram(prog)
@@ -518,6 +578,7 @@ export default function StripedWaves(props: Props) {
 
     return (
         <div
+            ref={containerRef}
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}
             style={{
@@ -528,10 +589,11 @@ export default function StripedWaves(props: Props) {
                 minHeight: 0,
                 width: typeof width === "number" && width > 0 ? width : "100%",
                 height: typeof height === "number" && height > 0 ? height : "100%",
+                touchAction: "pan-y",
                 ...style,
             }}
         >
-            <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
+            <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", pointerEvents: "none" }} />
         </div>
     )
 }

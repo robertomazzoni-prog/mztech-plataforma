@@ -266,7 +266,7 @@ export default function CleanCorporateTheme({
       {/* ============================================================ */}
       <section className={`py-16 sm:py-24 border-b ${theme.border} relative overflow-hidden`}>
         {/* Originkit Striped Waves Ambient Background */}
-        <div className="absolute inset-0 pointer-events-auto opacity-65 overflow-hidden z-0">
+        <div className="absolute inset-0 pointer-events-none sm:pointer-events-auto opacity-65 overflow-hidden z-0">
           <StripedWaves
             background={isDarkMode ? "#09090b" : "#f8fafc"}
             color1="#1d4ed8"
